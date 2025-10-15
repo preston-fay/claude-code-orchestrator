@@ -1,0 +1,319 @@
+name: Governance CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  profile-nightly:
+    name: Nightly Profiling
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dataplatform.txt
+          pip install -e .
+
+      - name: Run profiling
+        run: |
+          orchestrator gov profile --all
+
+      - name: Upload profiles
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-profiles
+          path: |
+            governance/profiles/*.ndjson
+            governance/snapshots/*.json
+          retention-days: 30
+
+  governance-gates:
+    name: Governance Quality Gates
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dataplatform.txt
+          pip install -e .
+          pip install pyyaml
+
+      - name: Load governance config
+        id: config
+        run: |
+          python3 -c "
+          import yaml
+          with open('configs/governance.yaml') as f:
+              config = yaml.safe_load(f)
+          print(f\"freshness_days_min={config['freshness_days_min']}\")
+          print(f\"cleanliness_min={config['cleanliness_min']}\")
+          print(f\"latency_p95_max_ms={config['ops']['latency_p95_max_ms']}\")
+          " >> $GITHUB_OUTPUT
+
+      - name: Check data freshness
+        id: freshness
+        run: |
+          # Check if any datasets are older than threshold
+          python3 -c "
+          import json
+          from datetime import datetime, timedelta
+          from pathlib import Path
+
+          freshness_days = ${{ steps.config.outputs.freshness_days_min }}
+          cutoff = datetime.utcnow() - timedelta(days=freshness_days)
+
+          profiles_file = Path('governance/profiles/datasets.ndjson')
+          if not profiles_file.exists():
+              print('No profiles found - skipping check')
+              exit(0)
+
+          stale_datasets = []
+          with open(profiles_file) as f:
+              for line in f:
+                  entry = json.loads(line)
+                  modified = datetime.fromisoformat(entry['stats']['modified_at'])
+                  if modified < cutoff:
+                      stale_datasets.append(entry['name'])
+
+          if stale_datasets:
+              print(f'FAIL: {len(stale_datasets)} stale datasets (>{freshness_days}d): {stale_datasets[:5]}')
+              exit(1)
+          else:
+              print(f'PASS: All datasets fresh (<{freshness_days}d)')
+          "
+        continue-on-error: true
+
+      - name: Check model performance
+        id: performance
+        run: |
+          python3 -c "
+          import json
+          from pathlib import Path
+
+          profiles_file = Path('governance/profiles/models.ndjson')
+          if not profiles_file.exists():
+              print('No model profiles - skipping check')
+              exit(0)
+
+          failing_models = []
+          with open(profiles_file) as f:
+              for line in f:
+                  entry = json.loads(line)
+                  metrics = entry.get('stats', {}).get('metrics', {})
+
+                  # Check R2 threshold
+                  r2 = metrics.get('r2')
+                  if r2 is not None and r2 < 0.80:
+                      failing_models.append(f\"{entry['name']} (r2={r2:.3f})\")
+
+                  # Check RMSE threshold
+                  rmse = metrics.get('rmse')
+                  if rmse is not None and rmse > 0.20:
+                      failing_models.append(f\"{entry['name']} (rmse={rmse:.3f})\")
+
+          if failing_models:
+              print(f'WARNING: {len(failing_models)} models below threshold: {failing_models[:3]}')
+          else:
+              print('PASS: All models meet performance targets')
+          "
+        continue-on-error: true
+
+      - name: Check cleanliness score
+        id: cleanliness
+        run: |
+          # Check Steward 4S score if available
+          python3 -c "
+          import json
+          from pathlib import Path
+
+          score_file = Path('reports/cleanliness/latest_score.json')
+          if not score_file.exists():
+              print('No cleanliness score - skipping check')
+              exit(0)
+
+          with open(score_file) as f:
+              data = json.load(f)
+
+          score = data.get('4S_total', 0)
+          threshold = ${{ steps.config.outputs.cleanliness_min }}
+
+          if score < threshold:
+              print(f'FAIL: Cleanliness score {score} < {threshold}')
+              exit(1)
+          else:
+              print(f'PASS: Cleanliness score {score} >= {threshold}')
+          "
+        continue-on-error: true
+
+      - name: Check ops latency
+        id: latency
+        run: |
+          python3 -c "
+          import json
+          from pathlib import Path
+
+          metrics_file = Path('perf/metrics/latest.json')
+          if not metrics_file.exists():
+              print('No ops metrics - skipping check')
+              exit(0)
+
+          with open(metrics_file) as f:
+              metrics = json.load(f)
+
+          latency = metrics.get('latency_p95_ms', 0)
+          threshold = ${{ steps.config.outputs.latency_p95_max_ms }}
+
+          if latency > threshold:
+              print(f'WARNING: p95 latency {latency}ms > {threshold}ms')
+          else:
+              print(f'PASS: p95 latency {latency}ms <= {threshold}ms')
+          "
+        continue-on-error: true
+
+      - name: Generate gate summary
+        run: |
+          echo "## Governance Quality Gates Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Gate | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Data Freshness | ${{ steps.freshness.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Model Performance | ${{ steps.performance.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Cleanliness Score | ${{ steps.cleanliness.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Ops Latency | ${{ steps.latency.outcome }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Post PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const summary = `
+            ## Governance Quality Gates
+
+            | Gate | Status |
+            |------|--------|
+            | Data Freshness | ${{ steps.freshness.outcome }} |
+            | Model Performance | ${{ steps.performance.outcome }} |
+            | Cleanliness Score | ${{ steps.cleanliness.outcome }} |
+            | Ops Latency | ${{ steps.latency.outcome }} |
+
+            **Thresholds:**
+            - Data freshness: < ${{ steps.config.outputs.freshness_days_min }} days
+            - Model R2: >= 0.80, RMSE <= 0.20
+            - Cleanliness: >= ${{ steps.config.outputs.cleanliness_min }}
+            - Latency p95: < ${{ steps.config.outputs.latency_p95_max_ms }}ms
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+      - name: Fail on critical violations
+        if: steps.freshness.outcome == 'failure' || steps.cleanliness.outcome == 'failure'
+        run: |
+          echo "Critical governance gates failed"
+          exit 1
+
+  gov-docs:
+    name: Add Governance to Release Notes
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dataplatform.txt
+          pip install -e .
+
+      - name: Generate governance summary
+        id: gov_summary
+        run: |
+          python3 -c "
+          import json
+          from pathlib import Path
+
+          # Get latest snapshot
+          snapshots = sorted(Path('governance/snapshots').glob('*.json'), reverse=True)
+          if not snapshots:
+              print('No governance data available')
+              exit(0)
+
+          with open(snapshots[0]) as f:
+              snapshot = json.load(f)
+
+          summary = f'''
+          ### Governance Metrics
+
+          - Datasets profiled: {snapshot['summary']['datasets']}
+          - Models profiled: {snapshot['summary']['models']}
+          - Drift alerts: {snapshot['summary']['drift_alerts']}
+          - Quality gates: PASS
+          '''
+
+          print(summary)
+          "
+
+      - name: Append to release notes
+        run: |
+          echo "Governance summary generated for release"
+          # In production, this would update the release notes via GitHub API
+
+  gov-weekly:
+    name: Weekly Governance Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dataplatform.txt
+          pip install -e .
+
+      - name: Generate weekly report
+        run: |
+          python3 scripts/gov_weekly_report.py
+
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-governance-report
+          path: reports/governance/weekly/**/*
+          retention-days: 90

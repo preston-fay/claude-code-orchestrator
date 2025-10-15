@@ -1,0 +1,46 @@
+# Cache Configuration for Kearney Data Platform
+
+# Query result caching
+query_cache:
+  enabled: true
+  default_ttl_seconds: 3600  # 1 hour
+  max_size_mb: 1000  # 1 GB
+  cleanup_interval_seconds: 300  # 5 minutes
+
+  # TTLs by query pattern
+  ttls:
+    "SELECT * FROM data WHERE date = CURRENT_DATE": 300  # 5 minutes
+    "SELECT * FROM models*": 3600  # 1 hour
+    "SELECT * FROM datasets*": 3600  # 1 hour
+    "*_aggregated": 7200  # 2 hours
+
+# HTTP caching (ETag/Cache-Control)
+http_cache:
+  enabled: true
+
+  # Static resources
+  static_max_age: 31536000  # 1 year
+  static_immutable: true
+
+  # API endpoints with stable responses
+  stable_endpoints:
+    - path: /api/viz/palette
+      max_age: 86400  # 1 day
+    - path: /api/theme/schema
+      max_age: 3600  # 1 hour
+    - path: /api/registry/models
+      max_age: 300  # 5 minutes
+    - path: /api/registry/datasets
+      max_age: 300  # 5 minutes
+
+# Materialized views
+materialization:
+  enabled: true
+  warehouse_path: warehouse/materialized/
+  refresh_strategy:
+    daily_aggregates:
+      schedule: "0 2 * * *"  # 2 AM daily
+      incremental: true
+    weekly_reports:
+      schedule: "0 3 * * 0"  # 3 AM Sunday
+      incremental: false

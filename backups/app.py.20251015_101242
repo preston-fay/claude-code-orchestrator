@@ -1,0 +1,377 @@
+"""FastAPI server with SQL endpoint, metrics, admin dashboard, and Mangum adapter for Lambda."""
+
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Any
+import json
+from pathlib import Path
+import io
+import csv
+
+try:
+    from mangum import Mangum
+except ImportError:
+    Mangum = None
+
+from src.data.warehouse import DuckDBWarehouse, QueryNotAllowed, QueryTimeout
+from src.server.admin.routes import router as admin_router
+from src.server.theme_routes import router as theme_router
+from src.server.registry_routes import router as registry_router
+from src.server.iso_providers import get_isochrones
+import time as time_module
+
+# Create app
+app = FastAPI(
+    title="Kearney Data Platform API",
+    description="DuckDB warehouse API with allowlisted SQL execution and admin dashboard",
+    version="1.0.0",
+)
+
+# Mount static files
+static_dir = Path(__file__).parent / "static"
+static_dir.mkdir(exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# Mount admin routes
+app.include_router(admin_router)
+
+# Mount theme management routes
+app.include_router(theme_router)
+
+# Mount registry routes
+app.include_router(registry_router)
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Warehouse instance
+warehouse: Optional[DuckDBWarehouse] = None
+
+
+def get_warehouse() -> DuckDBWarehouse:
+    """Get or create warehouse instance."""
+    global warehouse
+    if warehouse is None:
+        db_path = Path.cwd() / "warehouse" / "analytics.duckdb"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        warehouse = DuckDBWarehouse(db_path, read_only=False, timeout_seconds=30)
+        warehouse.connect()
+    return warehouse
+
+
+# Request/Response models
+class SQLRequest(BaseModel):
+    """SQL query request."""
+
+    sql: str = Field(..., description="SQL query (SELECT, WITH, DESCRIBE only)")
+    params: Optional[Dict[str, Any]] = Field(None, description="Query parameters")
+    timeout: Optional[int] = Field(None, description="Timeout in seconds", ge=1, le=300)
+    limit: Optional[int] = Field(100, description="Result limit", ge=1, le=10000)
+    offset: Optional[int] = Field(0, description="Result offset", ge=0)
+
+
+class SQLResponse(BaseModel):
+    """SQL query response."""
+
+    columns: List[str]
+    rows: List[List[Any]]
+    row_count: int
+    execution_time_ms: float
+    has_more: bool
+
+
+class MetricsResponse(BaseModel):
+    """Metrics response."""
+
+    orchestrator: Optional[Dict[str, Any]] = None
+    cleanliness: Optional[Dict[str, Any]] = None
+    isochrone: Optional[Dict[str, Any]] = None
+
+
+# Routes
+@app.get("/healthz")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy", "service": "kearney-data-platform"}
+
+
+@app.post("/sql", response_model=SQLResponse)
+async def execute_sql(request: SQLRequest):
+    """
+    Execute allowlisted SQL query.
+
+    Allowed operations:
+    - SELECT
+    - WITH (CTEs)
+    - DESCRIBE
+    - SHOW
+    - EXPLAIN
+
+    Blocked operations:
+    - DROP, DELETE, TRUNCATE
+    - ALTER, CREATE USER
+    - GRANT, REVOKE
+    """
+    import time
+
+    try:
+        wh = get_warehouse()
+
+        start = time.time()
+
+        # Add pagination
+        sql_with_limit = request.sql
+        if "LIMIT" not in sql_with_limit.upper():
+            sql_with_limit += f" LIMIT {request.limit} OFFSET {request.offset}"
+
+        # Execute query
+        result = wh.query(sql_with_limit, params=request.params, timeout=request.timeout)
+
+        # Fetch results
+        rows = result.fetchall()
+        columns = [desc[0] for desc in result.description]
+
+        execution_time = (time.time() - start) * 1000
+
+        # Check if there are more rows
+        count_sql = f"SELECT COUNT(*) FROM ({request.sql}) AS _count"
+        count_result = wh.query(count_sql, params=request.params, check_allowlist=False)
+        total_rows = count_result.fetchone()[0]
+        has_more = (request.offset + len(rows)) < total_rows
+
+        return SQLResponse(
+            columns=columns,
+            rows=rows,
+            row_count=len(rows),
+            execution_time_ms=execution_time,
+            has_more=has_more,
+        )
+
+    except QueryNotAllowed as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except QueryTimeout as e:
+        raise HTTPException(status_code=408, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Query execution failed: {str(e)}")
+
+
+@app.get("/sql/export")
+async def export_sql(
+    sql: str = Query(..., description="SQL query"),
+    format: str = Query("csv", description="Export format (csv or json)"),
+):
+    """
+    Export query results as CSV or JSON.
+
+    Args:
+        sql: SQL query
+        format: "csv" or "json"
+
+    Returns:
+        Streaming response with results
+    """
+    try:
+        wh = get_warehouse()
+        result = wh.query(sql, timeout=60)
+
+        rows = result.fetchall()
+        columns = [desc[0] for desc in result.description]
+
+        if format == "csv":
+            # CSV export
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(columns)
+            writer.writerows(rows)
+
+            output.seek(0)
+            return StreamingResponse(
+                iter([output.getvalue()]),
+                media_type="text/csv",
+                headers={"Content-Disposition": "attachment; filename=export.csv"},
+            )
+
+        else:
+            # JSON export
+            data = [dict(zip(columns, row)) for row in rows]
+            return JSONResponse(content={"data": data, "row_count": len(rows)})
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Isochrone metrics tracking
+_isochrone_requests = 0
+_isochrone_latency_sum = 0
+_isochrone_latency_count = 0
+
+
+@app.get("/isochrone")
+async def get_isochrone_data(
+    lat: float = Query(..., description="Latitude"),
+    lon: float = Query(..., description="Longitude"),
+    range: int = Query(30, description="Max travel time in minutes", ge=1, le=60),
+    buckets: int = Query(3, description="Number of isochrone zones", ge=1, le=4),
+    profile: str = Query("driving", description="Travel profile"),
+    provider: str = Query("stub", description="Provider (stub, openrouteservice, mapbox)")
+):
+    """
+    Get isochrone polygons for travel time analysis.
+
+    Args:
+        lat: Latitude of starting point
+        lon: Longitude of starting point
+        range: Maximum travel time in minutes (1-60)
+        buckets: Number of isochrone zones (1-4)
+        profile: Travel profile (driving, walking, cycling)
+        provider: Provider name (stub, openrouteservice, mapbox)
+
+    Returns:
+        GeoJSON FeatureCollection with isochrone polygons
+
+    Features:
+        - Rate limiting (10 req/min default)
+        - 5s provider timeout with fallback to stub
+        - Environment-based API key configuration
+    """
+    global _isochrone_requests, _isochrone_latency_sum, _isochrone_latency_count
+
+    start_time = time_module.time()
+
+    try:
+        result, rate_limited = get_isochrones(lat, lon, range, buckets, profile, provider)
+
+        latency_ms = int((time_module.time() - start_time) * 1000)
+        _isochrone_requests += 1
+        _isochrone_latency_sum += latency_ms
+        _isochrone_latency_count += 1
+
+        if rate_limited:
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": "Rate limit exceeded",
+                    "fallback": result,
+                    "message": "Using stub data due to rate limit"
+                }
+            )
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/metrics", response_model=MetricsResponse)
+async def get_metrics():
+    """
+    Get orchestrator metrics and cleanliness score.
+
+    Returns:
+    - Latest orchestrator run metrics
+    - Repository cleanliness score
+    """
+    metrics = {}
+
+    # Orchestrator metrics
+    metrics_dir = Path.cwd() / ".claude" / "metrics"
+    if metrics_dir.exists():
+        metric_files = sorted(metrics_dir.glob("run_*.json"), key=lambda p: p.stat().st_mtime)
+        if metric_files:
+            with open(metric_files[-1]) as f:
+                metrics["orchestrator"] = json.load(f)
+
+    # Cleanliness score
+    hygiene_file = Path.cwd() / "reports" / "hygiene_summary.json"
+    if hygiene_file.exists():
+        with open(hygiene_file) as f:
+            metrics["cleanliness"] = json.load(f)
+
+    # Isochrone metrics
+    if _isochrone_requests > 0:
+        avg_latency = _isochrone_latency_sum / _isochrone_latency_count if _isochrone_latency_count > 0 else 0
+        metrics["isochrone"] = {
+            "requests_total": _isochrone_requests,
+            "latency_ms_avg": round(avg_latency, 2)
+        }
+
+    return MetricsResponse(**metrics)
+
+
+@app.get("/viz/palette")
+async def get_viz_palette(theme: str = Query("light", description="Theme: light or dark")):
+    """
+    Get visualization color palettes for current theme.
+
+    Args:
+        theme: "light" or "dark"
+
+    Returns:
+        Color palettes and tokens
+    """
+    tokens_file = Path(__file__).parent.parent.parent / "design_system" / "tokens.json"
+    palettes_file = Path(__file__).parent.parent.parent / "design_system" / "palettes.json"
+
+    if not tokens_file.exists() or not palettes_file.exists():
+        raise HTTPException(status_code=404, detail="Design tokens not found")
+
+    with open(tokens_file) as f:
+        tokens = json.load(f)
+
+    with open(palettes_file) as f:
+        palettes = json.load(f)
+
+    theme_colors = tokens["theme"].get(theme, tokens["theme"]["light"])
+
+    return {
+        "theme": theme,
+        "colors": theme_colors,
+        "palettes": palettes,
+        "rules": palettes["visualization"]["rules"],
+    }
+
+
+@app.get("/tables")
+async def list_tables():
+    """List all tables and views in warehouse."""
+    try:
+        wh = get_warehouse()
+        tables = wh.list_tables()
+        return {"tables": tables, "count": len(tables)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/tables/{table_name}/schema")
+async def get_table_schema(table_name: str):
+    """Get schema for table."""
+    try:
+        wh = get_warehouse()
+        schema = wh.describe(table_name)
+        return {"table": table_name, "schema": schema.to_dict(orient="records")}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+# Mangum adapter for Lambda
+if Mangum:
+    handler = Mangum(app)
+else:
+    # Stub handler if Mangum not installed
+    def handler(event, context):
+        return {"statusCode": 500, "body": json.dumps({"error": "Mangum not installed"})}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

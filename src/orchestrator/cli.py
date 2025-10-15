@@ -36,6 +36,20 @@ try:
 except ImportError as e:
     console.print(f"[yellow]Warning: Could not import style CLI: {e}[/yellow]")
 
+# Add registry command group
+try:
+    from src.orchestrator.registry import app as registry_app
+    app.add_typer(registry_app, name="registry")
+except ImportError as e:
+    console.print(f"[yellow]Warning: Could not import registry CLI: {e}[/yellow]")
+
+# Add governance command group
+try:
+    from src.orchestrator.governance import app as gov_app
+    app.add_typer(gov_app, name="gov")
+except ImportError as e:
+    console.print(f"[yellow]Warning: Could not import governance CLI: {e}[/yellow]")
+
 # Add data command group (import commands from existing src/cli.py)
 try:
     from src.cli import app as data_cli_app

@@ -1,0 +1,362 @@
+name: Lifecycle Automation
+
+on:
+  schedule:
+    # Weekly dependency audit: Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task to run'
+        required: true
+        type: choice
+        options:
+          - all
+          - dependency-audit
+          - security-scan
+          - weekly-report
+          - health-webhook
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  # Job 1: Dependency Audit
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event.inputs.task == 'all' || github.event.inputs.task == 'dependency-audit'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit pyyaml
+
+      - name: Install Node dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Run dependency audit
+        id: audit
+        continue-on-error: true
+        run: |
+          python scripts/lifecycle/dependency_audit.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-report
+          path: reports/lifecycle/dependencies/*.json
+          retention-days: 90
+
+      - name: Check for auto-upgrade PR
+        id: check_pr
+        run: |
+          # Check if a PR was created
+          BRANCH_PREFIX="auto/dep-upgrade-"
+          DATE_STR=$(date +%Y%m%d)
+          BRANCH_NAME="${BRANCH_PREFIX}${DATE_STR}"
+
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "pr_created=true" >> $GITHUB_OUTPUT
+            echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          else
+            echo "pr_created=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR
+        if: steps.check_pr.outputs.pr_created == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ steps.check_pr.outputs.branch_name }}';
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branchName}`,
+              state: 'open'
+            });
+
+            if (prs.length > 0) {
+              const pr = prs[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: '## Dependency Audit\n\nAutomated dependency upgrades have been applied. Please review and merge if tests pass.'
+              });
+            }
+
+  # Job 2: Security Scan
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event.inputs.task == 'all' || github.event.inputs.task == 'security-scan'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit pip-audit safety pyyaml
+
+      - name: Install Node dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Run security scan
+        id: security
+        run: |
+          python src/lifecycle/security_scan.py
+        continue-on-error: true
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-report
+          path: reports/lifecycle/security/*.json
+          retention-days: 90
+
+      - name: Check security score
+        run: |
+          REPORT=$(ls -t reports/lifecycle/security/*.json | head -n1)
+          SCORE=$(jq -r '.platform_security_score' "$REPORT")
+          echo "Platform Security Score: $SCORE"
+
+          if (( $(echo "$SCORE < 70" | bc -l) )); then
+            echo "ERROR: Security score below threshold (70)"
+            exit 1
+          fi
+
+      - name: Run Bandit on production code
+        run: |
+          bandit -r src -f json -o bandit-report.json || true
+
+      - name: Run npm audit (production only)
+        working-directory: apps/web
+        run: |
+          npm audit --production --json > npm-audit-report.json || true
+
+      - name: Upload scan artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-artifacts
+          path: |
+            bandit-report.json
+            apps/web/npm-audit-report.json
+          retention-days: 90
+
+  # Job 3: Weekly Hygiene Report
+  weekly-report:
+    name: Weekly Hygiene Report
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, security-scan]
+    if: |
+      always() &&
+      (github.event_name == 'schedule' || github.event.inputs.task == 'all' || github.event.inputs.task == 'weekly-report')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Download audit reports
+        uses: actions/download-artifact@v4
+        with:
+          name: dependency-audit-report
+          path: reports/lifecycle/dependencies/
+
+      - name: Download security reports
+        uses: actions/download-artifact@v4
+        with:
+          name: security-scan-report
+          path: reports/lifecycle/security/
+
+      - name: Generate weekly hygiene report
+        run: |
+          python scripts/lifecycle/weekly_hygiene_report.py
+
+      - name: Upload weekly report
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-hygiene-report
+          path: reports/lifecycle/weekly/**/*
+          retention-days: 365
+
+      - name: Create GitHub Issue for report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Find latest report
+            const reportsDir = 'reports/lifecycle/weekly';
+            const weekDirs = fs.readdirSync(reportsDir)
+              .filter(f => fs.statSync(path.join(reportsDir, f)).isDirectory())
+              .sort()
+              .reverse();
+
+            if (weekDirs.length === 0) {
+              console.log('No report found');
+              return;
+            }
+
+            const latestWeek = weekDirs[0];
+            const reportPath = path.join(reportsDir, latestWeek, 'report.json');
+
+            if (!fs.existsSync(reportPath)) {
+              console.log('report.json not found');
+              return;
+            }
+
+            const reportData = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            const scores = reportData.scores || {};
+            const recommendations = reportData.recommendations || [];
+
+            const body = `## Weekly Platform Hygiene Report
+
+**Week:** ${latestWeek}
+**Generated:** ${reportData.timestamp}
+
+### Health Scores
+
+| Category | Score |
+|----------|-------|
+| Security | ${scores.security || 0}/100 |
+| Operations | ${scores.ops || 0}/100 |
+| Governance | ${scores.governance || 0}/100 |
+| Reliability | ${scores.reliability || 0}/100 |
+
+### Key Recommendations
+
+${recommendations.map(rec => `- ${rec}`).join('\n')}
+
+### Report Links
+
+- [HTML Report](../../../reports/lifecycle/weekly/${latestWeek}/report.html)
+- [JSON Data](../../../reports/lifecycle/weekly/${latestWeek}/report.json)
+
+---
+*Generated by Lifecycle Automation*`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Weekly Platform Health Report - ${latestWeek}`,
+              body: body,
+              labels: ['health-report', 'automated']
+            });
+
+  # Job 4: Health Webhook
+  health-webhook:
+    name: Post Health Webhook
+    runs-on: ubuntu-latest
+    needs: [weekly-report]
+    if: |
+      always() &&
+      (github.event_name == 'schedule' || github.event.inputs.task == 'all' || github.event.inputs.task == 'health-webhook')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Download weekly report
+        uses: actions/download-artifact@v4
+        with:
+          name: weekly-hygiene-report
+          path: reports/lifecycle/weekly/
+
+      - name: Post health webhook
+        if: env.LIFECYCLE_WEBHOOK_URL != ''
+        run: |
+          python src/lifecycle/health_webhook.py
+        env:
+          LIFECYCLE_WEBHOOK_URL: ${{ secrets.LIFECYCLE_WEBHOOK_URL }}
+
+  # Job 5: Summary
+  summary:
+    name: Lifecycle Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, security-scan, weekly-report, health-webhook]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const auditResult = '${{ needs.dependency-audit.result }}';
+            const securityResult = '${{ needs.security-scan.result }}';
+            const reportResult = '${{ needs.weekly-report.result }}';
+            const webhookResult = '${{ needs.health-webhook.result }}';
+
+            const summary = `## Lifecycle Automation Summary
+
+| Job | Status |
+|-----|--------|
+| Dependency Audit | ${auditResult} |
+| Security Scan | ${securityResult} |
+| Weekly Report | ${reportResult} |
+| Health Webhook | ${webhookResult} |
+
+### Next Steps
+
+${auditResult === 'failure' ? '- Review dependency audit failures and address vulnerabilities' : ''}
+${securityResult === 'failure' ? '- Review security scan failures and address critical issues' : ''}
+${reportResult === 'success' ? '- Weekly hygiene report generated successfully' : ''}
+${webhookResult === 'success' ? '- Health webhook posted successfully' : ''}
+
+---
+*Generated by Lifecycle CI*`;
+
+            core.summary.addRaw(summary).write();

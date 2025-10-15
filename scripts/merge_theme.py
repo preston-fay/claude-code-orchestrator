@@ -166,6 +166,7 @@ def main():
         help="Output directory for generated files",
     )
     parser.add_argument("--validate-only", action="store_true", help="Only validate, don't generate")
+    parser.add_argument("--dry-run", action="store_true", help="Validate and show what would be generated without writing files")
     args = parser.parse_args()
 
     # Paths
@@ -219,6 +220,20 @@ def main():
         "name": client_theme.get("client", {}).get("name", args.client),
         "generated_from": ["design_system/tokens.json", f"clients/{args.client}/theme.json"],
     }
+
+    # Dry-run mode: show what would be generated
+    if args.dry_run:
+        print("\n[DRY RUN] Would generate the following files:")
+        print(f"  - CSS:        {output_dir / args.client}.css")
+        print(f"  - TypeScript: {output_dir / args.client}.ts")
+        print(f"  - JSON:       {output_dir / args.client}.json")
+        print(f"\nMerged token summary:")
+        print(f"  - Colors (light): {len(merged_tokens.get('colors', {}).get('light', {}))}")
+        print(f"  - Colors (dark):  {len(merged_tokens.get('colors', {}).get('dark', {}))}")
+        print(f"  - Typography:     {len(merged_tokens.get('typography', {}))}")
+        print(f"  - Spacing:        {len(merged_tokens.get('spacing', {}))}")
+        print("\n✓ Dry run complete (no files written)")
+        return
 
     # Generate output files
     print(f"Generating CSS tokens to {output_dir / args.client}.css")

@@ -1,8 +1,8 @@
 """FastAPI server with SQL endpoint, metrics, admin dashboard, and Mangum adapter for Lambda."""
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import io
 import csv
+import time as time_module
 
 try:
     from mangum import Mangum
@@ -19,8 +20,32 @@ except ImportError:
 from src.data.warehouse import DuckDBWarehouse, QueryNotAllowed, QueryTimeout
 from src.server.admin.routes import router as admin_router
 from src.server.theme_routes import router as theme_router
+from src.server.registry_routes import router as registry_router
+from src.server.gov_routes import router as gov_router
 from src.server.iso_providers import get_isochrones
-import time as time_module
+
+# Ops layer
+from src.ops.logging import configure_logging, get_logger, bind_context
+from src.ops.tracing import init_tracer, instrument_fastapi, get_current_trace_id
+from src.ops.metrics import (
+    http_requests_total,
+    http_request_latency,
+    get_metrics,
+    get_content_type,
+)
+
+# Security layer
+from src.security.context import get_optional_identity, attach_identity_to_request, require_auth, get_tenant_context
+from src.security.schemas import Identity, TenantContext, ScopeEnum
+from src.security.headers import SecurityHeadersMiddleware
+from src.security.ratelimit import is_rate_limited
+from src.security.audit import get_audit_logger
+from src.security.signing import create_signed_artifact_url
+
+# Configure logging and tracing on startup
+configure_logging(json=False, level="INFO")
+logger = get_logger(__name__)
+init_tracer(service_name="kearney-platform-api")
 
 # Create app
 app = FastAPI(
@@ -28,6 +53,9 @@ app = FastAPI(
     description="DuckDB warehouse API with allowlisted SQL execution and admin dashboard",
     version="1.0.0",
 )
+
+# Instrument with OpenTelemetry
+instrument_fastapi(app)
 
 # Mount static files
 static_dir = Path(__file__).parent / "static"
@@ -40,6 +68,12 @@ app.include_router(admin_router)
 # Mount theme management routes
 app.include_router(theme_router)
 
+# Mount registry routes
+app.include_router(registry_router)
+
+# Mount governance routes
+app.include_router(gov_router)
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -48,6 +82,104 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Security headers middleware
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+# Request/Response logging middleware with auth and rate limiting
+@app.middleware("http")
+async def logging_middleware(request: Request, call_next):
+    """Log requests and responses with metrics, auth, and rate limiting."""
+    start_time = time_module.time()
+
+    # Bind request context
+    request_id = request.headers.get("X-Request-ID", "unknown")
+    trace_id = get_current_trace_id()
+    bind_context(request_id=request_id, trace_id=trace_id, path=request.url.path)
+
+    # Extract and attach identity (optional - non-blocking)
+    x_api_key = request.headers.get("X-API-Key")
+    authorization = request.headers.get("Authorization")
+    identity = await get_optional_identity(x_api_key=x_api_key, authorization=authorization)
+    attach_identity_to_request(request, identity)
+
+    # Check rate limiting for authenticated requests
+    if identity:
+        tenant = request.headers.get("X-Tenant", identity.tenants[0] if identity.tenants else "default")
+        is_limited, rate_headers = is_rate_limited(identity, tenant, request.url.path)
+
+        if is_limited:
+            # Log rate limit event
+            audit_logger = get_audit_logger()
+            audit_logger.log_access_denied(
+                identity=identity,
+                resource_type="api",
+                resource_id=request.url.path,
+                tenant=tenant,
+                reason="rate_limit_exceeded",
+                ip_address=request.client.host if request.client else None,
+                trace_id=trace_id
+            )
+
+            # Return 429 with rate limit headers
+            logger.warning(
+                "rate_limit_exceeded",
+                identity_id=identity.id,
+                tenant=tenant,
+                path=request.url.path
+            )
+
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": "rate_limit_exceeded",
+                    "message": "Too many requests. Please slow down.",
+                },
+                headers=rate_headers
+            )
+
+        # Add rate limit headers to response (done after processing)
+        request.state.rate_headers = rate_headers
+
+    # Log request
+    logger.info(
+        "request_started",
+        method=request.method,
+        path=request.url.path,
+        client=request.client.host if request.client else None,
+        identity=identity.id if identity else None,
+    )
+
+    # Process request
+    response = await call_next(request)
+
+    # Add rate limit headers if present
+    if hasattr(request.state, "rate_headers"):
+        for key, value in request.state.rate_headers.items():
+            response.headers[key] = value
+
+    # Calculate latency
+    latency = time_module.time() - start_time
+
+    # Record metrics
+    http_requests_total.labels(
+        route=request.url.path, method=request.method, status=response.status_code
+    ).inc()
+    http_request_latency.labels(route=request.url.path, method=request.method).observe(latency)
+
+    # Log response
+    logger.info(
+        "request_completed",
+        method=request.method,
+        path=request.url.path,
+        status=response.status_code,
+        latency_ms=round(latency * 1000, 2),
+        identity=identity.id if identity else None,
+    )
+
+    return response
+
 
 # Warehouse instance
 warehouse: Optional[DuckDBWarehouse] = None
@@ -356,6 +488,122 @@ async def get_table_schema(table_name: str):
         return {"table": table_name, "schema": schema.to_dict(orient="records")}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.get("/metrics")
+async def metrics_endpoint():
+    """
+    Prometheus metrics endpoint.
+
+    Returns:
+        Metrics in Prometheus text format
+    """
+    metrics_data = get_metrics()
+    return Response(content=metrics_data, media_type=get_content_type())
+
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint.
+
+    Returns:
+        Health status
+    """
+    return {
+        "status": "healthy",
+        "service": "kearney-platform-api",
+        "version": "1.0.0",
+    }
+
+
+# Signed URL endpoint
+@app.post("/api/sign")
+async def sign_artifact_url(
+    path: str = Query(..., description="Artifact path to sign"),
+    ttl_minutes: int = Query(15, description="TTL in minutes", ge=1, le=1440),
+    identity: Identity = Depends(require_auth),
+    tenant_context: TenantContext = Depends(get_tenant_context),
+    request: Request = None
+):
+    """
+    Generate signed URL for artifact access.
+
+    Requires authentication and tenant access.
+    """
+    # Check scope
+    if not identity.has_scope(ScopeEnum.ARTIFACT_READ):
+        audit_logger = get_audit_logger()
+        audit_logger.log_access_denied(
+            identity=identity,
+            resource_type="artifact",
+            resource_id=path,
+            tenant=tenant_context.tenant,
+            reason="insufficient_scope",
+            ip_address=request.client.host if request and request.client else None,
+            trace_id=get_current_trace_id()
+        )
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "insufficient_permissions",
+                "message": "Requires artifact:read scope"
+            }
+        )
+
+    # Generate signed URL
+    ip_address = request.client.host if request and request.client else None
+    signed_url = create_signed_artifact_url(
+        artifact_path=path,
+        tenant=tenant_context.tenant,
+        ttl_minutes=ttl_minutes,
+        ip_address=ip_address
+    )
+
+    # Log event
+    audit_logger = get_audit_logger()
+    audit_logger.log_signed_url_issue(
+        identity=identity,
+        path=path,
+        tenant=tenant_context.tenant,
+        ttl_seconds=ttl_minutes * 60,
+        ip_address=ip_address,
+        trace_id=get_current_trace_id()
+    )
+
+    return {
+        "signed_url": signed_url,
+        "expires_in_seconds": ttl_minutes * 60,
+        "path": path,
+        "tenant": tenant_context.tenant
+    }
+
+
+# Exception handlers for security errors
+@app.exception_handler(401)
+async def unauthorized_handler(request: Request, exc: HTTPException):
+    """Handle 401 Unauthorized errors."""
+    return JSONResponse(
+        status_code=401,
+        content={
+            "error": "unauthorized",
+            "message": "Authentication required. Provide X-API-Key or Authorization header.",
+            "path": request.url.path
+        }
+    )
+
+
+@app.exception_handler(403)
+async def forbidden_handler(request: Request, exc: HTTPException):
+    """Handle 403 Forbidden errors."""
+    return JSONResponse(
+        status_code=403,
+        content={
+            "error": "forbidden",
+            "message": "Access denied. Insufficient permissions.",
+            "path": request.url.path
+        }
+    )
 
 
 # Mangum adapter for Lambda

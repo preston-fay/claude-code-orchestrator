@@ -1,0 +1,45 @@
+# Governance Configuration
+# Quality gates and thresholds for platform governance
+
+# Data freshness requirements
+freshness_days_min: 7
+
+# Cleanliness requirements (Steward 4S score)
+cleanliness_min: 85
+
+# Performance targets
+perf_targets:
+  rmse_max: 0.20
+  r2_min: 0.80
+  mae_max: 0.15
+  accuracy_min: 0.85
+
+# Operational thresholds
+ops:
+  latency_p95_max_ms: 400
+  error_rate_max_pct: 1.0
+  cache_hit_rate_min_pct: 80.0
+
+# Drift detection thresholds
+drift:
+  numeric_mean_delta_max_pct: 20
+  category_overlap_min_pct: 70
+  row_delta_max_pct: 50
+
+# Quality gates
+gates:
+  - name: "data_freshness"
+    enabled: true
+    severity: "error"
+  - name: "model_performance"
+    enabled: true
+    severity: "warning"
+  - name: "cleanliness_score"
+    enabled: true
+    severity: "error"
+  - name: "ops_latency"
+    enabled: true
+    severity: "warning"
+  - name: "security_compliance"
+    enabled: true
+    severity: "error"

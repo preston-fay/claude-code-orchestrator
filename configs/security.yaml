@@ -1,0 +1,168 @@
+# Security Configuration for Kearney Data Platform
+
+# Tenants (client slugs)
+tenants:
+  - slug: acme-corp
+    name: "Acme Corporation"
+    enabled: true
+
+  - slug: globex
+    name: "Globex Industries"
+    enabled: true
+
+  - slug: initech
+    name: "Initech Solutions"
+    enabled: true
+
+# Role mappings
+roles:
+  admin:
+    description: "Full access to all resources and tenants"
+    default_scopes:
+      - registry:read
+      - registry:write
+      - theme:read
+      - theme:write
+      - dataset:read
+      - dataset:write
+      - artifact:read
+      - artifact:write
+      - admin:read
+      - admin:write
+      - security:manage
+
+  editor:
+    description: "Read/write access to assigned tenants"
+    default_scopes:
+      - registry:read
+      - registry:write
+      - theme:read
+      - theme:write
+      - dataset:read
+      - dataset:write
+      - artifact:read
+
+  viewer:
+    description: "Read-only access to assigned tenants"
+    default_scopes:
+      - registry:read
+      - theme:read
+      - dataset:read
+      - artifact:read
+
+  service:
+    description: "Machine-to-machine with specific scopes"
+    default_scopes: []  # Scopes assigned per service
+
+# Rate limiting
+rate_limits:
+  enabled: true
+
+  # Default limits (per tenant, per user)
+  default:
+    requests_per_minute: 60
+    burst: 10
+
+  # Per-route overrides
+  routes:
+    "/api/registry/models":
+      requests_per_minute: 120
+      burst: 20
+
+    "/api/theme/apply":
+      requests_per_minute: 30
+      burst: 5
+
+    "/api/sign":
+      requests_per_minute: 100
+      burst: 15
+
+# Content Security Policy
+csp:
+  # Default policy
+  default:
+    default-src: "'self'"
+    script-src:
+      - "'self'"
+      - "'unsafe-inline'"  # For HTMX and inline scripts
+      - "https://cdn.jsdelivr.net"  # For CDN libraries
+    style-src:
+      - "'self'"
+      - "'unsafe-inline'"  # For inline styles
+    img-src:
+      - "'self'"
+      - "data:"
+      - "https://api.mapbox.com"  # Mapbox tiles
+      - "https://a.tile.openstreetmap.org"  # OSM tiles
+      - "https://b.tile.openstreetmap.org"
+      - "https://c.tile.openstreetmap.org"
+    font-src:
+      - "'self'"
+      - "data:"
+    connect-src:
+      - "'self'"
+      - "https://api.mapbox.com"  # Mapbox API
+    frame-ancestors: "'none'"
+    base-uri: "'self'"
+    form-action: "'self'"
+
+  # Admin-specific policy (more permissive for development tools)
+  admin:
+    default-src: "'self'"
+    script-src:
+      - "'self'"
+      - "'unsafe-inline'"
+      - "'unsafe-eval'"  # For SQL console and admin tools
+      - "https://cdn.jsdelivr.net"
+    style-src:
+      - "'self'"
+      - "'unsafe-inline'"
+    img-src:
+      - "'self'"
+      - "data:"
+      - "https:"  # Allow all HTTPS images
+    connect-src:
+      - "'self'"
+      - "https:"
+
+# Security headers
+headers:
+  strict-transport-security: "max-age=31536000; includeSubDomains"
+  x-content-type-options: "nosniff"
+  x-frame-options: "DENY"
+  referrer-policy: "strict-origin-when-cross-origin"
+  permissions-policy: "geolocation=(), microphone=(), camera=()"
+
+# Signed URLs
+signed_urls:
+  enabled: true
+  default_ttl_minutes: 15
+  max_ttl_minutes: 1440  # 24 hours
+
+# Audit logging
+audit:
+  enabled: true
+  log_path: ".claude/logs/audit.log"
+  retention_days: 90
+
+  # Events to log
+  log_events:
+    - api_key_create
+    - api_key_revoke
+    - theme_create
+    - theme_update
+    - theme_delete
+    - model_register
+    - dataset_register
+    - artifact_download
+    - signed_url_issue
+    - login_success
+    - login_failure
+    - access_denied
+
+  # Anomaly detection (basic)
+  anomaly_detection:
+    enabled: true
+    max_failed_auth_attempts: 5
+    max_failed_auth_window_minutes: 15
+    max_requests_per_minute: 300  # Per user

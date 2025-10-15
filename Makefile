@@ -1,0 +1,102 @@
+.PHONY: help docs-dev docs-build docs-export docs-clean docs-gen docs-brand-check
+
+# Default target
+help:
+	@echo "Kearney Data Platform - Makefile"
+	@echo ""
+	@echo "Documentation Commands:"
+	@echo "  make docs-dev          Start Docusaurus dev server"
+	@echo "  make docs-build        Build documentation for production"
+	@echo "  make docs-gen          Generate API/CLI/design token docs"
+	@echo "  make docs-brand-check  Check documentation for brand compliance"
+	@echo "  make docs-export       Export documentation as PDFs"
+	@echo "  make docs-clean        Clean documentation build files"
+	@echo ""
+	@echo "Server Commands:"
+	@echo "  make server-start      Start FastAPI server"
+	@echo "  make server-stop       Stop FastAPI server"
+	@echo ""
+	@echo "Development Commands:"
+	@echo "  make install           Install Python dependencies"
+	@echo "  make test              Run tests"
+	@echo "  make lint              Run linters"
+	@echo "  make format            Format code"
+
+# Documentation commands
+docs-dev:
+	@echo "Starting Docusaurus development server..."
+	cd site && npm install && npm start
+
+docs-build: docs-gen
+	@echo "Building documentation..."
+	cd site && npm install && npm run build
+	@echo "Build complete! Output in site/build"
+
+docs-gen:
+	@echo "Generating documentation..."
+	@echo "1. Generating design token docs..."
+	python3 scripts/sync_tokens_for_docs.py
+	@echo "2. Generating API docs (if server is running)..."
+	-python3 scripts/gen_openapi_docs.py
+	@echo "3. Generating CLI docs (if CLI is installed)..."
+	-python3 scripts/gen_cli_docs.py
+	@echo "Documentation generation complete!"
+
+docs-brand-check:
+	@echo "Checking brand compliance..."
+	python3 scripts/brand_guard_docs.py
+
+docs-export:
+	@echo "Exporting PDFs..."
+	@echo "1. Building documentation..."
+	cd site && npm run build
+	@echo "2. Starting local server..."
+	cd site && npx serve build -p 3000 &
+	@sleep 5
+	@echo "3. Exporting PDFs..."
+	npx ts-node scripts/export_pdfs.ts
+	@echo "4. Stopping server..."
+	@pkill -f "serve build" || true
+	@echo "PDFs exported to site/pdfs/"
+
+docs-clean:
+	@echo "Cleaning documentation build files..."
+	rm -rf site/build
+	rm -rf site/.docusaurus
+	rm -rf site/node_modules
+	rm -rf site/pdfs
+	@echo "Clean complete!"
+
+# Server commands
+server-start:
+	@echo "Starting FastAPI server..."
+	orchestrator server start --port 8000
+
+server-stop:
+	@echo "Stopping FastAPI server..."
+	orchestrator server stop
+
+# Development commands
+install:
+	@echo "Installing Python dependencies..."
+	pip install -r requirements-dataplatform.txt
+	pip install -e .
+	@echo "Installing Node dependencies..."
+	cd site && npm install
+	cd apps/web && npm install
+
+test:
+	@echo "Running tests..."
+	pytest tests/ -v --cov=src --cov-report=html --cov-report=term
+
+lint:
+	@echo "Running linters..."
+	ruff check src/ tests/
+	mypy src/
+	cd apps/web && npm run lint
+
+format:
+	@echo "Formatting code..."
+	black src/ tests/ scripts/
+	ruff check --fix src/ tests/
+	cd apps/web && npm run format

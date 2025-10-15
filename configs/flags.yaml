@@ -1,0 +1,29 @@
+# Feature Flags Configuration
+# Control feature rollouts and experimental functionality
+
+flags:
+  # UI features
+  ui.experimental_map: false
+  ui.advanced_filters: true
+  ui.data_explorer: true
+  ui.dark_mode: true
+
+  # Pipeline features
+  pipeline.parallel_processing: true
+  pipeline.caching: true
+  pipeline.auto_retry: true
+
+  # Map features
+  map.high_resolution: false
+  map.satellite_view: false
+  map.3d_terrain: false
+
+  # Release features
+  release.beta_features: false
+  release.canary_deployment: false
+  release.feature_preview: false
+
+  # Governance features
+  gov.auto_profiling: true
+  gov.drift_detection: true
+  gov.weekly_reports: true

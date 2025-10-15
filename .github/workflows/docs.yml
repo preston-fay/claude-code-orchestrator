@@ -1,0 +1,237 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'docs/**'
+      - 'design_system/**'
+      - 'scripts/gen_*.py'
+      - 'scripts/sync_tokens_for_docs.py'
+      - 'scripts/brand_guard_docs.py'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'docs/**'
+      - 'design_system/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          pip install requests
+
+      - name: Brand Compliance Check
+        run: |
+          python scripts/brand_guard_docs.py
+        continue-on-error: false
+
+      - name: Markdown Linting
+        uses: avto-dev/markdown-lint@v1
+        with:
+          config: '.markdownlint.json'
+          args: 'site/docs/**/*.md'
+        continue-on-error: true
+
+  build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    needs: quality-gates
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: site/package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements-dataplatform.txt
+          pip install requests
+
+      - name: Install Node dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Generate design token docs
+        run: |
+          python scripts/sync_tokens_for_docs.py
+
+      - name: Generate API docs (if server is available)
+        run: |
+          python scripts/gen_openapi_docs.py || echo "API server not available, skipping API docs generation"
+        continue-on-error: true
+
+      - name: Generate CLI docs (if CLI is available)
+        run: |
+          pip install -e . || echo "CLI not installed"
+          python scripts/gen_cli_docs.py || echo "CLI not available, skipping CLI docs generation"
+        continue-on-error: true
+
+      - name: Build Docusaurus site
+        working-directory: site
+        run: npm run build
+
+      - name: Check for broken links
+        working-directory: site
+        run: |
+          npx linkinator build --recurse --silent || echo "Link check completed with warnings"
+        continue-on-error: true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-build
+          path: site/build
+          retention-days: 7
+
+  deploy-github-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: 'pages'
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-build
+          path: site/build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  deploy-amplify:
+    name: Trigger Amplify Deployment
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Trigger AWS Amplify Build
+        run: |
+          echo "AWS Amplify will automatically deploy from main branch"
+          echo "Amplify configuration is in site/amplify.yml"
+          echo "Configure Amplify app to watch the 'site' folder"
+
+  pdf-export:
+    name: Export PDFs
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: site/package-lock.json
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-build
+          path: site/build
+
+      - name: Install dependencies
+        working-directory: site
+        run: |
+          npm ci
+          npm install puppeteer ts-node @types/node
+
+      - name: Serve docs locally
+        working-directory: site
+        run: |
+          npx serve build -p 3000 &
+          sleep 5
+
+      - name: Export PDFs
+        working-directory: .
+        run: |
+          npx ts-node scripts/export_pdfs.ts
+        env:
+          DOCS_BASE_URL: http://localhost:3000
+
+      - name: Upload PDF artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-pdfs
+          path: site/pdfs/*.pdf
+          retention-days: 30
+
+  version-docs:
+    name: Version Documentation
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create docs version
+        working-directory: site
+        run: |
+          npm run docusaurus docs:version ${{ steps.version.outputs.VERSION }}
+
+      - name: Commit versioned docs
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add site/versioned_docs site/versioned_sidebars site/versions.json
+          git commit -m "docs: version ${{ steps.version.outputs.VERSION }}" || echo "No changes to commit"
+          git push || echo "No changes to push"

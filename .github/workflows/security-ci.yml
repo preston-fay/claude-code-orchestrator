@@ -1,0 +1,138 @@
+name: Security CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  security-tests:
+    name: Security Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install pytest bcrypt pyjwt cryptography pyyaml
+
+      - name: Run security tests
+        run: |
+          pytest -v tests/security/test_security_suite.py
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-test-results
+          path: |
+            .pytest_cache/
+            *.log
+
+  security-smoke:
+    name: Security Smoke Test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install bcrypt pyyaml click rich
+
+      - name: Start FastAPI server
+        run: |
+          cd src/server
+          python -m uvicorn app:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+
+      - name: Create API key
+        id: create_key
+        run: |
+          python -c "
+          from src.security.keys import get_key_manager
+          from src.security.schemas import RoleEnum, ScopeEnum
+
+          manager = get_key_manager()
+          api_key, plain_key = manager.create(
+              owner_id='ci-test',
+              roles=[RoleEnum.EDITOR],
+              tenants=['acme-corp'],
+              scopes=[ScopeEnum.REGISTRY_WRITE],
+              ttl_days=1
+          )
+
+          print(f'KEY={plain_key}')
+          print(f'KEY_ID={api_key.id}')
+          " > /tmp/key_output.txt
+
+          KEY=$(grep "KEY=" /tmp/key_output.txt | cut -d'=' -f2)
+          KEY_ID=$(grep "KEY_ID=" /tmp/key_output.txt | cut -d'=' -f2)
+          echo "api_key=$KEY" >> $GITHUB_OUTPUT
+          echo "key_id=$KEY_ID" >> $GITHUB_OUTPUT
+
+      - name: Test protected endpoint with valid key
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "X-API-Key: ${{ steps.create_key.outputs.api_key }}" \
+            -H "X-Tenant: acme-corp" \
+            http://localhost:8000/api/registry/models)
+
+          echo "HTTP status with valid key: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "404" ]; then
+            echo "Expected 200 or 404, got $HTTP_CODE"
+            exit 1
+          fi
+
+      - name: Revoke API key
+        run: |
+          python -c "
+          from src.security.keys import get_key_manager
+
+          manager = get_key_manager()
+          success = manager.revoke('${{ steps.create_key.outputs.key_id }}')
+
+          if not success:
+              print('Failed to revoke key')
+              exit(1)
+          print('Key revoked successfully')
+          "
+
+      - name: Test protected endpoint with revoked key
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "X-API-Key: ${{ steps.create_key.outputs.api_key }}" \
+            -H "X-Tenant: acme-corp" \
+            http://localhost:8000/api/registry/models)
+
+          echo "HTTP status with revoked key: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "401" ] && [ "$HTTP_CODE" != "403" ]; then
+            echo "Expected 401 or 403, got $HTTP_CODE"
+            exit 1
+          fi
+
+      - name: Upload audit log
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: audit-log
+          path: .claude/logs/audit.log

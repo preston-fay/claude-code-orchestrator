@@ -1,0 +1,89 @@
+# Lifecycle Automation Configuration
+# Controls dependency auditing, security scanning, and health reporting
+
+# Python dependency management
+python:
+  audit_tool: pip-audit  # Tool for Python dependency auditing
+  auto_upgrade: true     # Enable automatic safe upgrades
+  upgrade_types:
+    - patch              # Auto-upgrade patch versions (x.y.Z)
+    - minor              # Auto-upgrade minor versions (x.Y.z)
+  exclude_packages: []   # Packages to exclude from auto-upgrade
+
+# Node/npm dependency management
+node:
+  audit_tool: npm        # Tool for Node dependency auditing
+  auto_upgrade: true     # Enable automatic safe upgrades
+  upgrade_types:
+    - patch
+    - minor
+  exclude_packages: []
+
+# Security scanning configuration
+security:
+  tools:
+    - bandit             # Python static analysis
+    - pip-audit          # Python CVE scanning
+    - npm-audit          # Node CVE scanning
+  severity_threshold: high  # Only flag vulnerabilities at this severity or above
+  fail_on_critical: true    # Fail CI on critical vulnerabilities
+
+# Dependency audit settings
+audit:
+  severity_threshold: high  # Threshold for manual review vs auto-upgrade
+  branch_prefix: auto/dep-upgrade-  # Git branch prefix for auto-upgrade PRs
+  create_pr: true                   # Automatically create PRs for safe upgrades
+  pr_labels:
+    - dependencies
+    - automated
+
+# Weekly hygiene report configuration
+reports:
+  weekly:
+    enabled: true
+    schedule: "0 7 * * 1"  # Monday 07:00 UTC (cron format)
+    output_formats:
+      - html
+      - pdf
+      - json
+    sections:
+      - executive_summary
+      - security_findings
+      - dependency_audit
+      - ops_metrics
+      - governance_scores
+      - recommendations
+    include_charts: true
+
+# Platform health webhook
+webhook:
+  enabled: true
+  url_secret: LIFECYCLE_WEBHOOK_URL  # Environment variable or secret name
+  format: slack  # slack, teams, webex, generic
+  retry_count: 3
+  retry_backoff: 2  # Exponential backoff multiplier
+  timeout: 10       # Seconds
+
+# Audit logging
+audit:
+  enabled: true
+  log_file: governance/audit/lifecycle.ndjson
+  events:
+    - dependency_audit
+    - security_scan
+    - weekly_report_generated
+    - health_webhook_posted
+    - auto_upgrade_pr_created
+
+# Scoring weights for platform health index
+scoring:
+  weights:
+    security: 0.30
+    ops: 0.25
+    governance: 0.25
+    reliability: 0.20
+  thresholds:
+    excellent: 95
+    good: 85
+    fair: 70
+    poor: 0

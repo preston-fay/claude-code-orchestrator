@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v1.0.0
+
+jobs:
+  build-and-release:
+    name: Build and Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Verify registry integrity
+        run: |
+          python -m src.orchestrator.registry verify || echo "::warning::Registry verification failed"
+
+      - name: Run tests
+        run: |
+          pytest tests/registry/ -v --tb=short
+
+      - name: Count registry entries
+        id: registry-stats
+        run: |
+          # Get stats
+          MODELS=$(python -c "from src.registry.manager import RegistryManager; from pathlib import Path; m = RegistryManager(Path.cwd()); print(len(m.list_models()))")
+          DATASETS=$(python -c "from src.registry.manager import RegistryManager; from pathlib import Path; m = RegistryManager(Path.cwd()); print(len(m.list_datasets()))")
+          echo "models=$MODELS" >> $GITHUB_OUTPUT
+          echo "datasets=$DATASETS" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## Release Summary
+
+            **Models:** ${{ steps.registry-stats.outputs.models }}
+            **Datasets:** ${{ steps.registry-stats.outputs.datasets }}
+
+            ### Artifacts
+            - Model Registry: `models/registry/releases.json`
+            - Dataset Catalog: `datasets/catalog.json`
+
+            Generated with Claude Code
+          draft: false
+          prerelease: false
+
+      - name: Upload Model Registry
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./models/registry/releases.json
+          asset_name: releases.json
+          asset_content_type: application/json
+
+      - name: Upload Dataset Catalog
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./datasets/catalog.json
+          asset_name: catalog.json
+          asset_content_type: application/json
+
+  steward-hygiene:
+    name: Steward Hygiene Check
+    runs-on: ubuntu-latest
+    needs: build-and-release
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check manifest sizes
+        run: |
+          # Check models/registry/releases.json < 10 MB
+          SIZE=$(stat -f%z models/registry/releases.json 2>/dev/null || stat -c%s models/registry/releases.json)
+          if [ $SIZE -gt 10485760 ]; then
+            echo "::error::models/registry/releases.json exceeds 10 MB ($SIZE bytes)"
+            exit 1
+          fi
+
+          # Check datasets/catalog.json < 10 MB
+          SIZE=$(stat -f%z datasets/catalog.json 2>/dev/null || stat -c%s datasets/catalog.json)
+          if [ $SIZE -gt 10485760 ]; then
+            echo "::error::datasets/catalog.json exceeds 10 MB ($SIZE bytes)"
+            exit 1
+          fi
+
+      - name: Check for dangling paths
+        run: |
+          # Verify all artifact paths exist
+          python -c "
+          from src.registry.manager import RegistryManager
+          from pathlib import Path
+
+          manager = RegistryManager(Path.cwd())
+          results = manager.verify_integrity()
+
+          if not results['valid']:
+              print('::error::Registry integrity check failed')
+              for error in results['errors']:
+                  print(f'::error::{error}')
+              exit(1)
+          "

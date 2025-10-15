@@ -76,6 +76,7 @@ def apply_theme(
     output: str = typer.Option(
         "design_system/.generated", "--output", "-o", help="Output directory for generated tokens"
     ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate and show what would be generated without writing files"),
 ):
     """
     Apply client theme by merging with base tokens and regenerating files.
@@ -84,6 +85,8 @@ def apply_theme(
     1. Validates the client theme against schema
     2. Merges base tokens with client overrides
     3. Generates CSS, TypeScript, and JSON token files
+
+    Use --dry-run to validate without generating files.
     """
     theme_path = CLIENTS_DIR / client / "theme.json"
 
@@ -95,17 +98,28 @@ def apply_theme(
     console.print(f"[cyan]Applying theme for client: {client}[/cyan]")
     console.print(f"Theme file: {theme_path.relative_to(PROJECT_ROOT)}")
 
+    if dry_run:
+        console.print("[yellow]DRY RUN MODE - No files will be written[/yellow]")
+
     # Run merge script
     try:
+        cmd = [sys.executable, str(MERGE_SCRIPT), "--client", client, "--output", output]
+        if dry_run:
+            cmd.append("--dry-run")
+
         result = subprocess.run(
-            [sys.executable, str(MERGE_SCRIPT), "--client", client, "--output", output],
+            cmd,
             capture_output=True,
             text=True,
             check=True,
         )
 
         console.print(result.stdout)
-        console.print(f"[green]✓ Theme applied successfully for client: {client}[/green]")
+
+        if dry_run:
+            console.print(f"[green]✓ Dry run complete for client: {client}[/green]")
+        else:
+            console.print(f"[green]✓ Theme applied successfully for client: {client}[/green]")
 
     except subprocess.CalledProcessError as e:
         console.print("[red]Theme application failed:[/red]", file=sys.stderr)
@@ -166,20 +180,27 @@ def create_theme(
     client: str = typer.Option(..., "--client", "-c", help="Client slug for new theme"),
     name: str = typer.Option(..., "--name", "-n", help="Client display name"),
     template: Optional[str] = typer.Option(None, "--from", help="Copy from existing client theme"),
+    force: bool = typer.Option(False, "--force", "-f", help="Overwrite existing theme if it exists"),
 ):
     """
     Create a new client theme from template.
 
     If --from is specified, copies an existing theme as a starting point.
     Otherwise, creates a minimal theme with Kearney defaults.
+
+    Use --force to overwrite an existing theme.
     """
     client_dir = CLIENTS_DIR / client
     theme_path = client_dir / "theme.json"
 
-    if theme_path.exists():
+    if theme_path.exists() and not force:
         console.print(f"[red]Theme already exists for client: {client}[/red]", file=sys.stderr)
         console.print(f"Path: {theme_path.relative_to(PROJECT_ROOT)}")
+        console.print("Use --force to overwrite")
         raise typer.Exit(1)
+
+    if theme_path.exists() and force:
+        console.print(f"[yellow]Overwriting existing theme for client: {client}[/yellow]")
 
     console.print(f"[cyan]Creating theme for client: {client}[/cyan]")
 

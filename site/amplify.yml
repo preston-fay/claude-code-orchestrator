@@ -1,0 +1,19 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+        - cd .. && python3 scripts/gen_openapi_docs.py
+        - cd .. && python3 scripts/gen_cli_docs.py
+        - cd .. && python3 scripts/sync_tokens_for_docs.py
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: build
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*

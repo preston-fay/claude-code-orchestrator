@@ -1,0 +1,10 @@
+{
+  "default": true,
+  "MD013": false,
+  "MD033": {
+    "allowed_elements": ["table", "thead", "tbody", "tr", "th", "td", "div", "span", "style", "br"]
+  },
+  "MD041": false,
+  "no-hard-tabs": false,
+  "whitespace": false
+}
