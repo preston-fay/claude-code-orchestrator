@@ -1,7 +1,7 @@
 """Unified orchestrator CLI - composes intake and data command groups."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 import sys
 
 try:
@@ -28,6 +28,13 @@ console = Console()
 
 # Add intake command group
 app.add_typer(intake_app, name="intake")
+
+# Add style command group
+try:
+    from src.orchestrator.style import app as style_app
+    app.add_typer(style_app, name="style")
+except ImportError as e:
+    console.print(f"[yellow]Warning: Could not import style CLI: {e}[/yellow]")
 
 # Add data command group (import commands from existing src/cli.py)
 try:

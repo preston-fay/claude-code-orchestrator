@@ -1,0 +1,25 @@
+{
+  "client": {
+    "slug": "acme-corp",
+    "name": "ACME Corporation",
+    "logo": "logo.svg"
+  },
+  "colors": {
+    "light": {
+      "primary": "#1E3A8A",
+      "emphasis": "#DC2626"
+    },
+    "dark": {
+      "primary": "#3B82F6",
+      "emphasis": "#EF4444"
+    }
+  },
+  "typography": {
+    "fontFamilyPrimary": "Roboto, Arial, sans-serif"
+  },
+  "constraints": {
+    "allowEmojis": false,
+    "allowGridlines": false,
+    "labelFirst": true
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://kearney.com/schemas/client-theme.schema.json",
+  "title": "Kearney Client Theme",
+  "description": "Per-client theme overrides for the Kearney Data Platform",
+  "type": "object",
+  "properties": {
+    "client": {
+      "type": "object",
+      "description": "Client metadata",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Client identifier (lowercase, hyphens only)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Client display name"
+        },
+        "logo": {
+          "type": "string",
+          "description": "Path to client logo (relative to clients/<slug>/)"
+        }
+      },
+      "required": ["slug", "name"]
+    },
+    "colors": {
+      "type": "object",
+      "description": "Color overrides (all optional)",
+      "properties": {
+        "light": {
+          "type": "object",
+          "properties": {
+            "primary": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Primary brand color (hex)"
+            },
+            "secondary": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Secondary brand color (hex)"
+            },
+            "emphasis": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Spot color for emphasis (hex)"
+            },
+            "background": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "surface": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "text": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "text_secondary": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "border": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        },
+        "dark": {
+          "type": "object",
+          "properties": {
+            "primary": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "secondary": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "emphasis": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "background": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "surface": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "text": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "text_secondary": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "border": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "description": "Typography overrides",
+      "properties": {
+        "fontFamilyPrimary": {
+          "type": "string",
+          "description": "Primary font stack (must include fallbacks)",
+          "pattern": ".*,\\s*(sans-serif|serif|monospace)$"
+        },
+        "fontFamilyMonospace": {
+          "type": "string",
+          "pattern": ".*,\\s*monospace$"
+        },
+        "fontSizeBase": {
+          "type": "string",
+          "pattern": "^\\d+px$",
+          "description": "Base font size (e.g., 16px)"
+        },
+        "fontWeightNormal": {
+          "type": "number",
+          "enum": [300, 400, 500],
+          "description": "Normal font weight"
+        },
+        "fontWeightBold": {
+          "type": "number",
+          "enum": [600, 700, 800],
+          "description": "Bold font weight"
+        }
+      }
+    },
+    "spacing": {
+      "type": "object",
+      "description": "Spacing scale overrides (optional)",
+      "properties": {
+        "base": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 16,
+          "description": "Base spacing unit (pixels)"
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "description": "Design constraints (must not violate Kearney brand)",
+      "properties": {
+        "allowEmojis": {
+          "type": "boolean",
+          "const": false,
+          "description": "Emojis not allowed (Kearney brand rule)"
+        },
+        "allowGridlines": {
+          "type": "boolean",
+          "const": false,
+          "description": "Gridlines not allowed (Kearney brand rule)"
+        },
+        "labelFirst": {
+          "type": "boolean",
+          "const": true,
+          "description": "Labels before icons (Kearney brand rule)"
+        }
+      },
+      "required": ["allowEmojis", "allowGridlines", "labelFirst"]
+    }
+  },
+  "required": ["client", "constraints"]
+}

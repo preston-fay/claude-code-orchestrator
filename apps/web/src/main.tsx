@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { IsochroneD3Demo } from './maps/IsochroneD3Demo.tsx'
+import { ThemeStudio } from './pages/ThemeStudio.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/maps/d3-isochrone" element={<IsochroneD3Demo />} />
+          <Route path="/theme" element={<ThemeStudio />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

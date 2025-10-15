@@ -18,6 +18,7 @@ except ImportError:
 
 from src.data.warehouse import DuckDBWarehouse, QueryNotAllowed, QueryTimeout
 from src.server.admin.routes import router as admin_router
+from src.server.theme_routes import router as theme_router
 from src.server.iso_providers import get_isochrones
 import time as time_module
 
@@ -35,6 +36,9 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Mount admin routes
 app.include_router(admin_router)
+
+# Mount theme management routes
+app.include_router(theme_router)
 
 # CORS
 app.add_middleware(
