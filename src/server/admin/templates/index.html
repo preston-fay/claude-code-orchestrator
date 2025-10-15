@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Kearney Admin{% endblock %}
+
+{% block content %}
+<h2>System Overview</h2>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-label">Cleanliness Score</div>
+        <div class="kpi-value">{{ cleanliness_score }}%</div>
+        <div class="kpi-trend">
+            {% if cleanliness_trend > 0 %}
+            ▲ {{ cleanliness_trend }}% from last week
+            {% elif cleanliness_trend < 0 %}
+            ▼ {{ cleanliness_trend|abs }}% from last week
+            {% else %}
+            ─ No change
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">Total Queries</div>
+        <div class="kpi-value">{{ total_queries }}</div>
+        <div class="kpi-trend">Last 24 hours</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">Avg Query Time</div>
+        <div class="kpi-value">{{ avg_query_time_ms }}ms</div>
+        <div class="kpi-trend">
+            {% if query_time_trend < 0 %}
+            ▲ {{ query_time_trend|abs }}ms faster
+            {% elif query_time_trend > 0 %}
+            ▼ {{ query_time_trend }}ms slower
+            {% else %}
+            ─ Stable
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">Last Run ID</div>
+        <div class="kpi-value" style="font-size: var(--font-size-lg);">{{ last_run_id or 'N/A' }}</div>
+        <div class="kpi-trend">{{ last_run_time or 'No runs yet' }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: var(--spacing-3);">Query Activity (Last 7 Days)</h3>
+    <svg width="100%" height="60" style="display: block;">
+        <!-- Inline sparkline - NO GRIDLINES -->
+        {% for i in range(7) %}
+        <rect
+            x="{{ i * 14.28 }}%"
+            y="{{ 60 - (query_history[i] / max_queries * 50) }}"
+            width="12%"
+            height="{{ query_history[i] / max_queries * 50 }}"
+            fill="var(--emphasis)"
+            opacity="0.8"
+        />
+        {% endfor %}
+    </svg>
+    <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-2); font-size: var(--font-size-xs); color: var(--text-muted);">
+        {% for day in days_labels %}
+        <span>{{ day }}</span>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: var(--spacing-3);">Recent Tables</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Table Name</th>
+                <th>Row Count</th>
+                <th>Size</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for table in recent_tables %}
+            <tr>
+                <td><code>{{ table.name }}</code></td>
+                <td>{{ table.row_count }}</td>
+                <td>{{ table.size }}</td>
+                <td>{{ table.updated }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: var(--spacing-3);">Quick Actions</h3>
+    <div style="display: flex; gap: var(--spacing-3);">
+        <a href="/admin/sql" class="btn">Run SQL Query</a>
+        <a href="/admin/artifacts" class="btn btn-secondary">Browse Artifacts</a>
+        <a href="/healthz" class="btn btn-secondary">Health Check</a>
+    </div>
+</div>
+{% endblock %}

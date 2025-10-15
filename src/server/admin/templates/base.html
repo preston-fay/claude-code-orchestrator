@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kearney Admin{% endblock %}</title>
+    <link rel="stylesheet" href="/static/tokens.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--background);
+            color: var(--text);
+            line-height: var(--line-height-normal);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-6);
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: var(--spacing-4) 0;
+            margin-bottom: var(--spacing-6);
+        }
+
+        h1 {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--text);
+        }
+
+        h2 {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--text);
+            margin-bottom: var(--spacing-4);
+        }
+
+        nav {
+            margin-top: var(--spacing-3);
+        }
+
+        nav a {
+            color: var(--emphasis);
+            text-decoration: none;
+            margin-right: var(--spacing-4);
+            font-weight: var(--font-weight-medium);
+        }
+
+        nav a:hover {
+            color: var(--emphasis-hover);
+        }
+
+        nav a.active {
+            color: var(--text);
+            border-bottom: 2px solid var(--emphasis);
+        }
+
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-5);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .kpi-card {
+            background-color: var(--surface);
+            border-left: 4px solid var(--emphasis);
+            padding: var(--spacing-4);
+            border-radius: var(--radius-md);
+        }
+
+        .kpi-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .kpi-value {
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--text);
+            margin: var(--spacing-2) 0;
+        }
+
+        .kpi-trend {
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--surface);
+        }
+
+        th, td {
+            text-align: left;
+            padding: var(--spacing-3);
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: var(--font-weight-semibold);
+            color: var(--text);
+            background-color: var(--surface-elevated);
+        }
+
+        td {
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-4);
+        }
+
+        label {
+            display: block;
+            font-weight: var(--font-weight-medium);
+            color: var(--text);
+            margin-bottom: var(--spacing-2);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: var(--spacing-3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background-color: var(--background);
+            color: var(--text);
+            font-family: var(--font-family-primary);
+        }
+
+        textarea {
+            font-family: var(--font-family-mono);
+            min-height: 120px;
+        }
+
+        button, .btn {
+            padding: var(--spacing-3) var(--spacing-5);
+            background-color: var(--emphasis);
+            color: var(--text-inverse);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            font-family: var(--font-family-primary);
+        }
+
+        button:hover, .btn:hover {
+            background-color: var(--emphasis-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--surface-elevated);
+        }
+
+        footer {
+            margin-top: var(--spacing-8);
+            padding-top: var(--spacing-4);
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+        }
+
+        .alert {
+            padding: var(--spacing-3);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .alert-error {
+            background-color: var(--error-tint);
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+
+        .alert-success {
+            background-color: var(--success-tint);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-warning {
+            background-color: var(--warning-tint);
+            color: var(--warning);
+            border-left: 4px solid var(--warning);
+        }
+
+        code {
+            font-family: var(--font-family-mono);
+            background-color: var(--surface);
+            padding: 0.125rem 0.25rem;
+            border-radius: var(--radius-sm);
+        }
+
+        pre {
+            background-color: var(--surface);
+            padding: var(--spacing-4);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-sm);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kearney Data Platform Admin</h1>
+            <nav>
+                <a href="/admin" class="{% if request.url.path == '/admin' %}active{% endif %}">Dashboard</a>
+                <a href="/admin/sql" class="{% if request.url.path == '/admin/sql' %}active{% endif %}">SQL Console</a>
+                <a href="/admin/artifacts" class="{% if request.url.path == '/admin/artifacts' %}active{% endif %}">Artifacts</a>
+                <a href="/metrics">Metrics</a>
+                <a href="/">App</a>
+            </nav>
+        </header>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <p>Kearney Design System Admin Dashboard</p>
+            <p>No emojis • No gridlines • Label-first • Spot color emphasis</p>
+        </footer>
+    </div>
+</body>
+</html>

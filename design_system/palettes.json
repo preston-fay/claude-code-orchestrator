@@ -1,0 +1,112 @@
+{
+  "sequential": {
+    "purple": {
+      "description": "Sequential scale from light to dark purple, derived from violet tokens",
+      "colors": [
+        "#E6D2FA",
+        "#C8A5F0",
+        "#AF7DEB",
+        "#9150E1",
+        "#7823DC",
+        "#601FB5",
+        "#4A188E",
+        "#341167"
+      ],
+      "accessibility": "WCAG AA compliant on white background from index 4 onwards"
+    },
+    "neutral": {
+      "description": "Sequential scale from light to dark grey",
+      "colors": [
+        "#F5F5F5",
+        "#D2D2D2",
+        "#A5A5A5",
+        "#787878",
+        "#5A5A5A",
+        "#4B4B4B",
+        "#2D2D2D",
+        "#1E1E1E"
+      ]
+    }
+  },
+  "diverging": {
+    "purpleToGrey": {
+      "description": "Diverging scale for showing deviation from center",
+      "colors": [
+        "#7823DC",
+        "#9150E1",
+        "#AF7DEB",
+        "#C8A5F0",
+        "#E6D2FA",
+        "#D2D2D2",
+        "#A5A5A5",
+        "#787878",
+        "#4B4B4B"
+      ],
+      "center": "#E6D2FA"
+    }
+  },
+  "categorical": {
+    "primary": {
+      "description": "Categorical palette for distinct categories, max 6 recommended",
+      "colors": [
+        "#7823DC",
+        "#A5A5A5",
+        "#9150E1",
+        "#787878",
+        "#AF7DEB",
+        "#D2D2D2"
+      ],
+      "usage": "Use purple as primary/highlight, greys for supporting categories"
+    },
+    "extended": {
+      "description": "Extended categorical for more categories",
+      "colors": [
+        "#7823DC",
+        "#9150E1",
+        "#AF7DEB",
+        "#C8A5F0",
+        "#E6D2FA",
+        "#787878",
+        "#A5A5A5",
+        "#D2D2D2"
+      ]
+    }
+  },
+  "semantic": {
+    "status": {
+      "success": "#2E7D32",
+      "warning": "#ED6C02",
+      "error": "#D32F2F",
+      "info": "#7823DC"
+    },
+    "trend": {
+      "positive": "#2E7D32",
+      "negative": "#D32F2F",
+      "neutral": "#787878"
+    }
+  },
+  "visualization": {
+    "spotColor": {
+      "light": "#7823DC",
+      "dark": "#AF7DEB",
+      "description": "Use to highlight key insights in charts"
+    },
+    "muted": {
+      "light": "#A5A5A5",
+      "dark": "#787878",
+      "description": "Use for contextual/background data series"
+    },
+    "rules": {
+      "no_gridlines": true,
+      "label_first": "Prefer mark labels over axis labels",
+      "spot_color": "Use spot color to emphasize key data points or insights",
+      "no_pie_gauge": "Never use pie charts or gauge charts",
+      "collision_avoidance": "Ensure labels never overlap with data marks"
+    }
+  },
+  "meta": {
+    "generation_method": "Computed from core Kearney tokens using mathematical interpolation",
+    "color_space": "RGB with perceptual adjustments",
+    "version": "1.0.0"
+  }
+}

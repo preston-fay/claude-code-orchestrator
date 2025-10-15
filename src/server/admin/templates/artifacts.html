@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Artifacts - Kearney Admin{% endblock %}
+
+{% block content %}
+<h2>Artifacts Browser</h2>
+
+{% if not run_ids or run_ids|length == 0 %}
+<div class="card">
+    <p style="color: var(--text-muted);">No artifacts found. Run analyses to generate artifacts.</p>
+</div>
+{% else %}
+
+{% for run_id in run_ids %}
+<div class="card">
+    <h3 style="margin-bottom: var(--spacing-3);">
+        Run ID: <code>{{ run_id }}</code>
+    </h3>
+
+    {% if artifacts[run_id]|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>Artifact</th>
+                <th>Size</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for artifact in artifacts[run_id] %}
+            <tr>
+                <td><code>{{ artifact.name }}</code></td>
+                <td>{{ artifact.size }}</td>
+                <td>{{ artifact.type }}</td>
+                <td>
+                    <a href="/admin/artifacts/{{ run_id }}/{{ artifact.name }}" class="btn btn-secondary" style="padding: var(--spacing-1) var(--spacing-3); font-size: var(--font-size-sm);">
+                        Download
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: var(--text-muted); font-size: var(--font-size-sm);">No artifacts for this run.</p>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% endif %}
+
+<div class="card">
+    <h3 style="margin-bottom: var(--spacing-3);">Storage Summary</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-4);">
+        <div>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Total Runs</div>
+            <div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--text);">
+                {{ run_ids|length }}
+            </div>
+        </div>
+        <div>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Total Artifacts</div>
+            <div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--text);">
+                {{ total_artifacts }}
+            </div>
+        </div>
+        <div>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Total Size</div>
+            <div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--text);">
+                {{ total_size }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

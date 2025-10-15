@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://claude-code-orchestrator/schemas/project-intake.schema.json",
+  "title": "Project Intake",
+  "description": "Schema for project intake configuration",
+  "type": "object",
+  "required": ["project", "goals"],
+  "properties": {
+    "project": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project name (kebab-case recommended)",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["webapp", "service", "library", "analytics", "ml", "cli", "other"],
+          "description": "Project type/category"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief project description (1-2 sentences)"
+        },
+        "version": {
+          "type": "string",
+          "default": "0.1.0",
+          "description": "Initial version number"
+        }
+      }
+    },
+    "goals": {
+      "type": "object",
+      "required": ["primary"],
+      "properties": {
+        "primary": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Primary project goals and objectives",
+          "minItems": 1
+        },
+        "secondary": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Secondary/nice-to-have goals"
+        },
+        "success_criteria": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Measurable success criteria"
+        }
+      }
+    },
+    "stakeholders": {
+      "type": "object",
+      "properties": {
+        "product_owner": {"type": "string"},
+        "tech_lead": {"type": "string"},
+        "team_members": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "budget": {"type": "string"},
+        "timeline": {"type": "string"},
+        "team_size": {"type": "integer"},
+        "technical": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Technical constraints or limitations"
+        },
+        "compliance": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Compliance requirements (GDPR, HIPAA, SOC2, etc.)"
+        }
+      }
+    },
+    "tech_preferences": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Preferred programming languages"
+        },
+        "frameworks": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Preferred frameworks"
+        },
+        "databases": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Database preferences"
+        },
+        "cloud_provider": {
+          "type": "string",
+          "enum": ["aws", "gcp", "azure", "on-prem", "hybrid", "none"],
+          "description": "Cloud provider preference"
+        },
+        "avoid": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Technologies to avoid"
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "type": {"type": "string"},
+              "description": {"type": "string"},
+              "sensitivity": {
+                "type": "string",
+                "enum": ["public", "internal", "confidential", "restricted"]
+              }
+            }
+          }
+        },
+        "storage": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Data storage requirements"
+        },
+        "privacy_requirements": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "PII handling, anonymization, compliance"
+        }
+      }
+    },
+    "analytics_ml": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether analytics/ML is required"
+        },
+        "use_cases": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Analytics or ML use cases"
+        },
+        "data_volume": {"type": "string"},
+        "latency_requirements": {"type": "string"},
+        "model_types": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Types of models needed (classification, regression, clustering, etc.)"
+        }
+      }
+    },
+    "environments": {
+      "type": "object",
+      "properties": {
+        "development": {"type": "object"},
+        "staging": {"type": "object"},
+        "production": {
+          "type": "object",
+          "properties": {
+            "scaling": {"type": "string"},
+            "monitoring": {"type": "array", "items": {"type": "string"}},
+            "backup": {"type": "string"}
+          }
+        }
+      }
+    },
+    "orchestration": {
+      "type": "object",
+      "properties": {
+        "enabled_agents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["architect", "data", "developer", "qa", "documentarian", "consensus", "reviewer"]
+          },
+          "default": ["architect", "developer", "qa", "documentarian", "consensus"]
+        },
+        "checkpoint_cadence": {
+          "type": "string",
+          "enum": ["per-phase", "per-milestone", "daily", "on-demand"],
+          "default": "per-phase"
+        },
+        "approval_gates": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Phases requiring explicit approval"
+        },
+        "consensus_required": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Phases requiring consensus agent approval"
+        }
+      }
+    },
+    "testing": {
+      "type": "object",
+      "properties": {
+        "coverage_target": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 80
+        },
+        "test_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["unit", "integration", "e2e", "performance", "security"]
+          }
+        },
+        "ci_cd": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "documentation": {
+      "type": "object",
+      "properties": {
+        "required_docs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["README", "API_REFERENCE", "USER_GUIDE", "ARCHITECTURE", "DEPLOYMENT", "SECURITY"]
+          }
+        },
+        "api_docs_format": {
+          "type": "string",
+          "enum": ["openapi", "markdown", "jsdoc", "sphinx", "none"]
+        }
+      }
+    },
+    "secrets_policy": {
+      "type": "object",
+      "properties": {
+        "vault_required": {"type": "boolean", "default": false},
+        "rotation_period": {"type": "string"},
+        "encryption_at_rest": {"type": "boolean", "default": true}
+      }
+    },
+    "risk_register": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "risk": {"type": "string"},
+          "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+          "mitigation": {"type": "string"}
+        }
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "path": {"type": "string"},
+          "description": {"type": "string"}
+        }
+      }
+    }
+  }
+}

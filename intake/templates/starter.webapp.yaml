@@ -1,0 +1,125 @@
+# Starter intake template for web applications
+
+project:
+  name: "my-webapp"
+  type: "webapp"
+  description: "A web application built with modern frameworks"
+  version: "0.1.0"
+
+goals:
+  primary:
+    - "Build a responsive web application"
+    - "Implement user authentication and authorization"
+    - "Create RESTful API backend"
+  secondary:
+    - "Add real-time features (WebSockets)"
+    - "Implement caching for performance"
+  success_criteria:
+    - "Application loads in <2 seconds"
+    - "Support 1000+ concurrent users"
+    - "API response time <200ms (95th percentile)"
+
+stakeholders:
+  product_owner: "To be determined"
+  tech_lead: "To be determined"
+  team_members: []
+  reviewers: []
+
+constraints:
+  budget: "TBD"
+  timeline: "TBD"
+  team_size: 1
+  technical:
+    - "Must be cloud-native"
+    - "Must support mobile browsers"
+  compliance: []
+
+tech_preferences:
+  language:
+    - "TypeScript"
+    - "Python"
+  frameworks:
+    - "React"
+    - "FastAPI"
+  databases:
+    - "PostgreSQL"
+    - "Redis"
+  cloud_provider: "aws"
+  avoid: []
+
+data:
+  sources:
+    - name: "User data"
+      type: "Database"
+      description: "User profiles and authentication data"
+      sensitivity: "confidential"
+  storage:
+    - "PostgreSQL for relational data"
+    - "Redis for sessions and caching"
+  privacy_requirements:
+    - "Encrypt passwords using bcrypt"
+    - "Store PII encrypted at rest"
+    - "GDPR-compliant data retention"
+
+analytics_ml:
+  required: false
+  use_cases: []
+  data_volume: "N/A"
+  latency_requirements: "N/A"
+  model_types: []
+
+environments:
+  development:
+    description: "Local development environment"
+  staging:
+    description: "Pre-production staging"
+  production:
+    scaling: "Auto-scaling based on CPU/memory"
+    monitoring:
+      - "Application logs"
+      - "Error tracking"
+      - "Performance metrics"
+    backup: "Daily database backups with 30-day retention"
+
+orchestration:
+  enabled_agents:
+    - "architect"
+    - "developer"
+    - "qa"
+    - "documentarian"
+    - "consensus"
+  checkpoint_cadence: "per-phase"
+  approval_gates:
+    - "planning"
+    - "quality_assurance"
+  consensus_required:
+    - "planning"
+    - "quality_assurance"
+
+testing:
+  coverage_target: 80
+  test_types:
+    - "unit"
+    - "integration"
+    - "e2e"
+  ci_cd: true
+
+documentation:
+  required_docs:
+    - "README"
+    - "API_REFERENCE"
+    - "USER_GUIDE"
+    - "DEPLOYMENT"
+  api_docs_format: "openapi"
+
+secrets_policy:
+  vault_required: false
+  rotation_period: "90 days"
+  encryption_at_rest: true
+
+risk_register:
+  - risk: "Third-party API dependency"
+    severity: "medium"
+    mitigation: "Implement circuit breaker and fallback mechanism"
+
+attachments: []

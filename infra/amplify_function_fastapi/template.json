@@ -1,0 +1,95 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Amplify Function for FastAPI backend",
+  "Parameters": {
+    "env": {
+      "Type": "String",
+      "Description": "Environment name"
+    }
+  },
+  "Resources": {
+    "LambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "kearneyDataPlatformAPI-${env}"
+        },
+        "Runtime": "python3.11",
+        "Handler": "handler.handler",
+        "Code": {
+          "ZipFile": "placeholder"
+        },
+        "Role": {
+          "Fn::GetAtt": ["LambdaExecutionRole", "Arn"]
+        },
+        "Timeout": 30,
+        "MemorySize": 512,
+        "Environment": {
+          "Variables": {
+            "DUCKDB_PATH": "/tmp/analytics.duckdb",
+            "PYTHONPATH": "/var/task"
+          }
+        }
+      }
+    },
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ]
+      }
+    },
+    "FunctionUrl": {
+      "Type": "AWS::Lambda::Url",
+      "Properties": {
+        "TargetFunctionArn": {
+          "Ref": "LambdaFunction"
+        },
+        "AuthType": "NONE",
+        "Cors": {
+          "AllowOrigins": ["*"],
+          "AllowMethods": ["*"],
+          "AllowHeaders": ["*"]
+        }
+      }
+    },
+    "FunctionUrlPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "Action": "lambda:InvokeFunctionUrl",
+        "Principal": "*",
+        "FunctionUrlAuthType": "NONE"
+      }
+    }
+  },
+  "Outputs": {
+    "FunctionArn": {
+      "Value": {
+        "Fn::GetAtt": ["LambdaFunction", "Arn"]
+      },
+      "Description": "Lambda Function ARN"
+    },
+    "FunctionUrl": {
+      "Value": {
+        "Fn::GetAtt": ["FunctionUrl", "FunctionUrl"]
+      },
+      "Description": "Lambda Function URL"
+    }
+  }
+}

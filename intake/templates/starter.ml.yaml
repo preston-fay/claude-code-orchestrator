@@ -1,0 +1,146 @@
+# Starter intake template for machine learning projects
+
+project:
+  name: "ml-project"
+  type: "ml"
+  description: "Machine learning model development and deployment"
+  version: "0.1.0"
+
+goals:
+  primary:
+    - "Develop and train ML model for [use case]"
+    - "Build inference API for model serving"
+    - "Implement model monitoring and retraining pipeline"
+  secondary:
+    - "A/B testing framework for model versions"
+    - "Feature store for reusable features"
+  success_criteria:
+    - "Model achieves target accuracy/performance metric"
+    - "Inference latency <100ms (P95)"
+    - "Model monitoring detects drift within 24 hours"
+
+stakeholders:
+  product_owner: "To be determined"
+  tech_lead: "To be determined"
+  team_members: []
+  reviewers: []
+
+constraints:
+  budget: "TBD"
+  timeline: "TBD"
+  team_size: 1
+  technical:
+    - "Must support real-time inference"
+    - "Model versioning and rollback required"
+  compliance:
+    - "Explainability required for regulatory compliance"
+
+tech_preferences:
+  language:
+    - "Python"
+  frameworks:
+    - "scikit-learn"
+    - "PyTorch"
+    - "TensorFlow"
+    - "MLflow"
+  databases:
+    - "PostgreSQL"
+    - "Redis"
+  cloud_provider: "aws"
+  avoid: []
+
+data:
+  sources:
+    - name: "Training data"
+      type: "Database/S3"
+      description: "Historical data for model training"
+      sensitivity: "confidential"
+    - name: "Feature store"
+      type: "Database"
+      description: "Engineered features for training and inference"
+      sensitivity: "internal"
+  storage:
+    - "S3 for training data and model artifacts"
+    - "PostgreSQL for feature store"
+    - "Redis for feature caching"
+  privacy_requirements:
+    - "Remove PII from training data"
+    - "Differential privacy for sensitive features"
+    - "Secure model artifact storage"
+
+analytics_ml:
+  required: true
+  use_cases:
+    - "Classification/Regression/Clustering [specify]"
+    - "Real-time inference via API"
+    - "Batch scoring for offline use cases"
+  data_volume: "10GB - 100GB training data"
+  latency_requirements: "Real-time: <100ms, Batch: hourly"
+  model_types:
+    - "Random Forest / Gradient Boosting"
+    - "Neural Networks (if applicable)"
+
+environments:
+  development:
+    description: "Local development with sample data"
+  staging:
+    description: "Staging for model validation"
+  production:
+    scaling: "Auto-scaling inference endpoints"
+    monitoring:
+      - "Model performance metrics"
+      - "Inference latency and throughput"
+      - "Data drift detection"
+      - "Model drift detection"
+    backup: "Model artifact versioning with MLflow"
+
+orchestration:
+  enabled_agents:
+    - "architect"
+    - "data"
+    - "developer"
+    - "qa"
+    - "documentarian"
+    - "consensus"
+  checkpoint_cadence: "per-phase"
+  approval_gates:
+    - "planning"
+    - "data_engineering"
+    - "quality_assurance"
+  consensus_required:
+    - "planning"
+    - "data_engineering"
+
+testing:
+  coverage_target: 80
+  test_types:
+    - "unit"
+    - "integration"
+    - "performance"
+  ci_cd: true
+
+documentation:
+  required_docs:
+    - "README"
+    - "API_REFERENCE"
+    - "USER_GUIDE"
+    - "ARCHITECTURE"
+  api_docs_format: "openapi"
+
+secrets_policy:
+  vault_required: true
+  rotation_period: "90 days"
+  encryption_at_rest: true
+
+risk_register:
+  - risk: "Model performance degradation over time"
+    severity: "high"
+    mitigation: "Implement monitoring, retraining pipeline, and alerting"
+  - risk: "Data drift affecting predictions"
+    severity: "high"
+    mitigation: "Data drift detection and automated alerts"
+  - risk: "Model bias or fairness issues"
+    severity: "medium"
+    mitigation: "Fairness metrics, bias testing, regular audits"
+
+attachments: []

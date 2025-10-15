@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}SQL Console - Kearney Admin{% endblock %}
+
+{% block content %}
+<h2>SQL Console</h2>
+
+<div class="card">
+    <form method="POST" action="/admin/sql">
+        <div class="form-group">
+            <label for="sql">SQL Query (SELECT/WITH only, {{ max_rows }} row limit)</label>
+            <textarea
+                name="sql"
+                id="sql"
+                placeholder="SELECT * FROM table_name LIMIT 100"
+                required
+            >{{ sql or '' }}</textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-3); margin-bottom: var(--spacing-4);">
+            <div class="form-group">
+                <label for="limit">Row Limit</label>
+                <input
+                    type="number"
+                    name="limit"
+                    id="limit"
+                    value="{{ limit or max_rows }}"
+                    min="1"
+                    max="{{ max_rows }}"
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="timeout">Timeout (seconds)</label>
+                <input
+                    type="number"
+                    name="timeout"
+                    id="timeout"
+                    value="{{ timeout or 3 }}"
+                    min="1"
+                    max="10"
+                />
+            </div>
+        </div>
+
+        <div style="display: flex; gap: var(--spacing-3);">
+            <button type="submit">Execute Query</button>
+            <button type="submit" name="export" value="csv" class="btn btn-secondary">Export CSV</button>
+        </div>
+    </form>
+</div>
+
+{% if error %}
+<div class="alert alert-error">
+    <strong>Error:</strong> {{ error }}
+</div>
+{% endif %}
+
+{% if results %}
+<div class="card">
+    <h3 style="margin-bottom: var(--spacing-3);">Query Results</h3>
+
+    <div style="margin-bottom: var(--spacing-3); font-size: var(--font-size-sm); color: var(--text-muted);">
+        <strong>{{ results.row_count }}</strong> rows returned in <strong>{{ results.execution_time_ms }}ms</strong>
+        {% if results.has_more %}
+        <span style="color: var(--warning);">(Limited to {{ max_rows }} rows, more available)</span>
+        {% endif %}
+    </div>
+
+    {% if results.rows|length > 0 %}
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    {% for col in results.columns %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results.rows %}
+                <tr>
+                    {% for cell in row %}
+                    <td>
+                        {% if cell is none %}
+                        <em style="color: var(--text-muted);">NULL</em>
+                        {% else %}
+                        {{ cell }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        No results returned.
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="card">
+    <h3 style="margin-bottom: var(--spacing-3);">Available Tables</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-2);">
+        {% for table in tables %}
+        <code
+            style="cursor: pointer; padding: var(--spacing-2); background: var(--surface-elevated); border-radius: var(--radius-sm);"
+            onclick="document.getElementById('sql').value = 'SELECT * FROM {{ table }} LIMIT 100'"
+        >
+            {{ table }}
+        </code>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

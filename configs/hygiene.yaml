@@ -1,0 +1,203 @@
+# Repository Hygiene Configuration
+# Thresholds, rules, and whitelists for the Steward agent
+
+# File size threshold (in MB) for flagging large files
+large_file_mb: 1
+
+# Binary file extensions to check against threshold
+binary_exts:
+  - ".png"
+  - ".jpg"
+  - ".jpeg"
+  - ".gif"
+  - ".bmp"
+  - ".svg"
+  - ".pdf"
+  - ".zip"
+  - ".tar"
+  - ".gz"
+  - ".bz2"
+  - ".xz"
+  - ".dmg"
+  - ".exe"
+  - ".dll"
+  - ".so"
+  - ".dylib"
+  - ".woff"
+  - ".woff2"
+  - ".ttf"
+  - ".eot"
+  - ".ico"
+
+# Whether to automatically clear notebook outputs
+# (false = detect only, true = clear on --apply)
+notebook_clear_outputs: false
+
+# Directories and patterns to whitelist (exempt from cleanup)
+whitelist_globs:
+  # Data directories
+  - "data/external/**"
+  - "data/raw/**"
+  - "data/processed/**"
+
+  # Documentation assets
+  - "docs/**"
+  - "*.md"
+
+  # CI/CD configurations
+  - ".github/**"
+
+  # Model artifacts
+  - "models/**"
+
+  # Analytics outputs
+  - "analytics/**"
+
+  # Notebooks directory (outputs flagged but not deleted)
+  - "notebooks/**"
+
+  # Test fixtures and sample data
+  - "tests/fixtures/**"
+  - "tests/samples/**"
+
+  # Build and distribution
+  - "dist/**"
+  - "build/**"
+
+# Dead code analysis configuration
+dead_code:
+  # Minimum confidence level to report (0-100)
+  min_confidence: 60
+
+  # Exclude patterns (regex)
+  exclude_patterns:
+    - "__init__\\.py$"
+    - "test_.*\\.py$"
+    - ".*_test\\.py$"
+
+  # Always exclude these from dead code analysis
+  exclude_names:
+    - "__all__"
+    - "__version__"
+    - "__author__"
+    - "main"
+    - "cli"
+    - "app"
+
+  # Ignore unused imports in these files
+  ignore_unused_imports:
+    - "__init__.py"
+
+# Orphan detection configuration
+orphan_detection:
+  # Minimum age (days) before flagging as orphan
+  min_age_days: 30
+
+  # Extensions to check for references
+  reference_extensions:
+    - ".py"
+    - ".md"
+    - ".yaml"
+    - ".yml"
+    - ".toml"
+    - ".json"
+
+  # Patterns that indicate a file is not orphaned
+  # (e.g., test files, examples, templates)
+  protected_patterns:
+    - "example"
+    - "template"
+    - "fixture"
+    - "sample"
+
+# Report generation settings
+reports:
+  # Include detailed file metadata
+  include_metadata: true
+
+  # Show file sizes in reports
+  include_sizes: true
+
+  # Include last modified timestamps
+  include_timestamps: true
+
+  # Sort order for CSV reports (size, name, date)
+  csv_sort_by: "size"
+  csv_sort_descending: true
+
+# Safety thresholds for --apply mode
+safety:
+  # Maximum number of file deletions allowed in single apply
+  max_apply_deletions: 50
+
+  # Maximum number of file renames allowed in single apply
+  max_apply_renames: 50
+
+  # Maximum bytes that can be removed in single apply (10 MB default)
+  max_apply_bytes_removed: 10485760
+
+# Cleanliness quality gates
+quality:
+  # Warn if orphan count exceeds this threshold
+  max_orphans_warn: 10
+
+  # Block (fail CI) if orphan count exceeds this threshold
+  max_orphans_block: 50
+
+  # Minimum cleanliness score (0-100) required to pass CI
+  min_cleanliness_score: 85
+
+  # Score weights (sum to 100)
+  score_weights:
+    no_orphans: 30        # Weight for having no orphaned files
+    no_large_files: 25    # Weight for no non-whitelisted large files
+    no_dead_code: 20      # Weight for no dead code
+    no_notebook_outputs: 15  # Weight for clean notebooks
+    no_secrets: 10        # Weight for no exposed secrets
+
+# Monorepo support (optional)
+monorepo:
+  # Enable monorepo mode (allows per-package .tidyignore)
+  enabled: false
+
+  # Root directories for packages (e.g., ["packages/*"])
+  roots: []
+
+# Documentation link checking
+links:
+  # Enable doc link checking
+  check_doc_links: true
+
+  # Directories to scan for documentation
+  doc_dirs:
+    - "docs"
+    - "README.md"
+    - "CLAUDE.md"
+
+  # Extensions to check for links
+  doc_extensions:
+    - ".md"
+    - ".rst"
+    - ".html"
+
+# Security scanning
+security:
+  # Enable secret scanning (uses gitleaks if available, else regex)
+  run_secret_scan: true
+
+  # Enable license header checking
+  run_license_header_check: true
+
+  # Expected SPDX license identifier
+  spdx_id: "Apache-2.0"
+
+  # Directories to check for license headers
+  license_check_dirs:
+    - "src"
+    - "tests"
+
+  # File extensions requiring license headers
+  license_extensions:
+    - ".py"
+    - ".js"
+    - ".ts"

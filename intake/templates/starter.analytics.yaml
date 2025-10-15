@@ -1,0 +1,141 @@
+# Starter intake template for analytics projects
+
+project:
+  name: "analytics-project"
+  type: "analytics"
+  description: "Data analytics and reporting project"
+  version: "0.1.0"
+
+goals:
+  primary:
+    - "Build ETL pipelines for data ingestion and transformation"
+    - "Create analytics dashboards and reports"
+    - "Implement data quality monitoring"
+  secondary:
+    - "Automate data refresh schedules"
+    - "Add predictive analytics capabilities"
+  success_criteria:
+    - "ETL pipeline processes data within SLA"
+    - "Dashboard query performance <500ms"
+    - "Data quality metrics >95%"
+
+stakeholders:
+  product_owner: "To be determined"
+  tech_lead: "To be determined"
+  team_members: []
+  reviewers: []
+
+constraints:
+  budget: "TBD"
+  timeline: "TBD"
+  team_size: 1
+  technical:
+    - "Must handle TB-scale data"
+    - "Real-time dashboards preferred"
+  compliance:
+    - "Data privacy regulations (GDPR/CCPA)"
+
+tech_preferences:
+  language:
+    - "Python"
+    - "SQL"
+  frameworks:
+    - "Pandas"
+    - "dbt"
+    - "Apache Airflow"
+  databases:
+    - "PostgreSQL"
+    - "Snowflake"
+    - "BigQuery"
+  cloud_provider: "aws"
+  avoid: []
+
+data:
+  sources:
+    - name: "Production database"
+      type: "PostgreSQL"
+      description: "Operational data from production systems"
+      sensitivity: "confidential"
+    - name: "External APIs"
+      type: "REST API"
+      description: "Third-party data sources"
+      sensitivity: "internal"
+  storage:
+    - "Data warehouse for analytics (Snowflake/BigQuery)"
+    - "S3 for data lake (raw data)"
+  privacy_requirements:
+    - "Anonymize PII before loading to warehouse"
+    - "Implement row-level security"
+    - "30-day data retention for raw data"
+
+analytics_ml:
+  required: true
+  use_cases:
+    - "Executive dashboards (KPI tracking)"
+    - "Customer behavior analytics"
+    - "Trend analysis and forecasting"
+  data_volume: "100GB - 1TB monthly"
+  latency_requirements: "Batch processing acceptable, dashboards <1s query time"
+  model_types:
+    - "Time series forecasting"
+    - "Clustering (customer segmentation)"
+
+environments:
+  development:
+    description: "Local dev with sample data"
+  staging:
+    description: "Staging with anonymized production data"
+  production:
+    scaling: "Auto-scaling compute for ETL workloads"
+    monitoring:
+      - "Pipeline execution metrics"
+      - "Data quality alerts"
+      - "Query performance"
+    backup: "Incremental backups, point-in-time recovery"
+
+orchestration:
+  enabled_agents:
+    - "architect"
+    - "data"
+    - "developer"
+    - "qa"
+    - "documentarian"
+    - "consensus"
+  checkpoint_cadence: "per-phase"
+  approval_gates:
+    - "planning"
+    - "data_engineering"
+    - "quality_assurance"
+  consensus_required:
+    - "planning"
+    - "data_engineering"
+
+testing:
+  coverage_target: 80
+  test_types:
+    - "unit"
+    - "integration"
+    - "performance"
+  ci_cd: true
+
+documentation:
+  required_docs:
+    - "README"
+    - "USER_GUIDE"
+    - "ARCHITECTURE"
+  api_docs_format: "markdown"
+
+secrets_policy:
+  vault_required: true
+  rotation_period: "90 days"
+  encryption_at_rest: true
+
+risk_register:
+  - risk: "Data quality issues from upstream systems"
+    severity: "high"
+    mitigation: "Implement comprehensive data validation and alerting"
+  - risk: "ETL pipeline failures"
+    severity: "medium"
+    mitigation: "Retry logic, dead letter queues, monitoring"
+
+attachments: []
