@@ -166,6 +166,14 @@ orchestrator:
   max_parallel_agents: 1  # Sequential by default
   timeout_minutes: 30
 
+  # Execution mode for LLM agents (agents without entrypoints)
+  # Options:
+  #   - "in_session": Print instructions for Claude Code to execute in current session (default)
+  #   - "stub": Simulated responses for testing workflow logic
+  #   - "api": Real Claude API calls (requires ANTHROPIC_API_KEY)
+  # Note: Can also be set via ORCHESTRATOR_EXECUTION_MODE env var
+  execution_mode: in_session
+
   # Natural language triggers
   nl_triggers:
     - phrase: "new project"

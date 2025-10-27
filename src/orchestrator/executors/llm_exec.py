@@ -19,9 +19,10 @@ async def execute_llm(
     """
     Execute an LLM-based agent using Claude API.
 
-    Supports two modes:
-    1. Real mode: If ANTHROPIC_API_KEY is set, calls Claude API
-    2. Stub mode: Falls back to simulated response if no API key
+    Supports three modes:
+    1. In-session mode: Prints instructions for Claude Code to execute in current session
+    2. Real mode: If ANTHROPIC_API_KEY is set, calls Claude API
+    3. Stub mode: Falls back to simulated response if no API key
 
     Args:
         prompt: Interpolated agent prompt
@@ -44,28 +45,56 @@ async def execute_llm(
     with open(prompt_file, "w") as f:
         f.write(prompt)
 
-    # Check for API key
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    # Check execution mode (env var takes precedence over config)
+    execution_mode = os.getenv("ORCHESTRATOR_EXECUTION_MODE")
+    if not execution_mode:
+        # Load from config if available
+        config_path = project_root / ".claude" / "config.yaml"
+        if config_path.exists():
+            import yaml
+            with open(config_path) as f:
+                config = yaml.safe_load(f)
+                execution_mode = config.get("orchestrator", {}).get("execution_mode", "in_session")
+        else:
+            execution_mode = "in_session"
 
-    if api_key:
-        # Real mode: Call Claude API
-        try:
-            response = await _call_claude_api(
-                prompt=prompt,
-                agent_name=agent_name,
-                phase_name=phase_name,
-                api_key=api_key,
-                timeout_seconds=timeout_seconds,
-            )
-            executor_type = "llm_api"
-        except Exception as e:
-            # Fallback to stub if API call fails
-            response = _simulate_llm_response(agent_name, phase_name, error=str(e))
-            executor_type = "llm_stub_fallback"
+    if execution_mode == "in_session":
+        # In-session mode: Print instructions for Claude Code
+        response = _print_in_session_instructions(
+            prompt=prompt,
+            agent_name=agent_name,
+            phase_name=phase_name,
+            prompt_file=prompt_file,
+            project_root=project_root,
+        )
+        executor_type = "in_session"
+        # Exit code 2 signals "awaiting human validation"
+        exit_code = 2
     else:
-        # Stub mode: Simulate response
-        response = _simulate_llm_response(agent_name, phase_name)
-        executor_type = "llm_stub"
+        # Check for API key
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+
+        if api_key:
+            # Real mode: Call Claude API
+            try:
+                response = await _call_claude_api(
+                    prompt=prompt,
+                    agent_name=agent_name,
+                    phase_name=phase_name,
+                    api_key=api_key,
+                    timeout_seconds=timeout_seconds,
+                )
+                executor_type = "llm_api"
+            except Exception as e:
+                # Fallback to stub if API call fails
+                response = _simulate_llm_response(agent_name, phase_name, error=str(e))
+                executor_type = "llm_stub_fallback"
+        else:
+            # Stub mode: Simulate response
+            response = _simulate_llm_response(agent_name, phase_name)
+            executor_type = "llm_stub"
+
+        exit_code = 0
 
     # Write response
     response_file = output_dir / "response.md"
@@ -80,7 +109,7 @@ async def execute_llm(
     return AgentExecResult(
         stdout=response,
         stderr="",
-        exit_code=0,
+        exit_code=exit_code,
         artifacts=artifacts,
         duration_s=duration,
         metadata={
@@ -91,6 +120,60 @@ async def execute_llm(
             "executor": executor_type,
         },
     )
+
+
+def _print_in_session_instructions(
+    prompt: str,
+    agent_name: str,
+    phase_name: str,
+    prompt_file: Path,
+    project_root: Path,
+) -> str:
+    """
+    Print agent instructions to console for Claude Code to execute in current session.
+
+    Returns the printed instructions as a string for logging.
+    """
+    # Load required artifacts from config
+    config_path = project_root / ".claude" / "config.yaml"
+    required_artifacts = []
+
+    if config_path.exists():
+        import yaml
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+            subagents = config.get("subagents", {})
+            agent_config = subagents.get(agent_name, {})
+            required_artifacts = agent_config.get("checkpoint_artifacts", [])
+
+    # Build output
+    output = []
+    output.append("\n" + "="*80)
+    output.append(f"🎯 PHASE READY: {phase_name.upper()} - {agent_name.upper()} AGENT")
+    output.append("="*80 + "\n")
+
+    output.append("📋 AGENT INSTRUCTIONS:\n")
+    output.append(prompt)
+    output.append("\n" + "-"*80 + "\n")
+
+    if required_artifacts:
+        output.append("✅ REQUIRED ARTIFACTS:\n")
+        for artifact in required_artifacts:
+            output.append(f"  - {artifact}")
+        output.append("\n" + "-"*80 + "\n")
+
+    output.append("="*80)
+    output.append("⏸️  ORCHESTRATOR PAUSED - AWAITING COMPLETION")
+    output.append("="*80 + "\n")
+    output.append("🤖 Claude Code: Execute the instructions above in this session.")
+    output.append(f"📝 Full prompt saved to: {prompt_file}")
+    output.append("\n👤 When work is complete, run: orchestrator run checkpoint\n")
+
+    # Print to console
+    message = "\n".join(output)
+    print(message)
+
+    return message
 
 
 async def _call_claude_api(

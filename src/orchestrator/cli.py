@@ -57,6 +57,13 @@ try:
 except ImportError as e:
     console.print(f"[yellow]Warning: Could not import bootstrap command: {e}[/yellow]")
 
+# Add checkpoint command
+try:
+    from src.orchestrator.commands.checkpoint import main as checkpoint_main
+    # Note: checkpoint is added to run_app below, not main app
+except ImportError as e:
+    console.print(f"[yellow]Warning: Could not import checkpoint command: {e}[/yellow]")
+
 # Add data command group (import commands from existing src/cli.py)
 try:
     from src.cli import app as data_cli_app
@@ -525,13 +532,31 @@ def run_next(
 
         # Show agent outcomes
         console.print("[bold]Agent Results:[/bold]")
+        in_session_mode = False
         for agent_outcome in outcome.agent_outcomes:
-            status = "✅" if agent_outcome.success else "❌"
+            # Check if in_session mode (exit_code=2)
+            if agent_outcome.exit_code == 2:
+                in_session_mode = True
+                status = "⏸️"
+            else:
+                status = "✅" if agent_outcome.success else "❌"
             console.print(f"  {status} {agent_outcome.agent_name}")
             if agent_outcome.notes:
                 console.print(f"     {agent_outcome.notes[:100]}")
 
         console.print()
+
+        # If in_session mode, show checkpoint instructions
+        if in_session_mode:
+            console.print("[yellow bold]⏸️  IN-SESSION MODE - WORK WITH CLAUDE CODE[/yellow bold]")
+            console.print()
+            console.print("[bold]The agent instructions have been printed above.[/bold]")
+            console.print()
+            console.print("[bold]Next steps:[/bold]")
+            console.print("  1. Claude Code (in this session) will execute the work")
+            console.print("  2. When complete, run: [cyan]orchestrator run checkpoint[/cyan]")
+            console.print()
+            return
 
         # Show validation results
         if outcome.validation:
@@ -1186,6 +1211,29 @@ This rollback is **non-destructive** and does not automatically modify git or fi
     except Exception as e:
         console.print(f"[red]✗ Error during rollback: {e}[/red]")
         raise
+
+
+@run_app.command(name="checkpoint")
+def run_checkpoint(
+    force: bool = typer.Option(
+        False, "--force", help="Force advance even if artifacts missing (not recommended)"
+    ),
+):
+    """
+    Validate checkpoint and advance workflow state (in-session guided mode).
+
+    Used when orchestrator is in in-session mode:
+    1. orchestrator run next - prints agent instructions and pauses
+    2. Claude Code executes work in current session
+    3. orchestrator run checkpoint - validates and advances ← YOU ARE HERE
+
+    Validates that required checkpoint artifacts exist and advances
+    workflow state to the next phase.
+    """
+    from src.orchestrator.commands.checkpoint import main as checkpoint_main
+
+    # Call the checkpoint command main function
+    checkpoint_main(force=force)
 
 
 # Release command group
