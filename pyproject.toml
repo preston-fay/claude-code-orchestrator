@@ -58,6 +58,9 @@ dependencies = [
 
     # Schema validation
     "jsonschema>=4.20.0",
+
+    # AI/LLM integration
+    "anthropic>=0.40.0",
 ]
 
 [project.optional-dependencies]
