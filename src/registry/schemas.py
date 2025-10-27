@@ -8,7 +8,7 @@ Defines validation models for:
 """
 
 from pydantic import BaseModel, Field, validator
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Literal
 from datetime import datetime
 import re
 
@@ -19,7 +19,7 @@ class ModelEntry(BaseModel):
     id: str = Field(..., description="Unique identifier (UUID)")
     name: str = Field(..., pattern=r"^[a-z0-9_-]+$", description="Model name (lowercase, hyphens/underscores)")
     version: str = Field(..., pattern=r"^\d+\.\d+\.\d+$", description="Semantic version (e.g., 1.0.0)")
-    type: str = Field("model", const=True, description="Entry type")
+    type: Literal["model"] = Field(default="model", description="Entry type")
     created_at: str = Field(..., description="ISO8601 timestamp")
     sha256: str = Field(..., pattern=r"^[a-f0-9]{64}$", description="SHA256 hash of primary artifact")
     metrics: Dict[str, float] = Field(default_factory=dict, description="Model metrics (e.g., rmse, r2)")
@@ -52,7 +52,7 @@ class DatasetEntry(BaseModel):
     id: str = Field(..., description="Unique identifier (UUID)")
     name: str = Field(..., pattern=r"^[a-z0-9_-]+$", description="Dataset name (lowercase, hyphens/underscores)")
     version: str = Field(..., pattern=r"^\d+\.\d+\.\d+$", description="Semantic version (e.g., 1.0.0)")
-    type: str = Field("dataset", const=True, description="Entry type")
+    type: Literal["dataset"] = Field(default="dataset", description="Entry type")
     created_at: str = Field(..., description="ISO8601 timestamp")
     sha256: str = Field(..., pattern=r"^[a-f0-9]{64}$", description="SHA256 hash of dataset file")
     row_count: int = Field(..., ge=0, description="Number of rows in dataset")

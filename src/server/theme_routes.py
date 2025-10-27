@@ -11,7 +11,7 @@ Provides endpoints for:
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, validator
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Literal
 from pathlib import Path
 import json
 import jsonschema
@@ -60,9 +60,9 @@ class Typography(BaseModel):
 
 class Constraints(BaseModel):
     """Design constraints (must not violate Kearney brand)."""
-    allowEmojis: bool = Field(False, const=True)
-    allowGridlines: bool = Field(False, const=True)
-    labelFirst: bool = Field(True, const=True)
+    allowEmojis: Literal[False] = Field(default=False)
+    allowGridlines: Literal[False] = Field(default=False)
+    labelFirst: Literal[True] = Field(default=True)
 
 
 class ClientTheme(BaseModel):
