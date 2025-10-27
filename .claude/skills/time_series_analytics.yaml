@@ -1,0 +1,657 @@
+# Time Series Analytics Skill
+#
+# Generic forecasting patterns and techniques applicable to ANY time-ordered data.
+# This skill teaches HOW to forecast, not WHAT to forecast. Adapt these patterns
+# to your specific domain (sales, web traffic, customer metrics, system load, etc.).
+
+name: time_series_analytics
+version: 1.0.0
+category: data_science
+
+description: >
+  Universal time series forecasting and analysis patterns. Learn how to apply
+  classical statistical methods, modern ML approaches, and diagnostic techniques
+  to any time-ordered data. Examples are domain-neutral to demonstrate methodology.
+
+# ==============================================================================
+# CORE CAPABILITIES
+# ==============================================================================
+
+capabilities:
+  - name: classical_forecasting
+    description: Statistical methods (ARIMA, SARIMA, exponential smoothing)
+    techniques:
+      - Box-Jenkins methodology for ARIMA model identification
+      - Seasonal decomposition (additive vs multiplicative)
+      - Auto-ARIMA for automated parameter selection
+      - Exponential smoothing (simple, Holt, Holt-Winters)
+      - Stationarity testing (ADF, KPSS, PP tests)
+      - ACF/PACF analysis for lag structure
+    when_to_use:
+      - "Short to medium-term forecasts (1-12 periods ahead)"
+      - "Data shows clear autocorrelation structure"
+      - "Need interpretable, explainable models"
+      - "Baseline comparison for more complex methods"
+    strengths:
+      - Fast training and inference
+      - Well-established statistical theory
+      - Interpretable parameters
+      - Works well with limited data (100+ observations)
+    limitations:
+      - Assumes linear relationships
+      - Struggles with complex seasonal patterns
+      - Requires stationary data (or differencing)
+      - Limited ability to incorporate exogenous variables
+    libraries:
+      - statsmodels>=0.14
+      - pmdarima>=2.0  # Auto-ARIMA
+      - scipy>=1.11
+
+  - name: prophet_forecasting
+    description: Additive regression model for business time series
+    techniques:
+      - Trend modeling (linear, logistic growth, changepoint detection)
+      - Multiple seasonality (daily, weekly, yearly patterns)
+      - Holiday and event effects (custom calendars)
+      - Uncertainty intervals via simulation
+      - Cross-validation with horizon-based metrics
+      - Handling missing data and outliers
+    when_to_use:
+      - "Business-day level data (daily, weekly)"
+      - "Strong seasonal patterns with multiple frequencies"
+      - "Need to incorporate known events or holidays"
+      - "Want automatic handling of missing values"
+      - "Require uncertainty quantification"
+    strengths:
+      - Intuitive, interpretable components
+      - Robust to missing data and outliers
+      - Handles multiple seasonality naturally
+      - Easy to add domain knowledge (holidays, events)
+    limitations:
+      - Less flexible than ML methods for complex patterns
+      - Assumes additive or multiplicative structure
+      - May overfit with limited data
+    libraries:
+      - prophet>=1.1
+      - pandas>=2.0
+      - numpy>=1.24
+
+  - name: deep_learning_forecasting
+    description: Neural network approaches (LSTM, GRU, Transformer)
+    techniques:
+      - LSTM for long-range dependencies
+      - GRU (faster alternative to LSTM)
+      - Multi-variate forecasting with exogenous features
+      - Sequence-to-sequence (encoder-decoder) architectures
+      - Attention mechanisms for interpretability
+      - Walk-forward validation and backtesting
+    when_to_use:
+      - "Long sequences (1000+ observations)"
+      - "Complex, non-linear patterns"
+      - "Many exogenous features available"
+      - "Multi-step ahead forecasting"
+      - "Computational resources available for training"
+    strengths:
+      - Captures complex non-linear relationships
+      - Handles high-dimensional feature spaces
+      - Can model interactions automatically
+      - Scales to large datasets
+    limitations:
+      - Requires substantial data (1000+ observations)
+      - Computationally expensive
+      - Hyperparameter tuning critical
+      - Less interpretable (black box)
+      - Risk of overfitting
+    libraries:
+      - tensorflow>=2.13 or pytorch>=2.0
+      - keras>=2.13
+      - scikit-learn>=1.3
+
+  - name: seasonal_decomposition
+    description: Break time series into trend, seasonal, and residual components
+    techniques:
+      - STL (Seasonal and Trend decomposition using Loess)
+      - Classical additive/multiplicative decomposition
+      - X-13ARIMA-SEATS (US Census Bureau method)
+      - Fourier analysis for multiple seasonal frequencies
+      - Wavelet decomposition for multi-scale patterns
+    when_to_use:
+      - "Understanding underlying patterns before modeling"
+      - "Feature engineering for ML models"
+      - "Detecting anomalies and structural breaks"
+      - "Communication with stakeholders (show components)"
+    applications:
+      - Detrending data for stationarity
+      - Extracting seasonal patterns for adjustment
+      - Identifying irregular components (anomalies)
+      - Creating features for supervised learning
+    libraries:
+      - statsmodels>=0.14
+      - scipy>=1.11
+
+  - name: anomaly_detection
+    description: Identify unusual patterns, outliers, and structural breaks
+    techniques:
+      - Statistical methods (Z-score, IQR, GESD)
+      - Change point detection (PELT, Binary Segmentation, Bayesian)
+      - Isolation Forest for multivariate anomalies
+      - One-class SVM
+      - Autoencoders (reconstruction error)
+      - Threshold-based alerts with adaptive baselines
+    when_to_use:
+      - "Detect sudden shifts in data patterns"
+      - "Identify data quality issues"
+      - "Monitor system health (unusual spikes/drops)"
+      - "Flag events requiring investigation"
+    applications:
+      - Quality control (manufacturing defects)
+      - System monitoring (performance degradation)
+      - Fraud detection (unusual transactions)
+      - Event detection (system failures, policy changes)
+    libraries:
+      - ruptures>=1.1  # Change point detection
+      - scikit-learn>=1.3
+      - scipy>=1.11
+      - pyod>=1.1  # Outlier detection
+
+  - name: multi_horizon_forecasting
+    description: Generate forecasts for multiple time horizons simultaneously
+    techniques:
+      - Direct multi-step forecasting (separate model per horizon)
+      - Recursive forecasting (use predictions as inputs)
+      - Hybrid approaches (direct for short-term, recursive for long-term)
+      - Quantile regression for prediction intervals
+      - Conformal prediction for distribution-free uncertainty
+      - Ensemble methods (averaging, stacking)
+    when_to_use:
+      - "Need forecasts at multiple horizons (1-day, 7-day, 30-day)"
+      - "Different stakeholders need different horizons"
+      - "Evaluate forecast degradation over time"
+    considerations:
+      - Uncertainty increases with horizon
+      - Direct methods require more training data
+      - Recursive methods accumulate error
+      - Ensembles often outperform single models
+    libraries:
+      - scikit-learn>=1.3
+      - statsmodels>=0.14
+      - mapie>=0.6  # Conformal prediction
+
+# ==============================================================================
+# METHODOLOGY PATTERNS (Domain-Agnostic)
+# ==============================================================================
+
+methodology_patterns:
+  pattern_1_univariate_forecasting:
+    description: "Forecast a single metric using only its historical values"
+    when_applicable:
+      - "Limited features available"
+      - "Target variable is primary driver"
+      - "Need simple, interpretable model"
+    workflow:
+      step_1: "Load historical data (datetime index, single value column)"
+      step_2: "Visualize series (identify trend, seasonality, outliers)"
+      step_3: "Test for stationarity (ADF test); difference if needed"
+      step_4: "Identify seasonal period (ACF plot, domain knowledge)"
+      step_5: "Fit candidate models (ARIMA, Prophet, Exponential Smoothing)"
+      step_6: "Evaluate on holdout set (RMSE, MAE, MAPE)"
+      step_7: "Generate forecasts with uncertainty intervals"
+    example_applications:
+      - "Daily website traffic forecasting"
+      - "Monthly revenue projections"
+      - "Hourly system load prediction"
+
+  pattern_2_multivariate_forecasting:
+    description: "Forecast using target variable + exogenous features"
+    when_applicable:
+      - "External factors influence target"
+      - "Have access to leading indicators"
+      - "Want to model causal relationships"
+    workflow:
+      step_1: "Load target variable and features (aligned timestamps)"
+      step_2: "Explore relationships (correlation, lagged correlations)"
+      step_3: "Create lagged features (T-1, T-7, rolling averages)"
+      step_4: "Split data chronologically (train/validate/test)"
+      step_5: "Fit model (ARIMAX, Prophet with regressors, LSTM)"
+      step_6: "Evaluate feature importance and residuals"
+      step_7: "Generate forecasts (requires future feature values!)"
+    example_applications:
+      - "Sales forecasting with marketing spend and seasonality"
+      - "Energy demand with temperature and day-of-week"
+      - "Transaction volume with economic indicators"
+    critical_consideration: "Exogenous features must be known at prediction time!"
+
+  pattern_3_seasonal_pattern_modeling:
+    description: "Handle data with repeating patterns (daily, weekly, yearly)"
+    when_applicable:
+      - "Clear repeating cycles in data"
+      - "Business processes tied to calendar"
+      - "Holiday or event effects present"
+    workflow:
+      step_1: "Decompose series to visualize seasonal component"
+      step_2: "Determine seasonal period (24 for hourly/daily, 7 for weekly, 12 for monthly)"
+      step_3: "Choose approach: SARIMA (single seasonality) or Prophet (multiple)"
+      step_4: "Fit model with appropriate seasonal parameters"
+      step_5: "Validate that seasonal component is captured (check residuals)"
+      step_6: "Adjust for holidays/events if relevant"
+    example_applications:
+      - "Retail sales (weekly + yearly seasonality)"
+      - "Call center volume (hourly + daily + weekly)"
+      - "Utility usage (daily + yearly seasonality)"
+
+  pattern_4_trend_changepoint_detection:
+    description: "Identify when underlying trend shifts (growth rate changes)"
+    when_applicable:
+      - "Business undergoes regime changes"
+      - "Data shows structural breaks"
+      - "Need to understand 'when things changed'"
+    workflow:
+      step_1: "Visualize data to identify suspected breakpoints"
+      step_2: "Apply change point detection algorithm (PELT, Bayesian)"
+      step_3: "Validate detected changepoints (domain knowledge, events)"
+      step_4: "Model pre/post change periods separately OR"
+      step_5: "Use piecewise regression or Prophet with changepoints"
+    example_applications:
+      - "User growth before/after product launch"
+      - "Cost structure before/after policy change"
+      - "Performance before/after system upgrade"
+
+  pattern_5_forecast_reconciliation:
+    description: "Ensure forecasts are coherent across hierarchies (top-down, bottom-up)"
+    when_applicable:
+      - "Forecasting at multiple aggregation levels"
+      - "Need consistency (region forecasts sum to national)"
+      - "Different stakeholders own different levels"
+    workflow:
+      step_1: "Define hierarchy (e.g., Total → Regions → Stores)"
+      step_2: "Generate base forecasts at all levels"
+      step_3: "Choose reconciliation approach (bottom-up, top-down, optimal)"
+      step_4: "Reconcile forecasts to ensure additivity"
+      step_5: "Evaluate at each level of hierarchy"
+    example_applications:
+      - "Sales forecasting (corporate → division → product)"
+      - "Budget planning (company → department → team)"
+      - "Demand forecasting (national → regional → local)"
+
+# ==============================================================================
+# EVALUATION FRAMEWORK
+# ==============================================================================
+
+evaluation:
+  train_test_splitting:
+    critical_principle: "NEVER shuffle time series data - split chronologically!"
+    recommended_approach:
+      - "Use most recent 20% for test set (holdout)"
+      - "Use preceding data for training and validation"
+      - "For validation, use time series cross-validation (expanding or sliding window)"
+    diagram: |
+      |--------Training--------|--Validation--|---Test---|
+      t=0                   t=train_end  t=val_end  t=now
+
+  cross_validation:
+    time_series_cv:
+      description: "Rolling window validation respecting temporal order"
+      expanding_window:
+        - "Train on data from t=0 to t=i, test on t=i+1 to t=i+h"
+        - "Expand training window each fold"
+        - "Use when more data → better models"
+      sliding_window:
+        - "Fixed training window size, slide forward each fold"
+        - "Use when recent data more relevant"
+      implementation: "sklearn.model_selection.TimeSeriesSplit"
+
+  metrics:
+    point_forecast:
+      mae: "Mean Absolute Error (interpretable, robust to outliers)"
+      rmse: "Root Mean Squared Error (penalizes large errors)"
+      mape: "Mean Absolute Percentage Error (scale-independent, fails if y=0)"
+      smape: "Symmetric MAPE (handles zero better)"
+      mase: "Mean Absolute Scaled Error (compare to naive baseline)"
+
+    probabilistic_forecast:
+      quantile_loss: "Asymmetric loss for quantile predictions"
+      winkler_score: "Evaluates prediction interval coverage"
+      crps: "Continuous Ranked Probability Score"
+
+    business_metrics:
+      directional_accuracy: "% of times forecast correctly predicts up/down"
+      bias: "Systematic over or under-prediction (mean error)"
+
+  baseline_models:
+    always_establish: "Compare against simple baselines to validate complexity"
+    common_baselines:
+      naive: "Tomorrow = Today (random walk)"
+      seasonal_naive: "Tomorrow = Same period last cycle"
+      moving_average: "Tomorrow = Average of last N periods"
+      linear_trend: "Fit simple linear regression to time index"
+    acceptance_criteria: "Model must beat baseline by meaningful margin (>10% RMSE improvement)"
+
+# ==============================================================================
+# DATA PREPARATION PATTERNS
+# ==============================================================================
+
+data_preparation:
+  handling_missing_values:
+    assessment:
+      - "Visualize missingness pattern (random vs systematic)"
+      - "Calculate % missing per period"
+      - "Identify if missingness is informative"
+    strategies:
+      forward_fill: "Use last known value (assumes slow changes)"
+      backward_fill: "Use next known value (rare, avoid for forecasting)"
+      interpolation: "Linear, polynomial, or spline interpolation"
+      model_based: "ARIMA or Kalman filter imputation"
+    caution: "Document all imputation - impacts uncertainty estimates"
+
+  outlier_treatment:
+    detection:
+      - "Z-score (> 3 standard deviations)"
+      - "IQR method (< Q1-1.5*IQR or > Q3+1.5*IQR)"
+      - "Domain knowledge (physically impossible values)"
+    treatment:
+      investigate: "Always investigate outliers first (data error vs real event)"
+      cap: "Winsorize (cap at percentile threshold)"
+      remove: "Only if confirmed data error"
+      keep: "If genuine events, consider separate modeling"
+
+  feature_engineering:
+    temporal_features:
+      - "Hour of day, day of week, day of month, month, quarter, year"
+      - "Is weekend, is holiday (requires calendar)"
+      - "Days since last event (recency)"
+      - "Cyclical encoding: sin/cos for circular time (hour, month)"
+    lag_features:
+      - "Value at T-1, T-7, T-30 (depends on seasonality)"
+      - "Rolling statistics (mean, std, min, max over window)"
+      - "Exponentially weighted moving average (EWMA)"
+    derived_features:
+      - "Difference from previous period (delta, percent change)"
+      - "Ratio to moving average (above/below trend)"
+      - "Time since last anomaly or event"
+
+  stationarity:
+    why_it_matters: "Most statistical models assume stationarity"
+    tests:
+      - "Augmented Dickey-Fuller (ADF) test"
+      - "KPSS test"
+      - "Phillips-Perron (PP) test"
+    achieving_stationarity:
+      - "Differencing (first-order, seasonal differencing)"
+      - "Log transformation (for exponential growth)"
+      - "Detrending (remove linear or polynomial trend)"
+
+# ==============================================================================
+# GENERIC EXAMPLE USE CASES (Adaptable to Any Domain)
+# ==============================================================================
+
+example_use_cases:
+  - name: single_metric_forecasting
+    description: "Forecast a single KPI using only its historical values"
+    scenario: "You have daily values of a metric for 2 years, need 30-day forecast"
+    data_structure:
+      - "Columns: [date, metric_value]"
+      - "Frequency: Daily"
+      - "History: 730 observations (2 years)"
+    workflow:
+      1: "Load and visualize data (trend, seasonality, outliers)"
+      2: "Decompose to understand components"
+      3: "Test stationarity; difference if needed"
+      4: "Fit Prophet (handles seasonality automatically)"
+      5: "Fit ARIMA as comparison baseline"
+      6: "Evaluate on last 30 days (holdout set)"
+      7: "Select best model based on RMSE/MAE"
+      8: "Generate 30-day forecast with 80%/95% intervals"
+    adaptable_to:
+      - "Daily active users, revenue, costs, inventory"
+      - "Hourly server requests, API calls, transactions"
+      - "Weekly customer inquiries, orders, returns"
+
+  - name: multi_feature_forecasting
+    description: "Forecast target using historical values + external predictors"
+    scenario: "You have target metric + 5 features, need to forecast next 14 periods"
+    data_structure:
+      - "Columns: [date, target, feature_1, ..., feature_5]"
+      - "All features have historical and future values"
+    workflow:
+      1: "Explore feature-target correlations and lag structures"
+      2: "Create lagged features (T-1, rolling averages)"
+      3: "Split data chronologically (train 80%, test 20%)"
+      4: "Fit Prophet with regressors OR LSTM with multivariate inputs"
+      5: "Analyze feature importance"
+      6: "Evaluate on test set"
+      7: "Generate forecasts (requires future feature values!)"
+    critical_point: "You must know/predict exogenous features at forecast time"
+    adaptable_to:
+      - "Sales forecasting with promotions, pricing, seasonality"
+      - "Energy demand with temperature, day-type, economic activity"
+      - "System load with user activity, time features, historical patterns"
+
+  - name: seasonal_pattern_analysis
+    description: "Model data with strong repeating patterns"
+    scenario: "Data shows weekly and yearly cycles (e.g., retail, hospitality)"
+    workflow:
+      1: "Decompose series (STL or classical)"
+      2: "Visualize seasonal components (weekly, yearly)"
+      3: "Fit Prophet with yearly + weekly seasonality"
+      4: "Add holiday effects if applicable (custom calendar)"
+      5: "Validate seasonal component is well-captured (check residuals)"
+      6: "Generate forecasts accounting for both cycles"
+    adaptable_to:
+      - "Any business with calendar-driven patterns"
+      - "Hourly data (daily + weekly cycles)"
+      - "Monthly data (yearly cycles)"
+
+  - name: anomaly_detection_workflow
+    description: "Identify unusual events or data quality issues"
+    scenario: "Monitor ongoing metric, flag when unusual"
+    workflow:
+      1: "Establish baseline behavior (rolling statistics)"
+      2: "Define anomaly threshold (e.g., > 3 std deviations)"
+      3: "Apply change point detection for structural breaks"
+      4: "Combine statistical and ML methods (ensemble)"
+      5: "Flag anomalies with severity score"
+      6: "Investigate root causes (data error vs real event)"
+      7: "Update baseline periodically (adapt to changes)"
+    adaptable_to:
+      - "System monitoring (CPU, memory, latency spikes)"
+      - "Business metrics (sudden revenue drop, user churn spike)"
+      - "Quality control (defect rate, process variation)"
+
+  - name: hierarchical_forecasting
+    description: "Forecast at multiple aggregation levels with coherence"
+    scenario: "Forecast total + 5 segments, ensure segments sum to total"
+    workflow:
+      1: "Define hierarchy (Total → Segment A, B, C, D, E)"
+      2: "Generate base forecasts at all levels independently"
+      3: "Check if sum(segment forecasts) = total forecast (usually not!)"
+      4: "Apply reconciliation method (optimal, top-down, or bottom-up)"
+      5: "Validate reconciled forecasts at each level"
+    reconciliation_approaches:
+      bottom_up: "Forecast segments, sum to get total (ignores total forecast)"
+      top_down: "Forecast total, allocate to segments (ignores segment forecasts)"
+      optimal: "Minimize forecast error across all levels (best practice)"
+    adaptable_to:
+      - "Geographic hierarchy (Country → Region → Store)"
+      - "Product hierarchy (Category → Subcategory → SKU)"
+      - "Organizational hierarchy (Company → Division → Team)"
+
+# ==============================================================================
+# BEST PRACTICES (Universal Guidance)
+# ==============================================================================
+
+best_practices:
+  always_visualize_first:
+    - "Plot the raw time series before any modeling"
+    - "Look for trend, seasonality, outliers, structural breaks"
+    - "Understand the data generation process"
+
+  chronological_splitting:
+    - "Never shuffle time series data"
+    - "Always train on past, test on future"
+    - "Use time series cross-validation for hyperparameter tuning"
+
+  start_simple:
+    - "Fit simple baselines first (naive, moving average)"
+    - "Add complexity only if it improves performance meaningfully"
+    - "Complex models ≠ better forecasts"
+
+  validate_assumptions:
+    - "Check stationarity before ARIMA"
+    - "Validate residuals are white noise (no autocorrelation)"
+    - "Test for heteroskedasticity (non-constant variance)"
+
+  quantify_uncertainty:
+    - "Always provide prediction intervals, not just point forecasts"
+    - "Wider intervals for longer horizons"
+    - "Use bootstrapping or simulation if analytical intervals unavailable"
+
+  domain_knowledge:
+    - "Incorporate known events (holidays, promotions, policy changes)"
+    - "Use domain expertise to validate model outputs"
+    - "Question forecasts that contradict business logic"
+
+  monitor_performance:
+    - "Track forecast accuracy in production"
+    - "Detect when forecasts degrade (model drift)"
+    - "Retrain periodically or trigger-based"
+
+  document_methodology:
+    - "Record all preprocessing steps"
+    - "Document model choice rationale"
+    - "Version control models and parameters"
+
+# ==============================================================================
+# COMMON PITFALLS (What NOT to Do)
+# ==============================================================================
+
+common_pitfalls:
+  - pitfall: "Using future information in training (data leakage)"
+    example: "Creating features that include future values of the target"
+    prevention: "Only use information available at prediction time"
+
+  - pitfall: "Ignoring seasonality"
+    example: "Fitting ARIMA(p,d,q) when SARIMA(p,d,q)(P,D,Q)m is needed"
+    prevention: "Always decompose and visualize seasonal patterns first"
+
+  - pitfall: "Overfitting to noise"
+    example: "Using 20 lagged features for 100 observations"
+    prevention: "Keep model complexity appropriate to data size; use regularization"
+
+  - pitfall: "Not validating on holdout set"
+    example: "Evaluating model on training data"
+    prevention: "Always reserve recent data for testing"
+
+  - pitfall: "Extrapolating beyond training range"
+    example: "Training on data with max value 100, expecting good forecasts at 200"
+    prevention: "Be cautious when forecasting outside historical range"
+
+  - pitfall: "Ignoring non-stationarity"
+    example: "Fitting ARIMA to trending data without differencing"
+    prevention: "Test for stationarity; difference or detrend as needed"
+
+  - pitfall: "Treating all errors equally"
+    example: "Using RMSE when over-forecasting is much more costly than under-forecasting"
+    prevention: "Choose metric aligned with business cost (asymmetric loss if needed)"
+
+# ==============================================================================
+# ADAPTING TO YOUR DOMAIN
+# ==============================================================================
+
+adaptation_guide:
+  step_1_understand_your_data:
+    questions:
+      - "What is the frequency? (hourly, daily, weekly, monthly)"
+      - "How much history is available? (100 points? 10,000?)"
+      - "Are there seasonal patterns? (daily, weekly, yearly)"
+      - "Are there known events that affect the metric? (holidays, promotions)"
+      - "Do you have exogenous features? (if yes, multivariate; if no, univariate)"
+
+  step_2_select_appropriate_techniques:
+    if_short_history:
+      - "Use simpler models (ARIMA, Exponential Smoothing)"
+      - "Avoid deep learning (requires 1000+ observations)"
+    if_strong_seasonality:
+      - "Use SARIMA or Prophet"
+      - "Consider multiple seasonal periods (Prophet excels here)"
+    if_many_features:
+      - "Use LSTM or gradient boosting"
+      - "Feature selection important to avoid overfitting"
+    if_need_interpretability:
+      - "Use Prophet (decomposable components)"
+      - "Use ARIMA (clear statistical interpretation)"
+      - "Avoid black-box models"
+
+  step_3_customize_workflows:
+    - "Adapt example use cases to your domain terminology"
+    - "Incorporate domain-specific events (add to Prophet holidays)"
+    - "Define appropriate evaluation metrics (business-relevant)"
+    - "Set forecast horizons based on planning needs"
+
+  step_4_iterate_and_improve:
+    - "Start with simplest baseline"
+    - "Add complexity incrementally"
+    - "Evaluate each change (does it improve holdout performance?)"
+    - "Solicit domain expert feedback on forecasts"
+
+# ==============================================================================
+# DEPENDENCIES
+# ==============================================================================
+
+dependencies:
+  core:
+    - python: ">=3.10"
+    - pandas: ">=2.0"
+    - numpy: ">=1.24"
+    - matplotlib: ">=3.7"
+    - seaborn: ">=0.12"
+
+  statistical_forecasting:
+    - statsmodels: ">=0.14"
+    - pmdarima: ">=2.0"  # Auto-ARIMA
+    - scipy: ">=1.11"
+
+  prophet:
+    - prophet: ">=1.1"
+
+  deep_learning:
+    - tensorflow: ">=2.13"  # or pytorch>=2.0
+    - keras: ">=2.13"
+    - scikit-learn: ">=1.3"
+
+  anomaly_detection:
+    - ruptures: ">=1.1"
+    - pyod: ">=1.1"
+
+  utilities:
+    - sktime: ">=0.24"  # Unified time series ML framework
+
+# ==============================================================================
+# REFERENCES
+# ==============================================================================
+
+references:
+  books:
+    - title: "Forecasting: Principles and Practice (3rd ed)"
+      authors: "Hyndman & Athanasopoulos"
+      url: "https://otexts.com/fpp3/"
+      focus: "Comprehensive forecasting methods"
+
+    - title: "Time Series Analysis and Its Applications (4th ed)"
+      authors: "Shumway & Stoffer"
+      focus: "Statistical foundations"
+
+  papers:
+    - title: "Forecasting at Scale"
+      authors: "Taylor & Letham (Facebook)"
+      year: 2017
+      focus: "Prophet methodology"
+
+  online_resources:
+    - name: "Statsmodels Time Series Documentation"
+      url: "https://www.statsmodels.org/stable/tsa.html"
+
+    - name: "Prophet Documentation"
+      url: "https://facebook.github.io/prophet/"
+
+    - name: "Sktime Documentation"
+      url: "https://www.sktime.net/"

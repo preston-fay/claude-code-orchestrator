@@ -1,0 +1,623 @@
+# Client Governance Configuration - Example (Fictional Client)
+#
+# This is a comprehensive example showing ALL available governance options.
+# Use this as a reference when creating client-specific configurations.
+# Most clients will only override a subset of these fields.
+
+# ==============================================================================
+# METADATA
+# ==============================================================================
+
+client_name: "Example Corporation"
+# Client organization name (for documentation purposes)
+# Use legal entity name or commonly used abbreviation
+
+engagement_id: "ENG-2024-EXAMPLE"
+# Unique engagement identifier (project code, contract number, SOW reference)
+# Format: Use your organization's standard (ENG-YYYY-XXX, PROJ-ABC, etc.)
+
+effective_date: "2024-01-01"
+# Date when this governance config becomes active (ISO 8601: YYYY-MM-DD)
+# Used for audit trail and version control
+
+# ==============================================================================
+# QUALITY GATES
+# ==============================================================================
+
+quality_gates:
+  # Quality thresholds that must be met before phase progression
+  # QA Agent validates these before approving checkpoints
+
+  min_hygiene_score: 85
+  # Minimum repository hygiene score (0-100) to pass QA gate
+  # Checks for:
+  #   - No large binary files committed (> 1MB)
+  #   - Clean commit history (no secrets, no generated files)
+  #   - Proper .gitignore configuration
+  #   - No Jupyter notebook outputs committed
+  # Typical values:
+  #   - 70: Lenient (good for prototypes, MVPs)
+  #   - 85: Standard (balanced for most projects)
+  #   - 95: Strict (production-critical, open-source projects)
+
+  require_security_scan: true
+  # Whether to require automated security vulnerability scanning before deployment
+  # When true:
+  #   - Dependencies scanned for known CVEs (e.g., safety, snyk, dependabot)
+  #   - Static analysis for security issues (e.g., bandit for Python)
+  #   - Blocks deployment if HIGH or CRITICAL vulnerabilities found
+  # Set to true for:
+  #   - Client-facing applications
+  #   - Projects handling sensitive data
+  #   - Regulated industries (finance, healthcare)
+  # Set to false for:
+  #   - Internal analytics (no external exposure)
+  #   - Prototypes and proofs-of-concept
+
+  require_data_classification: true
+  # Whether all data files must have classification labels
+  # When true:
+  #   - Data files must include metadata: public, internal, confidential, restricted
+  #   - Enforced via naming convention (e.g., data/confidential/*.csv) or manifest file
+  #   - QA agent validates classification before checkpoint approval
+  # Set to true for:
+  #   - Clients with strict data governance (finance, healthcare, government)
+  #   - Projects with mixed sensitivity data
+  # Set to false for:
+  #   - All data is same sensitivity level
+  #   - Internal projects with minimal governance
+
+  min_test_coverage: 80
+  # Minimum code coverage percentage required (0-100)
+  # Applies to unit and integration tests
+  # Typical values:
+  #   - 0: No requirement (acceptable for prototypes, exploratory analysis)
+  #   - 70: Standard (good balance for most business logic)
+  #   - 80: High (recommended for production services)
+  #   - 90+: Very high (mission-critical systems, financial calculations)
+  # Note: High coverage ≠ good tests. Focus on meaningful test cases.
+
+  require_type_hints: true
+  # Whether Python code must include type hints (PEP 484)
+  # When true:
+  #   - Enforced via mypy or pyright
+  #   - Blocks merge if type errors detected
+  # Benefits:
+  #   - Better IDE autocomplete and refactoring
+  #   - Catch bugs at development time vs. runtime
+  #   - Improves code documentation
+  # Set to true for:
+  #   - Large codebases (> 5K lines)
+  #   - Teams with multiple developers
+  #   - Long-lived projects (> 6 months)
+  # Set to false for:
+  #   - Small scripts and notebooks
+  #   - Rapid prototyping
+
+  require_linting: true
+  # Whether code must pass linting checks
+  # Linters: pylint, flake8, black (Python); eslint, prettier (JavaScript)
+  # When true:
+  #   - Pre-commit hooks run linters automatically
+  #   - CI/CD fails if linting errors detected
+  # Recommendation: Always true (improves code consistency and catches bugs)
+
+  max_complexity: 10
+  # Maximum cyclomatic complexity allowed per function
+  # Measures number of independent paths through code (if/else, loops, etc.)
+  # Typical values:
+  #   - 5: Very strict (forces small, focused functions)
+  #   - 10: Standard (good balance)
+  #   - 15: Lenient (allows more complex logic)
+  #   - 20+: Too complex (hard to test and maintain)
+  # If function exceeds limit, refactor into smaller functions
+
+  require_peer_review: true
+  # Whether all code changes require human peer review before merging
+  # When true:
+  #   - GitHub/GitLab requires approvals (1+ reviewers)
+  #   - AI-generated code still needs human validation
+  # Set to true for:
+  #   - Production systems
+  #   - Team projects (knowledge sharing benefit)
+  #   - Compliance requirements (SOC2, ISO27001)
+  # Set to false for:
+  #   - Solo developer projects
+  #   - Exploratory analysis and prototypes
+
+# ==============================================================================
+# COMPLIANCE
+# ==============================================================================
+
+compliance:
+  # Regulatory and compliance requirements
+
+  frameworks:
+    - "SOC2"
+    - "GDPR"
+  # Compliance frameworks that apply to this engagement
+  # Options: SOC2, ISO27001, GDPR, HIPAA, PCI-DSS, CCPA, NIST, FedRAMP, None
+  # Multiple frameworks can apply (e.g., GDPR + SOC2 for European SaaS company)
+  # Implications:
+  #   - SOC2: Security controls, audit logging, access management
+  #   - GDPR: Data subject rights, consent, data minimization, breach notification
+  #   - HIPAA: PHI encryption, access controls, business associate agreements
+  #   - PCI-DSS: Cardholder data protection, network security
+  # If "None", no specific compliance framework (but still follow best practices)
+
+  pii_handling: "strict"
+  # PII (Personally Identifiable Information) handling strictness level
+  # Options:
+  #   - strict: Encrypt all PII at rest and in transit, anonymize for analytics,
+  #             audit all access, require data processing agreements
+  #   - standard: Document PII fields, apply access controls, basic encryption
+  #   - minimal: Awareness of PII, no special handling beyond general security
+  #   - none: No PII present in project
+  # Use "strict" for:
+  #   - GDPR/CCPA regulated projects
+  #   - Customer-facing applications storing user data
+  #   - Healthcare (PHI), finance (account data)
+  # Use "standard" for:
+  #   - Internal analytics with employee data
+  #   - B2B applications with limited PII
+  # Use "minimal" or "none" for:
+  #   - Aggregated/anonymized data only
+  #   - No personal identifiers
+
+  data_retention_days: 365
+  # Number of days to retain project data after engagement ends
+  # Used for:
+  #   - Auto-archival policies (move to cold storage)
+  #   - Deletion policies (permanent removal)
+  # Typical values:
+  #   - 90: Short-term projects, minimal retention need
+  #   - 365: Standard (1 year for reference and audit)
+  #   - 2555: 7 years (common for financial/legal retention requirements)
+  # Consider:
+  #   - Legal/regulatory retention requirements
+  #   - Client contractual obligations
+  #   - Storage costs
+
+  encryption_at_rest: true
+  # Whether data files must be encrypted at rest
+  # When true:
+  #   - Sensitive files encrypted using AES-256 or similar
+  #   - Encryption keys managed separately (not committed to repo)
+  # Applies to:
+  #   - PII/PHI data files
+  #   - Credentials and secrets (always encrypted regardless)
+  # Set to true for:
+  #   - HIPAA, PCI-DSS, high-security clients
+  #   - Data stored in cloud (S3, Azure Blob)
+  # Set to false for:
+  #   - Public or internal non-sensitive data
+  #   - Dev/test environments with synthetic data
+
+  encryption_in_transit: true
+  # Whether data transmission requires TLS/SSL encryption
+  # When true:
+  #   - All API calls use HTTPS (not HTTP)
+  #   - Database connections use SSL/TLS
+  #   - File transfers use SFTP/FTPS (not FTP)
+  # Recommendation: Always true (minimal overhead, significant security benefit)
+
+  audit_logging: true
+  # Whether to maintain detailed audit logs
+  # When true:
+  #   - Log all data access (who, what, when)
+  #   - Log data modifications (before/after values)
+  #   - Retain logs for compliance period (often 1-7 years)
+  # Required for:
+  #   - SOC2, ISO27001, HIPAA compliance
+  #   - Forensic investigation capability
+  # Overhead:
+  #   - Storage costs (logs can be large)
+  #   - Performance impact (logging I/O)
+
+  anonymization_required: true
+  # Whether PII must be anonymized/pseudonymized before analysis
+  # When true:
+  #   - Remove direct identifiers (name, email, SSN)
+  #   - Pseudonymize indirect identifiers (hash IDs, generalize zip codes)
+  #   - Apply k-anonymity or differential privacy techniques
+  # Required for:
+  #   - GDPR Article 25 (data protection by design)
+  #   - Sharing data across teams or with third parties
+  # Techniques:
+  #   - Hashing (one-way, consistent across datasets)
+  #   - Generalization (age → age_bucket, zip → region)
+  #   - Suppression (remove rare combinations)
+
+  geographic_restrictions:
+    - "RU"
+    - "CN"
+  # ISO 3166-1 alpha-2 country codes where data processing is restricted
+  # Use cases:
+  #   - Data sovereignty laws (data must stay in-country or region)
+  #   - Export control (cannot process data in certain countries)
+  #   - Client contractual requirements
+  # Examples:
+  #   - EU GDPR: Data processing restricted outside EU/EEA (unless adequacy decision)
+  #   - China Cybersecurity Law: Data localization required
+  #   - Russia: Personal data of Russian citizens must be stored in Russia
+  # Empty array [] means no geographic restrictions
+
+# ==============================================================================
+# BRAND CONSTRAINTS
+# ==============================================================================
+
+brand_constraints:
+  # Client branding and presentation requirements
+
+  theme_path: "clients/example-client/theme.json"
+  # Path to client-specific design tokens (colors, fonts, spacing)
+  # Format: JSON or YAML file with:
+  #   - primary_color, secondary_color, accent_color (hex codes)
+  #   - font_family, heading_font, body_font
+  #   - spacing scale, border radius, shadows
+  # Example path: "clients/{client-name}/theme.json"
+  # If not specified, uses default Kearney design system
+
+  custom_fonts:
+    - "Helvetica Neue"
+    - "Arial"
+  # Font families required by client brand guidelines
+  # Considerations:
+  #   - Must be available/licensed (check font licensing)
+  #   - Provide fallbacks for web safety (Arial, sans-serif)
+  #   - Include in deployment (web fonts, embedding)
+  # Leave empty [] if using default fonts
+
+  color_restrictions:
+    - "#FF0000"  # Competitor primary color (avoid)
+    - "#1DA1F2"  # Competitor brand blue
+  # Hex color codes that are forbidden
+  # Use cases:
+  #   - Competitor colors (avoid brand confusion)
+  #   - Culturally sensitive colors (red in China = good luck, but avoid for warnings)
+  #   - Accessibility conflicts (low contrast combinations)
+  # QA agent validates visualizations against this list
+
+  logo_path: "clients/example-client/logo.svg"
+  # Path to client logo file for inclusion in deliverables
+  # Formats: SVG (preferred), PNG (high-res), PDF
+  # Used in:
+  #   - PowerPoint presentations (title slide)
+  #   - Web applications (header/footer)
+  #   - PDF reports (cover page)
+  # License check: Ensure permission to use logo
+
+  forbid_terms:
+    - "legacy system"
+    - "technical debt"
+    - "quick and dirty"
+    - "hack"
+  # Terms/phrases to avoid in documentation, presentations, and UI
+  # Use cases:
+  #   - Competitor product names (avoid referencing competitors)
+  #   - Negative framing (don't say "legacy", say "current system")
+  #   - Jargon client dislikes (some clients hate "AI", prefer "analytics")
+  # Matching: Case-insensitive, substring match
+  # QA agent flags violations in documentation review
+
+  require_disclaimers: true
+  # Whether to include standard legal disclaimers in all deliverables
+  # When true:
+  #   - Add disclaimer footer to presentations
+  #   - Include "for discussion purposes only" on analysis
+  #   - Add confidentiality notice to documents
+  # Typical disclaimers:
+  #   - "This analysis is based on data provided by client..."
+  #   - "Recommendations are advisory; implementation is client's decision"
+  #   - "Confidential and proprietary - do not distribute"
+
+  presentation_template: "clients/example-client/template.pptx"
+  # Path to PowerPoint/Keynote template for client deliverables
+  # Template includes:
+  #   - Client logo and branding
+  #   - Approved color scheme
+  #   - Slide layouts (title, content, section divider)
+  # If not specified, uses Kearney default template
+
+# ==============================================================================
+# DEPLOYMENT
+# ==============================================================================
+
+deployment:
+  # Deployment and release requirements
+
+  environments:
+    - "development"
+    - "staging"
+    - "production"
+  # Deployment environments that must exist (in order)
+  # Flow: dev → staging → production
+  # Options: development/dev, staging, uat, pre-production, production/prod
+  # Minimum: ["development", "production"] (dev and prod)
+  # Recommended: ["dev", "staging", "prod"] (three-tier for testing)
+  # Enterprise: ["dev", "uat", "staging", "prod"] (full promotion pipeline)
+
+  require_approval: true
+  # Whether deployments require explicit human approval
+  # When true:
+  #   - Deployment paused pending approval
+  #   - Approval recorded in audit log
+  #   - Approval workflow: Developer → Tech Lead → Client (if client-stakeholder)
+  # Set to true for:
+  #   - Production deployments (always!)
+  #   - Client-managed environments
+  # Set to false for:
+  #   - Development environment (auto-deploy on commit)
+  #   - CI/CD for internal tools
+
+  approval_threshold: "tech-lead"
+  # Who can approve deployments if require_approval=true
+  # Options:
+  #   - any-developer: Any team member can approve (low barrier)
+  #   - tech-lead: Technical lead or senior engineer must approve (standard)
+  #   - client-stakeholder: Client representative must approve (high barrier, slower)
+  # Choose based on:
+  #   - Risk level (production > staging > dev)
+  #   - Client relationship (some clients want approval authority)
+  #   - Team maturity (junior teams need more oversight)
+
+  deployment_window:
+    # Allowed time windows for production deployments
+    # Used to avoid deploying during business hours (minimize user disruption)
+    days:
+      - "Saturday"
+      - "Sunday"
+    # Days of week when production deployments are allowed
+    # Typical patterns:
+    #   - Weekends only: ["Saturday", "Sunday"] (minimal business impact)
+    #   - Mid-week: ["Tuesday", "Wednesday", "Thursday"] (avoid Monday/Friday)
+    #   - Anytime: All seven days (if 24/7 operations or low-risk changes)
+
+    hours_utc: "02:00-06:00"
+    # Time range in 24-hour format UTC
+    # Format: "HH:MM-HH:MM"
+    # Examples:
+    #   - "02:00-06:00": Early morning (2 AM - 6 AM UTC)
+    #   - "22:00-02:00": Late night (10 PM - 2 AM next day)
+    #   - "00:00-23:59": Anytime (no restriction)
+    # Considerations:
+    #   - Convert to client's local timezone (UTC ≠ local time)
+    #   - Low-traffic windows (check analytics for lowest usage)
+    #   - Maintenance window agreements (SLA may define acceptable windows)
+
+  rollback_required: true
+  # Whether automated rollback capability must be implemented
+  # When true:
+  #   - Deployment includes rollback script/procedure
+  #   - One-command rollback to previous version
+  #   - Tested rollback before production deployment
+  # Implementation:
+  #   - Version tagging (git tags, semantic versioning)
+  #   - Blue-green deployment (instant switchback)
+  #   - Database migration reversibility (down migrations)
+  # Always true for production systems
+
+  canary_required: false
+  # Whether canary/blue-green deployments are required
+  # When true:
+  #   - Deploy to subset of users first (e.g., 10%)
+  #   - Monitor metrics (error rate, latency)
+  #   - Gradual rollout if metrics acceptable (10% → 50% → 100%)
+  #   - Automatic rollback if metrics degrade
+  # Use for:
+  #   - High-traffic applications (risk mitigation)
+  #   - User-facing changes (gradual exposure)
+  # Overhead:
+  #   - Infrastructure complexity (load balancer, traffic routing)
+  #   - Monitoring and alerting setup
+
+# ==============================================================================
+# DOCUMENTATION
+# ==============================================================================
+
+documentation:
+  # Documentation requirements and standards
+
+  require_adr: true
+  # Whether Architecture Decision Records are required
+  # When true:
+  #   - Significant decisions documented in .claude/decisions/
+  #   - ADRs reviewed by Consensus agent
+  #   - Checkpoint includes ADR artifacts
+  # Always true for:
+  #   - Projects > 1 month duration
+  #   - Multi-developer teams
+  #   - Architectural complexity
+  # Can be false for:
+  #   - Simple scripts or one-off analyses
+
+  require_data_dictionary: true
+  # Whether data dictionary is required
+  # When true:
+  #   - Document all data fields (name, type, description, source)
+  #   - Include sample values and constraints
+  #   - Maintain in docs/data_dictionary.md or separate file
+  # Essential for:
+  #   - Analytics projects (understand data meaning)
+  #   - Data pipelines (data lineage and transformations)
+  #   - Regulatory compliance (GDPR, HIPAA data inventories)
+  # Can be false for:
+  #   - No data processing (e.g., pure software projects)
+
+  min_documentation_score: 75
+  # Minimum documentation coverage score (0-100)
+  # Measures:
+  #   - README completeness (installation, usage, architecture)
+  #   - API documentation (all public functions/endpoints documented)
+  #   - Inline code comments (complex logic explained)
+  #   - Data dictionary (if applicable)
+  #   - Runbook (if applicable)
+  # Typical values:
+  #   - 50: Minimal (README + basic API docs)
+  #   - 75: Standard (comprehensive README + full API docs + runbook)
+  #   - 90: Excellent (all above + tutorials, examples, FAQs)
+  # Calculated by Documentarian agent
+
+  require_runbook: true
+  # Whether operational runbook is required
+  # Runbook includes:
+  #   - Deployment procedures (step-by-step)
+  #   - Monitoring and alerting (what to watch, thresholds)
+  #   - Troubleshooting guide (common issues, resolution steps)
+  #   - Rollback procedures
+  #   - Contact information (on-call, escalation)
+  # Essential for:
+  #   - Production systems
+  #   - Projects handed off to client/ops team
+  # Can be false for:
+  #   - Prototype or proof-of-concept
+  #   - Fully automated with no operational needs
+
+  require_user_guide: false
+  # Whether end-user documentation is required
+  # User guide includes:
+  #   - Getting started tutorial
+  #   - Feature walkthroughs (screenshots, step-by-step)
+  #   - FAQs
+  #   - Troubleshooting (user-facing issues)
+  # Essential for:
+  #   - Client-facing applications (web apps, dashboards)
+  #   - Tools used by non-technical users
+  # Can be false for:
+  #   - Developer-only tools (APIs, libraries)
+  #   - Internal analytics (team is technical)
+
+  language: "en"
+  # Primary language for documentation (ISO 639-1 code: two-letter)
+  # Options: en (English), es (Spanish), fr (French), de (German), zh (Chinese), ja (Japanese)
+  # If non-English:
+  #   - AI agents generate docs in specified language
+  #   - Code comments can remain in English (common practice)
+  #   - User-facing docs in client's language
+
+  require_code_comments: true
+  # Whether code must include inline comments explaining complex logic
+  # When true:
+  #   - Comment non-obvious algorithms
+  #   - Explain "why" not "what" (code shows what, comments show why)
+  #   - Document edge cases and assumptions
+  # Recommendation: Always true (helps future maintainers)
+
+  api_documentation_format: "OpenAPI"
+  # Required format for API documentation
+  # Options:
+  #   - OpenAPI: Swagger/OpenAPI 3.0 spec (RESTful APIs)
+  #   - Swagger: Older Swagger 2.0 spec
+  #   - Markdown: Simple Markdown files (lightweight)
+  #   - Sphinx: Python documentation generator (autodoc from docstrings)
+  #   - JSDoc: JavaScript documentation (from JSDoc comments)
+  #   - None: No specific format required
+  # Choose based on:
+  #   - API type (REST → OpenAPI, GraphQL → Schema docs)
+  #   - Tooling (Swagger UI for interactive docs)
+  #   - Client preference
+
+# ==============================================================================
+# NOTIFICATIONS
+# ==============================================================================
+
+notifications:
+  # Notification and alerting configuration
+
+  checkpoint_completion:
+    - "pm@example-client.com"
+    - "tech-lead@kearney.com"
+  # Email addresses to notify when checkpoints are completed
+  # Triggered after:
+  #   - Architecture approved (Consensus checkpoint)
+  #   - Development complete (Developer checkpoint)
+  #   - QA passed (QA checkpoint)
+  #   - Documentation complete (Final checkpoint)
+  # Use for:
+  #   - Project stakeholder updates
+  #   - Progress tracking
+
+  quality_gate_failure:
+    - "tech-lead@kearney.com"
+    - "qa-team@kearney.com"
+  # Email addresses to notify when quality gates fail
+  # Triggered when:
+  #   - Hygiene score below threshold
+  #   - Test coverage insufficient
+  #   - Security scan finds vulnerabilities
+  #   - ADR rejected by Consensus
+  # Use for:
+  #   - Immediate action required
+  #   - QA team escalation
+
+  deployment_notifications:
+    - "ops@example-client.com"
+    - "pm@example-client.com"
+  # Email addresses to notify on production deployments
+  # Triggered on:
+  #   - Successful production deployment
+  #   - Deployment failure or rollback
+  # Use for:
+  #   - Operations team awareness
+  #   - Client stakeholder visibility
+
+  slack_webhook: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+  # Slack webhook URL for automated notifications
+  # How to get:
+  #   1. Go to Slack → Apps → Incoming Webhooks
+  #   2. Create new webhook for desired channel
+  #   3. Copy webhook URL
+  # Notifications sent to Slack:
+  #   - Checkpoint completions (with summary)
+  #   - Quality gate failures (with details)
+  #   - Deployment status (success/failure)
+  # Format: "https://hooks.slack.com/services/XXX/YYY/ZZZ"
+
+# ==============================================================================
+# CUSTOM RULES
+# ==============================================================================
+
+custom_rules:
+  # Custom validation rules specific to this client
+  # Evaluated by QA agent during checkpoint validation
+
+  - rule_id: "no-hardcoded-credentials"
+    description: "Ensure no API keys, passwords, or tokens are hardcoded in source code"
+    severity: "error"
+    # Severity levels:
+    #   - error: Blocks checkpoint approval (must fix)
+    #   - warning: Flags for review (can proceed with acknowledgment)
+    #   - info: Logged for awareness (no blocking)
+    check_type: "code_pattern"
+    # Check types:
+    #   - code_pattern: Regex match against source code files
+    #   - file_pattern: Check for file names or paths matching pattern
+    #   - data_validation: Custom validation logic for data files
+    #   - manual_review: Require human review (checklist item)
+    pattern: '(api_key|password|secret|token)\s*=\s*[''"][^''"]+[''"]'
+    # Regex pattern (for code_pattern and file_pattern types)
+    # This example: Detects "api_key = 'abc123'" or "password = \"xyz789\""
+
+  - rule_id: "no-print-statements"
+    description: "Production code should use logging, not print() statements"
+    severity: "warning"
+    check_type: "code_pattern"
+    pattern: '^\s*print\('
+    # Detects print() at start of line (allows commented-out prints)
+
+  - rule_id: "require-client-approval"
+    description: "Client stakeholder must review and approve final deliverable"
+    severity: "error"
+    check_type: "manual_review"
+    pattern: ""
+    # No pattern for manual_review (QA agent creates checklist item)
+
+# ==============================================================================
+# NOTES
+# ==============================================================================
+
+# This configuration demonstrates ALL available options.
+# Most client configs will be much shorter, overriding only specific fields.
+#
+# See clients/kearney-default/governance.yaml for baseline defaults.
+# See clients/README.md for usage documentation and examples.

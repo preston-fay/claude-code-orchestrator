@@ -1,0 +1,687 @@
+# Analytics Best Practices
+#
+# Universal data science patterns and methodologies that apply across all domains.
+# These are domain-agnostic principles for building robust, production-ready analytics.
+
+name: analytics_best_practices
+version: 1.0.0
+scope: universal
+
+description: >
+  Core data science and analytics principles applicable to any industry or domain.
+  Covers data quality, feature engineering, modeling, evaluation, and deployment.
+
+# ==============================================================================
+# DATA QUALITY FRAMEWORK
+# ==============================================================================
+
+data_quality:
+  dimensions:
+    completeness:
+      definition: "Proportion of expected data that is present"
+      checks:
+        - Missing value rates by column (flag if > 5%)
+        - Record count vs expected (based on business rules)
+        - Required field validation (critical fields must be non-null)
+        - Time series gaps (missing dates, irregular intervals)
+      remediation:
+        - Document missing data patterns in data quality report
+        - Imputation only when missingness is random (MCAR/MAR)
+        - Consider multiple imputation for uncertainty quantification
+        - Never silently drop records without justification
+
+    consistency:
+      definition: "Data conforms to expected formats, ranges, and relationships"
+      checks:
+        - Referential integrity (foreign keys exist in parent tables)
+        - Cross-field validation (start_date < end_date, qty * price = total)
+        - Enumerated values match expected lists (e.g., state codes)
+        - Temporal consistency (no future dates, reasonable age ranges)
+      remediation:
+        - Flag inconsistent records for review
+        - Establish data cleaning rules (document all transformations)
+        - Standardize formats (dates, currencies, units)
+        - Validate against business logic
+
+    accuracy:
+      definition: "Data correctly represents the real-world entity or event"
+      checks:
+        - Benchmark against known ground truth (when available)
+        - Cross-validate with alternative data sources
+        - Outlier detection (IQR, Z-score, isolation forest)
+        - Domain expert review of samples
+      remediation:
+        - Investigate root causes of inaccuracies
+        - Implement upstream data quality fixes when possible
+        - Document known accuracy limitations
+        - Apply corrections only when confident
+
+    validity:
+      definition: "Data values fall within acceptable ranges and formats"
+      checks:
+        - "Range validation (age: 0-120, prices: > 0)"
+        - "Format validation (email, phone, postal codes)"
+        - "Type validation (numeric, date, categorical)"
+        - "Cardinality checks (categorical variables have expected # of levels)"
+      remediation:
+        - Reject or flag invalid records
+        - Apply format standardization (lowercase emails, strip whitespace)
+        - Validate against reference data (zip codes, country codes)
+
+    timeliness:
+      definition: "Data is available when needed and reflects current state"
+      checks:
+        - Data freshness (last updated timestamp)
+        - Lag between event and availability
+        - Version control and provenance tracking
+      remediation:
+        - Document data lineage and refresh schedules
+        - Implement monitoring for data pipeline delays
+        - Define SLAs for data availability
+
+  quality_gates:
+    bronze_raw:
+      - All records have unique IDs
+      - Critical timestamp fields present
+      - No catastrophic format errors (file readable, schema valid)
+
+    silver_cleaned:
+      - Missing value rates documented and acceptable (< 10% per column)
+      - Outliers identified and flagged
+      - Formats standardized (dates ISO 8601, amounts numeric)
+      - Referential integrity validated
+
+    gold_analytics_ready:
+      - Feature engineering complete
+      - Train/validation/test splits defined (no leakage)
+      - Target variable defined and validated
+      - Data dictionary and lineage documented
+
+  profiling_workflow:
+    step_1_descriptive_stats:
+      - Row count, column count
+      - Data types and nullable columns
+      - Summary statistics (mean, median, std, min, max) for numeric
+      - Value counts and cardinality for categorical
+      - Missing value counts and percentages
+
+    step_2_distributions:
+      - Histograms for numeric variables
+      - Bar charts for categorical variables
+      - Identify skewness and outliers
+      - Check for zero-inflation or bimodality
+
+    step_3_relationships:
+      - Correlation matrices for numeric features
+      - Cross-tabulations for categorical pairs
+      - Target variable associations (point-biserial, chi-square)
+      - Time series trends and seasonality
+
+    step_4_data_quality_report:
+      - Automated report generation (Great Expectations, Pandas Profiling)
+      - Flagged issues with severity (critical, warning, info)
+      - Recommendations for remediation
+      - Sign-off from data steward before proceeding
+
+# ==============================================================================
+# FEATURE ENGINEERING PATTERNS
+# ==============================================================================
+
+feature_engineering:
+  encoding_strategies:
+    categorical_variables:
+      one_hot_encoding:
+        when: "Low cardinality (< 10 categories), no ordinal relationship"
+        considerations:
+          - Creates sparse features (can increase dimensionality)
+          - Works well for tree-based models
+          - Reference category handled automatically in linear models
+        implementation: "pd.get_dummies() or sklearn.OneHotEncoder"
+
+      label_encoding:
+        when: "Ordinal relationships (low < medium < high)"
+        considerations:
+          - Preserves order information
+          - Can mislead models into assuming equal spacing
+          - Use with caution for non-tree models
+        implementation: "sklearn.LabelEncoder or manual mapping"
+
+      target_encoding:
+        when: "High cardinality categoricals (zip codes, customer IDs)"
+        considerations:
+          - Replace category with mean target value
+          - Requires cross-validation to avoid leakage
+          - Add smoothing for rare categories
+          - Works well for gradient boosting
+        implementation: "category_encoders.TargetEncoder with CV"
+
+      frequency_encoding:
+        when: "Category frequency is informative"
+        considerations:
+          - Replace category with its occurrence rate
+          - Simple, no leakage risk
+          - May not capture target relationship
+        implementation: "df['cat'].map(df['cat'].value_counts(normalize=True))"
+
+    numeric_variables:
+      scaling:
+        standard_scaling:
+          when: "Features have different units, normally distributed"
+          formula: "(x - mean) / std"
+          models: "Linear regression, logistic regression, SVM, neural networks"
+
+        min_max_scaling:
+          when: "Need bounded range [0, 1], uniform distributions"
+          formula: "(x - min) / (max - min)"
+          models: "Neural networks, k-NN, algorithms sensitive to magnitude"
+
+        robust_scaling:
+          when: "Presence of outliers"
+          formula: "(x - median) / IQR"
+          models: "Any model when outliers present"
+
+      transformations:
+        log_transform:
+          when: "Right-skewed distributions, multiplicative relationships"
+          considerations: "Add small constant if zeros present: log(x + 1)"
+
+        box_cox:
+          when: "Non-normal distributions, need to satisfy normality assumption"
+          considerations: "Only for positive values, automatically finds optimal lambda"
+
+        binning:
+          when: "Non-linear relationships, need interpretability"
+          considerations: "Equal-width vs equal-frequency vs quantile-based"
+
+  interaction_terms:
+    when_to_create:
+      - Domain knowledge suggests multiplicative effects
+      - Feature pairs show non-additive patterns in EDA
+      - Model is linear (trees capture interactions automatically)
+      - Example: "price * quality_tier for premium goods"
+
+    how_to_create:
+      - Multiplication: "feature_A * feature_B"
+      - Division/ratios: "revenue / num_employees (revenue per employee)"
+      - Polynomial: "feature^2, feature^3 (for quadratic/cubic relationships)"
+      - Domain-specific: "BMI = weight / height^2"
+
+    cautions:
+      - Increases dimensionality (curse of dimensionality)
+      - Can lead to multicollinearity
+      - Harder to interpret
+      - Use feature selection to prune
+
+  temporal_features:
+    from_timestamps:
+      - Hour of day (0-23)
+      - Day of week (Monday=0, Sunday=6)
+      - Day of month (1-31)
+      - Month (1-12)
+      - Quarter (Q1-Q4)
+      - Year
+      - Is weekend (binary)
+      - Is holiday (binary, requires calendar)
+      - Days since last event (recency)
+      - Cyclical encoding: "sin(2π * hour / 24), cos(2π * hour / 24)"
+
+    aggregations:
+      - Rolling statistics: "mean, sum, std over last N days/weeks"
+      - Lag features: "value from T-1, T-7, T-30"
+      - Exponentially weighted moving averages (EWMA)
+      - Change from previous period (delta, percent change)
+
+  text_features:
+    basic:
+      - Length (character count, word count)
+      - Presence of keywords or patterns (regex)
+      - Capitalization (all caps, title case)
+      - Punctuation density
+
+    nlp:
+      - TF-IDF vectors
+      - Word embeddings (Word2Vec, GloVe, BERT)
+      - Sentiment scores (VADER, TextBlob)
+      - Topic model features (LDA topic probabilities)
+      - Named entity counts (persons, organizations, locations)
+
+  geospatial_features:
+    from_coordinates:
+      - Distance to point of interest (haversine formula)
+      - Cluster assignment (k-means on lat/lon)
+      - Density (# of points within radius)
+      - Nearest neighbor distance
+
+    from_addresses:
+      - Geocoded lat/lon
+      - Administrative boundaries (zip, city, state)
+      - Census tract features (median income, population density)
+
+  missing_value_indicators:
+    pattern: "Create binary flag: was_missing_[feature]"
+    when: "Missingness itself is informative (e.g., non-response in surveys)"
+    implementation: "df['was_missing_age'] = df['age'].isnull().astype(int)"
+
+# ==============================================================================
+# MODEL EVALUATION FRAMEWORK
+# ==============================================================================
+
+model_evaluation:
+  train_test_split:
+    principles:
+      - Never evaluate on training data (optimistic bias)
+      - Holdout test set should be untouched until final evaluation
+      - Use validation set or cross-validation for hyperparameter tuning
+      - Split chronologically for time series (no future data in training)
+      - Stratify splits for imbalanced classification (preserve class ratios)
+
+    recommended_splits:
+      standard: "60% train, 20% validation, 20% test"
+      small_data: "Use k-fold cross-validation instead (k=5 or k=10)"
+      time_series: "Walk-forward validation or time-based splits"
+
+  cross_validation:
+    k_fold:
+      description: "Split data into k folds, train on k-1, validate on 1, repeat k times"
+      when: "IID data, want robust performance estimate"
+      typical_k: 5 or 10
+      advantages: "Uses all data, reduces variance in estimates"
+      disadvantages: "k times longer to train"
+
+    stratified_k_fold:
+      description: "K-fold with preserved class distributions in each fold"
+      when: "Classification with imbalanced classes"
+
+    time_series_cv:
+      description: "Expanding or sliding window validation respecting temporal order"
+      when: "Time series data (never use standard k-fold!)"
+      implementation: "sklearn.model_selection.TimeSeriesSplit"
+
+    leave_one_out:
+      description: "k=n, each sample is a test set once"
+      when: "Very small datasets (< 100 samples)"
+      disadvantages: "Extremely computationally expensive"
+
+  metrics_by_task:
+    classification_binary:
+      metrics:
+        - accuracy: "% correct predictions (misleading for imbalanced data)"
+        - precision: "TP / (TP + FP) - minimize false positives"
+        - recall: "TP / (TP + FN) - minimize false negatives"
+        - f1_score: "Harmonic mean of precision and recall"
+        - roc_auc: "Area under ROC curve (threshold-independent)"
+        - pr_auc: "Area under precision-recall curve (better for imbalanced)"
+        - log_loss: "Probabilistic metric (penalizes confident wrong predictions)"
+
+      choose_metric_based_on:
+        cost_of_errors:
+          - "High cost of FP → optimize precision (fraud detection: don't annoy customers)"
+          - "High cost of FN → optimize recall (disease detection: don't miss cases)"
+          - "Balanced costs → optimize F1 or accuracy"
+        class_imbalance:
+          - "Severe imbalance → use PR-AUC instead of ROC-AUC"
+        business_objective:
+          - "Need probabilities → optimize log-loss or Brier score"
+          - "Need rankings → optimize ROC-AUC"
+
+    classification_multiclass:
+      metrics:
+        - accuracy: "Overall % correct"
+        - macro_avg_f1: "Average F1 across classes (equal weight per class)"
+        - weighted_avg_f1: "Average F1 weighted by class support"
+        - cohen_kappa: "Agreement vs chance (good for imbalanced)"
+        - confusion_matrix: "Full breakdown of predictions by class"
+
+    regression:
+      metrics:
+        - mae: "Mean Absolute Error (interpretable, robust to outliers)"
+        - rmse: "Root Mean Squared Error (penalizes large errors)"
+        - r2: "Explained variance (0-1, higher is better, can be negative)"
+        - mape: "Mean Absolute Percentage Error (scale-independent)"
+        - median_ae: "Median Absolute Error (very robust to outliers)"
+
+      choose_metric_based_on:
+        outlier_sensitivity:
+          - "Sensitive to outliers → use RMSE (penalizes big errors)"
+          - "Robust to outliers → use MAE or Median AE"
+        interpretability:
+          - "Want same units as target → use MAE or RMSE"
+          - "Want percentage → use MAPE (but fails if y=0)"
+        business_context:
+          - "Symmetric error costs → use MAE"
+          - "Asymmetric error costs → use custom loss function"
+
+    ranking_recommendation:
+      metrics:
+        - ndcg: "Normalized Discounted Cumulative Gain"
+        - map: "Mean Average Precision"
+        - mrr: "Mean Reciprocal Rank"
+        - precision_at_k: "Precision in top-k recommendations"
+
+  baseline_models:
+    purpose: "Always compare against simple baselines to validate complexity"
+    classification:
+      - "Majority class (predict most common class)"
+      - "Stratified random (sample based on class distribution)"
+      - "Logistic regression with no feature engineering"
+    regression:
+      - "Mean prediction (predict average target value)"
+      - "Median prediction"
+      - "Linear regression with no feature engineering"
+    time_series:
+      - "Naive forecast (tomorrow = today)"
+      - "Seasonal naive (tomorrow = same day last year)"
+      - "Moving average"
+
+  model_comparison:
+    statistical_tests:
+      - "Paired t-test for comparing model performance across folds"
+      - "McNemar's test for comparing classifiers"
+      - "Friedman test for comparing multiple models"
+    practical_significance:
+      - "Is the improvement large enough to matter in business terms?"
+      - "Does the added complexity justify marginal gains?"
+      - "Can the model be deployed and maintained?"
+
+  diagnostic_plots:
+    classification:
+      - ROC curve (TPR vs FPR)
+      - Precision-Recall curve
+      - Calibration plot (predicted prob vs actual rate)
+      - Confusion matrix heatmap
+      - Feature importance plot
+
+    regression:
+      - Actual vs Predicted scatter plot
+      - Residuals vs Predicted (check for heteroskedasticity)
+      - Residuals histogram (check normality)
+      - QQ plot (normality of residuals)
+      - Residuals vs features (check for patterns)
+
+# ==============================================================================
+# DEPLOYMENT & MONITORING
+# ==============================================================================
+
+deployment:
+  model_artifacts:
+    required:
+      - Trained model file (pkl, joblib, h5, onnx)
+      - Feature preprocessing pipeline (scaler, encoder)
+      - Feature list and data types
+      - Model hyperparameters and training config
+      - Training data schema and validation rules
+      - Performance metrics on test set
+
+    model_card:
+      purpose: "Document intended use, limitations, and ethical considerations"
+      sections:
+        - Model details (algorithm, version, training date)
+        - Intended use and users
+        - Training data (source, size, time period, known biases)
+        - Evaluation metrics (test set performance)
+        - Limitations and caveats
+        - Ethical considerations (fairness, privacy)
+        - Recommendations for use
+
+  reproducibility:
+    requirements:
+      - Pin library versions (requirements.txt or environment.yml)
+      - Set random seeds for all stochastic steps
+      - Version control all code (git)
+      - Version control data (DVC, MLflow)
+      - Document compute environment (OS, hardware)
+      - Automate training pipeline (no manual steps)
+
+  inference_pipeline:
+    steps:
+      1: "Load model artifacts"
+      2: "Validate input schema (same features, types as training)"
+      3: "Apply same preprocessing (imputation, encoding, scaling)"
+      4: "Generate predictions"
+      5: "Apply business rules or thresholding"
+      6: "Return predictions with metadata (timestamp, version, confidence)"
+
+    error_handling:
+      - Graceful degradation if model unavailable (fallback to rules)
+      - Input validation with clear error messages
+      - Logging of all predictions and errors
+      - Timeout handling for slow predictions
+
+  monitoring:
+    data_drift:
+      definition: "Distribution of input features changes over time"
+      detection:
+        - Track feature statistics (mean, std, quantiles) over time
+        - Compare distributions (KS test, Chi-square, PSI)
+        - Alert when drift exceeds threshold
+      remediation:
+        - Retrain model on recent data
+        - Update feature engineering logic
+        - Investigate root cause of drift
+
+    concept_drift:
+      definition: "Relationship between features and target changes"
+      detection:
+        - Monitor model performance on labeled production data
+        - Track prediction confidence distributions
+        - Compare recent performance to baseline
+      remediation:
+        - Retrain model with recent data
+        - Revisit feature selection
+        - Consider online learning approaches
+
+    performance_monitoring:
+      metrics_to_track:
+        - Prediction latency (p50, p95, p99)
+        - Throughput (predictions per second)
+        - Error rate (failed predictions)
+        - Model performance (accuracy, RMSE, etc. on labeled samples)
+        - Data quality metrics (missing rates, outlier rates)
+
+      alerting_thresholds:
+        - Performance degradation > 5% from baseline
+        - Latency exceeds SLA (e.g., > 100ms for real-time)
+        - Error rate > 1%
+        - Data quality issues detected
+
+    retraining_triggers:
+      schedule_based:
+        - "Weekly, monthly, or quarterly retraining"
+        - "Pro: Simple, predictable"
+        - "Con: May retrain too often or not often enough"
+
+      performance_based:
+        - "Retrain when performance drops below threshold"
+        - "Pro: Adapts to actual need"
+        - "Con: Requires labeled production data"
+
+      drift_based:
+        - "Retrain when data drift detected"
+        - "Pro: Proactive before performance degrades"
+        - "Con: Drift doesn't always hurt performance"
+
+# ==============================================================================
+# COMMON PITFALLS
+# ==============================================================================
+
+pitfalls:
+  data_leakage:
+    description: "Using information in training that won't be available at prediction time"
+    examples:
+      - "Including the target variable or its proxies as features"
+      - "Using future information (e.g., next month's data to predict this month)"
+      - "Fitting preprocessing on full data before train/test split"
+      - "Oversampling before splitting (leaks minority class info to test set)"
+    prevention:
+      - "Always split data BEFORE any preprocessing"
+      - "Use sklearn Pipelines to ensure consistent train/test preprocessing"
+      - "Think carefully about feature engineering (is this known at prediction time?)"
+      - "For time series: never shuffle, always split chronologically"
+
+  overfitting:
+    description: "Model learns noise instead of signal, performs well on training but poorly on test"
+    symptoms:
+      - "Training performance >> test performance"
+      - "Complex model (many parameters) on small dataset"
+      - "Performance improves on training set but degrades on validation as training continues"
+    prevention:
+      - "Regularization (L1, L2, dropout for neural networks)"
+      - "Cross-validation to tune hyperparameters"
+      - "Early stopping for iterative models"
+      - "Reduce model complexity (fewer features, shallower trees)"
+      - "Collect more data"
+    detection:
+      - "Plot learning curves (train vs validation performance over time)"
+      - "Compare train/validation/test metrics"
+
+  underfitting:
+    description: "Model is too simple to capture underlying patterns"
+    symptoms:
+      - "Poor performance on both training and test sets"
+      - "High bias, low variance"
+    prevention:
+      - "Increase model complexity (more features, deeper trees, more layers)"
+      - "Reduce regularization"
+      - "Engineer more informative features"
+      - "Use more sophisticated algorithm"
+
+  imbalanced_classes:
+    description: "One class vastly outnumbers others (e.g., fraud: 1% positive)"
+    problems:
+      - "Model predicts majority class for all samples (high accuracy, useless model)"
+      - "Accuracy is misleading metric"
+    solutions:
+      - "Use stratified sampling in train/test split"
+      - "Choose appropriate metrics (PR-AUC, F1, not accuracy)"
+      - "Resample: Oversample minority (SMOTE) or undersample majority"
+      - "Class weighting in model training (cost-sensitive learning)"
+      - "Anomaly detection approaches if extreme imbalance (< 1%)"
+
+  multicollinearity:
+    description: "Features are highly correlated, causing instability in linear models"
+    symptoms:
+      - "Large coefficient standard errors"
+      - "Coefficients change dramatically with small data changes"
+      - "Counter-intuitive coefficient signs"
+    detection:
+      - "Correlation matrix (|r| > 0.9 is concerning)"
+      - "Variance Inflation Factor (VIF > 10 is problematic)"
+    solutions:
+      - "Remove one of correlated feature pair"
+      - "PCA or other dimensionality reduction"
+      - "Regularization (Ridge regression handles multicollinearity well)"
+      - "Use tree-based models (less sensitive to multicollinearity)"
+
+  sample_size_issues:
+    too_small:
+      - "High variance, unreliable estimates"
+      - "Solution: Simpler models, more regularization, Bayesian methods"
+    too_large:
+      - "Computational challenges, everything is 'statistically significant'"
+      - "Solution: Sampling for EDA, distributed computing, focus on practical significance"
+
+  ignoring_business_context:
+    description: "Optimizing the wrong metric or building an undeployable model"
+    examples:
+      - "Optimizing accuracy when false negatives are 100x more costly than false positives"
+      - "Building a model requiring data that won't be available at prediction time"
+      - "Creating a black box when stakeholders need interpretability"
+      - "Achieving 99% accuracy but 1000ms latency when SLA is 100ms"
+    prevention:
+      - "Start with business objective, map to technical metric"
+      - "Understand deployment constraints (latency, data availability, explainability)"
+      - "Communicate trade-offs clearly (accuracy vs speed, complexity vs interpretability)"
+      - "Involve stakeholders throughout the process"
+
+# ==============================================================================
+# WORKFLOW CHECKLIST
+# ==============================================================================
+
+workflow_checklist:
+  phase_1_problem_definition:
+    - "[ ] Business objective clearly defined"
+    - "[ ] Success metrics agreed upon with stakeholders"
+    - "[ ] Deployment constraints understood (latency, explainability, data availability)"
+    - "[ ] Baseline performance established (current process or simple heuristic)"
+
+  phase_2_data_collection:
+    - "[ ] Data sources identified and accessed"
+    - "[ ] Data lineage and provenance documented"
+    - "[ ] Sample size sufficient for task"
+    - "[ ] Target variable defined and validated"
+    - "[ ] Data dictionary created"
+
+  phase_3_exploratory_analysis:
+    - "[ ] Data profiling report generated"
+    - "[ ] Distributions visualized"
+    - "[ ] Missing values and outliers investigated"
+    - "[ ] Relationships between features and target explored"
+    - "[ ] Domain expert review of findings"
+
+  phase_4_data_preparation:
+    - "[ ] Missing values handled (with justification)"
+    - "[ ] Outliers addressed (with justification)"
+    - "[ ] Features encoded (categorical → numeric)"
+    - "[ ] Features scaled (if needed for algorithm)"
+    - "[ ] Feature engineering completed"
+    - "[ ] Train/validation/test split performed (no leakage!)"
+
+  phase_5_modeling:
+    - "[ ] Baseline model trained for comparison"
+    - "[ ] Multiple candidate models trained"
+    - "[ ] Hyperparameters tuned via cross-validation"
+    - "[ ] Performance metrics calculated on validation set"
+    - "[ ] Diagnostic plots reviewed"
+    - "[ ] Best model selected based on business criteria"
+
+  phase_6_evaluation:
+    - "[ ] Final model evaluated on held-out test set"
+    - "[ ] Performance compared to baseline and business requirement"
+    - "[ ] Error analysis conducted (where does model fail?)"
+    - "[ ] Fairness and bias assessed (if applicable)"
+    - "[ ] Stakeholder review and sign-off"
+
+  phase_7_deployment:
+    - "[ ] Model artifacts saved and versioned"
+    - "[ ] Inference pipeline implemented and tested"
+    - "[ ] Model card and documentation created"
+    - "[ ] Monitoring and alerting configured"
+    - "[ ] Rollback plan defined"
+    - "[ ] Deployment to production with staged rollout"
+
+  phase_8_monitoring:
+    - "[ ] Performance metrics tracked over time"
+    - "[ ] Data drift monitored"
+    - "[ ] Retraining schedule or triggers defined"
+    - "[ ] Feedback loop established for continuous improvement"
+
+# ==============================================================================
+# REFERENCES
+# ==============================================================================
+
+references:
+  books:
+    - title: "The Elements of Statistical Learning"
+      authors: "Hastie, Tibshirani, Friedman"
+      focus: "Theory and foundations"
+
+    - title: "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow"
+      authors: "Aurélien Géron"
+      focus: "Practical implementation"
+
+    - title: "Feature Engineering for Machine Learning"
+      authors: "Alice Zheng, Amanda Casari"
+      focus: "Feature engineering patterns"
+
+  online_resources:
+    - name: "Scikit-learn User Guide"
+      url: "https://scikit-learn.org/stable/user_guide.html"
+
+    - name: "Google's Machine Learning Crash Course"
+      url: "https://developers.google.com/machine-learning/crash-course"
+
+    - name: "Kaggle Learn"
+      url: "https://www.kaggle.com/learn"
+
+    - name: "Papers with Code"
+      url: "https://paperswithcode.com/"

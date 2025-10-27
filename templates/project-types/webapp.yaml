@@ -1,0 +1,144 @@
+# Web Application Project Template
+name: "Web Application"
+type: "webapp"
+description: "Full-stack web application template"
+
+directory_structure:
+  - ".claude/"
+  - ".github/workflows/"
+  - "frontend/src/components/"
+  - "frontend/src/pages/"
+  - "frontend/src/styles/"
+  - "frontend/public/"
+  - "backend/src/api/"
+  - "backend/src/models/"
+  - "backend/src/services/"
+  - "backend/tests/"
+  - "docs/"
+  - "scripts/"
+  - "configs/"
+
+copy_files:
+  - source: ".claude/knowledge/kearney_standards.yaml"
+    destination: ".claude/knowledge/kearney_standards.yaml"
+  - source: ".claude/decisions/template.md"
+    destination: ".claude/decisions/template.md"
+  - source: ".claude/decisions/README.md"
+    destination: ".claude/decisions/README.md"
+  - source: "design_system/"
+    destination: "design_system/"
+    recursive: true
+  - source: ".github/workflows/ci.yaml"
+    destination: ".github/workflows/ci.yaml"
+    optional: true
+  - source: ".pre-commit-config.yaml"
+    destination: ".pre-commit-config.yaml"
+
+agents:
+  - name: "Architect"
+    role: "Design application architecture, API contracts"
+    phases: ["planning", "consensus"]
+  - name: "Frontend Dev"
+    role: "Build UI components, client-side logic"
+    phases: ["frontend-development"]
+  - name: "Backend Dev"
+    role: "Implement API, business logic, data layer"
+    phases: ["backend-development"]
+  - name: "QA"
+    role: "Test functionality, integration, performance"
+    phases: ["qa"]
+  - name: "Documentarian"
+    role: "API docs, user guide, deployment docs"
+    phases: ["documentation"]
+
+phases:
+  - name: "planning"
+    description: "Define architecture, tech stack, API design"
+    agents: ["Architect"]
+    parallel: false
+    require_consensus: true
+  - name: "consensus"
+    description: "Review architecture"
+    agents: ["Consensus"]
+    parallel: false
+  - name: "backend-development"
+    description: "Implement backend API and business logic"
+    agents: ["Backend Dev"]
+    parallel: false
+  - name: "frontend-development"
+    description: "Build UI components and client app"
+    agents: ["Frontend Dev"]
+    parallel: false
+  - name: "qa"
+    description: "Test application end-to-end"
+    agents: ["QA"]
+    parallel: false
+  - name: "documentation"
+    description: "Create user and developer documentation"
+    agents: ["Documentarian"]
+    parallel: false
+
+intake_template:
+  project:
+    name: "{{PROJECT_NAME}}"
+    type: "webapp"
+    description: "{{PROJECT_DESCRIPTION}}"
+  requirements:
+    functional:
+      - "User authentication and authorization"
+      - "Responsive UI for desktop and mobile"
+      - "RESTful API with {{FEATURES}}"
+    technical:
+      - "Frontend: React/Vue/Angular"
+      - "Backend: FastAPI/Flask/Node.js"
+      - "Database: PostgreSQL/MongoDB"
+      - "Deploy to cloud (AWS/GCP/Azure)"
+
+dependencies:
+  python:
+    - "fastapi>=0.104.0"
+    - "uvicorn>=0.24.0"
+    - "pydantic>=2.5.0"
+    - "sqlalchemy>=2.0.0"
+    - "pytest>=7.4.0"
+  javascript:
+    - "react@^18.2.0"
+    - "typescript@^5.0.0"
+    - "vite@^5.0.0"
+
+config_files:
+  - name: ".gitignore"
+    content: |
+      __pycache__/
+      *.py[cod]
+      node_modules/
+      dist/
+      build/
+      .env
+      .venv
+      .DS_Store
+  - name: "README.md"
+    content: |
+      # {{PROJECT_NAME}}
+      {{PROJECT_DESCRIPTION}}
+
+      ## Tech Stack
+      - Frontend: React + TypeScript
+      - Backend: FastAPI
+      - Database: PostgreSQL
+
+      ## Getting Started
+      ```bash
+      # Install dependencies
+      pip install -r backend/requirements.txt
+      cd frontend && npm install
+
+      # Run development servers
+      uvicorn backend.main:app --reload
+      cd frontend && npm run dev
+      ```
+
+next_steps:
+  - "Install dependencies"
+  - "Configure database connection"
+  - "Start workflow: `orchestrator run start --intake intake.yaml`"

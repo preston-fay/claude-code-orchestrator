@@ -1,0 +1,257 @@
+# Kearney Default Governance Configuration
+#
+# Baseline standards that apply to ALL Kearney projects unless client overrides.
+# This represents Kearney's standard quality expectations and best practices.
+# Client-specific configs inherit these defaults and override as needed.
+
+client_name: "Kearney (Default Standards)"
+engagement_id: "DEFAULT"
+effective_date: "2025-01-26"
+
+# ==============================================================================
+# QUALITY GATES - Kearney Standard
+# ==============================================================================
+
+quality_gates:
+  # Balanced quality standards suitable for most consulting engagements
+
+  min_hygiene_score: 85
+  # Kearney standard: Clean, professional repositories
+  # Ensures no large binaries, secrets, or generated files committed
+
+  require_security_scan: false
+  # Default: false (most analytics projects are internal, low external exposure)
+  # Override to true for client-facing applications or sensitive data
+
+  require_data_classification: false
+  # Default: false (many projects have uniform data sensitivity)
+  # Override to true for clients with strict data governance (finance, healthcare)
+
+  min_test_coverage: 70
+  # Kearney standard: Good coverage for business logic
+  # Balance between quality and speed (not overly strict)
+  # Override to 80+ for production systems, 0 for prototypes
+
+  require_type_hints: false
+  # Default: false (allows rapid development, especially for analytics)
+  # Override to true for large codebases or long-lived projects
+
+  require_linting: true
+  # Always enforce linting for code consistency
+  # Minimal overhead, significant quality benefit
+
+  max_complexity: 10
+  # Standard cyclomatic complexity limit
+  # Encourages readable, maintainable code
+
+  require_peer_review: false
+  # Default: false (many Kearney projects are solo or small teams)
+  # Override to true for client-facing code or team projects
+
+# ==============================================================================
+# COMPLIANCE - Kearney Standard
+# ==============================================================================
+
+compliance:
+  # Baseline compliance aligned with Kearney's SOC2 certification
+
+  frameworks:
+    - "SOC2"
+  # Kearney is SOC2 certified; apply SOC2 controls to all projects
+
+  pii_handling: "standard"
+  # Standard PII handling: Document PII, apply access controls, basic encryption
+  # Override to "strict" for GDPR/HIPAA projects
+
+  data_retention_days: 365
+  # Default: 1 year retention for project artifacts
+  # Override based on client contract or regulatory requirements
+
+  encryption_at_rest: false
+  # Default: false (many analytics projects use non-sensitive data)
+  # Override to true for PII, PHI, or confidential client data
+
+  encryption_in_transit: true
+  # Always encrypt data in transit (HTTPS, SSL/TLS)
+  # Minimal overhead, critical security control
+
+  audit_logging: false
+  # Default: false (overhead not justified for most projects)
+  # Override to true for SOC2 evidence, forensic needs, or client requirement
+
+  anonymization_required: false
+  # Default: false (not always feasible or necessary)
+  # Override to true for GDPR compliance or multi-party data sharing
+
+  geographic_restrictions: []
+  # No geographic restrictions by default
+  # Override for clients with data sovereignty requirements
+
+# ==============================================================================
+# BRAND CONSTRAINTS - Kearney Standard
+# ==============================================================================
+
+brand_constraints:
+  # Kearney branding applied to deliverables
+
+  theme_path: "design_system/web/tokens.css"
+  # Kearney design system (colors, fonts, spacing)
+  # Clients can override with their own theme
+
+  custom_fonts: []
+  # Use default Kearney fonts (Arial per presentation standards)
+  # Clients specify custom fonts if brand guidelines require
+
+  color_restrictions: []
+  # No global color restrictions
+  # Clients specify competitor colors to avoid
+
+  logo_path: ""
+  # No client logo by default (Kearney logo used)
+  # Clients provide logo path for co-branding
+
+  forbid_terms: []
+  # No globally forbidden terms
+  # Clients specify sensitive terminology to avoid
+
+  require_disclaimers: false
+  # Default: false (add disclaimers manually when needed)
+  # Override to true if client requires standard disclaimer on all deliverables
+
+  presentation_template: ""
+  # Use standard Kearney PowerPoint template
+  # Clients provide custom template if required
+
+# ==============================================================================
+# DEPLOYMENT - Kearney Standard
+# ==============================================================================
+
+deployment:
+  # Minimal deployment requirements for analytics projects
+
+  environments:
+    - "development"
+    - "production"
+  # Minimum two environments (dev for testing, prod for delivery)
+  # Clients can add staging/UAT as needed
+
+  require_approval: false
+  # Default: false (allows rapid iteration for analytics)
+  # Override to true for production systems or client-managed deployments
+
+  approval_threshold: "tech-lead"
+  # If approval required, tech lead must approve
+  # Standard for Kearney projects
+
+  deployment_window: null
+  # No deployment window restrictions by default
+  # Clients specify if they have maintenance windows
+
+  rollback_required: false
+  # Default: false (many analytics projects are one-time deliveries)
+  # Override to true for ongoing production systems
+
+  canary_required: false
+  # Default: false (adds complexity, rarely needed for consulting projects)
+  # Override to true for high-traffic client-facing applications
+
+# ==============================================================================
+# DOCUMENTATION - Kearney Standard
+# ==============================================================================
+
+documentation:
+  # Documentation standards aligned with Kearney quality expectations
+
+  require_adr: true
+  # Always document significant architectural decisions
+  # ADRs improve project transparency and knowledge transfer
+
+  require_data_dictionary: false
+  # Default: false (add when working with complex data)
+  # Override to true for analytics projects with multiple data sources
+
+  min_documentation_score: 70
+  # Good documentation coverage for most projects
+  # Balance between thoroughness and delivery speed
+
+  require_runbook: false
+  # Default: false (not all projects need operational docs)
+  # Override to true for production systems or client handoffs
+
+  require_user_guide: false
+  # Default: false (technical documentation sufficient for most projects)
+  # Override to true for client-facing tools or non-technical users
+
+  language: "en"
+  # English documentation by default
+  # Clients specify their preferred language
+
+  require_code_comments: true
+  # Always comment complex logic
+  # Improves code maintainability
+
+  api_documentation_format: "Markdown"
+  # Simple Markdown docs by default (lightweight, readable)
+  # Clients can specify OpenAPI, Swagger, etc. if needed
+
+# ==============================================================================
+# NOTIFICATIONS - Kearney Standard
+# ==============================================================================
+
+notifications:
+  # Notification defaults (clients override with their stakeholders)
+
+  checkpoint_completion: []
+  # No default notifications (clients add their stakeholders)
+
+  quality_gate_failure: []
+  # No default notifications (add Kearney QA team if needed)
+
+  deployment_notifications: []
+  # No default notifications (clients add ops/PM contacts)
+
+  slack_webhook: ""
+  # No default Slack integration (clients provide webhook URL)
+
+# ==============================================================================
+# CUSTOM RULES - Kearney Standard
+# ==============================================================================
+
+custom_rules:
+  # Baseline rules applicable to all projects
+
+  - rule_id: "no-secrets-committed"
+    description: "No API keys, passwords, or secrets in version control"
+    severity: "error"
+    check_type: "code_pattern"
+    pattern: '(api[_-]?key|password|secret|token|aws[_-]?access)["\s]*[:=]["\s]*[A-Za-z0-9+/]{20,}'
+
+  - rule_id: "proper-gitignore"
+    description: "Repository must have .gitignore excluding common artifacts"
+    severity: "warning"
+    check_type: "file_pattern"
+    pattern: "^\\.gitignore$"
+
+# ==============================================================================
+# USAGE NOTES
+# ==============================================================================
+
+# This configuration defines Kearney's baseline quality standards.
+#
+# Client configs inherit these defaults and override specific fields:
+#
+# Example client override (only overriding what differs):
+# ```yaml
+# client_name: "High Security Client"
+# quality_gates:
+#   require_security_scan: true  # Override: client requires security scanning
+#   min_test_coverage: 90         # Override: higher coverage requirement
+# compliance:
+#   pii_handling: "strict"        # Override: GDPR compliance needed
+#   frameworks:                   # Override: add GDPR to SOC2
+#     - "SOC2"
+#     - "GDPR"
+# # All other fields inherit from kearney-default
+# ```
+#
+# See clients/README.md for full documentation on overriding defaults.

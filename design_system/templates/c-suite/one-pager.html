@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive One-Pager | Kearney</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* One-pager specific styles */
+    .one-pager {
+      max-width: 8.5in;
+      min-height: 11in;
+      margin: 0 auto;
+      padding: 0.75in;
+      background-color: white;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Header with logo and metadata */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-md);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .header-left h1 {
+      font-size: var(--text-3xl);
+      margin-bottom: var(--space-xs);
+      line-height: 1.2;
+    }
+
+    .header-right {
+      text-align: right;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+
+    /* SCR Section styling */
+    .scr-section {
+      margin-bottom: var(--space-xl);
+    }
+
+    .scr-label {
+      display: inline-block;
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: white;
+      background-color: var(--color-primary);
+      padding: 4px 12px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .scr-content {
+      font-size: var(--text-base);
+      line-height: 1.6;
+      color: var(--color-text-primary);
+    }
+
+    /* KPI Dashboard compact layout */
+    .kpi-dashboard {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-sm);
+      margin: var(--space-md) 0;
+      background-color: var(--color-surface);
+      padding: var(--space-md);
+      border-radius: 4px;
+    }
+
+    .kpi-item {
+      text-align: center;
+      padding: var(--space-sm);
+    }
+
+    .kpi-value {
+      font-size: var(--text-3xl);
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1;
+    }
+
+    .kpi-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .kpi-change {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* Decision framework table */
+    .decision-framework {
+      margin: var(--space-md) 0;
+    }
+
+    .decision-framework table {
+      font-size: var(--text-sm);
+      margin: 0;
+    }
+
+    .decision-framework th {
+      background-color: var(--color-primary);
+      color: white;
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .decision-framework td {
+      padding: var(--space-xs) var(--space-sm);
+      vertical-align: top;
+    }
+
+    /* Timeline compact */
+    .timeline-compact {
+      display: flex;
+      gap: var(--space-xs);
+      margin: var(--space-md) 0;
+    }
+
+    .timeline-item {
+      flex: 1;
+      background-color: var(--color-surface);
+      padding: var(--space-sm);
+      border-radius: 3px;
+      border-left: 3px solid var(--color-primary);
+    }
+
+    .timeline-month {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .timeline-milestone {
+      font-size: var(--text-sm);
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+
+    /* Print optimization */
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .one-pager {
+        box-shadow: none;
+        margin: 0;
+        padding: 0.5in;
+        max-width: 100%;
+      }
+
+      .header {
+        page-break-after: avoid;
+      }
+
+      .scr-section {
+        page-break-inside: avoid;
+      }
+
+      .kpi-dashboard {
+        background-color: white;
+        border: 1px solid var(--color-border);
+      }
+
+      .scr-label {
+        background-color: white;
+        color: var(--color-primary);
+        border: 2px solid var(--color-primary);
+      }
+
+      .decision-framework th {
+        background-color: var(--color-primary);
+        color: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    /* Responsive for screen viewing */
+    @media (max-width: 768px) {
+      .one-pager {
+        padding: var(--space-md);
+        box-shadow: none;
+      }
+
+      .header {
+        flex-direction: column;
+      }
+
+      .header-right {
+        text-align: left;
+        margin-top: var(--space-sm);
+      }
+
+      .kpi-dashboard {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .timeline-compact {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="one-pager">
+
+    <!-- =====================================================================
+         HEADER: Title and Metadata
+         ===================================================================== -->
+    <div class="header">
+      <div class="header-left">
+        <h1>Strategic Transformation Initiative</h1>
+        <p class="text-muted" style="margin: 0;">Unlocking $15M in Annual Value Through Operational Excellence</p>
+      </div>
+      <div class="header-right">
+        <p style="margin: 0;"><strong>Client:</strong> [Client Name]</p>
+        <p style="margin: 0;"><strong>Prepared by:</strong> Kearney</p>
+        <p style="margin: 0;"><strong>Date:</strong> [Date]</p>
+        <p style="margin: 0;"><strong>Status:</strong> Recommendation</p>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         SITUATION: Current State
+         ===================================================================== -->
+    <div class="scr-section">
+      <span class="scr-label">Situation</span>
+      <div class="scr-content">
+        <p><strong>Operational performance has declined 12 percentage points below target over the past 18 months</strong>, driven by process inefficiencies, technology gaps, and workforce optimization opportunities. Current efficiency stands at 68% vs. 80% target, resulting in $15M in excess annual operating costs.</p>
+
+        <div class="kpi-dashboard">
+          <div class="kpi-item">
+            <div class="kpi-value">68%</div>
+            <div class="kpi-label">Efficiency</div>
+            <div class="kpi-change negative">-12% vs. target</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-value">4.2 days</div>
+            <div class="kpi-label">Cycle Time</div>
+            <div class="kpi-change negative">+35% vs. benchmark</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-value">72%</div>
+            <div class="kpi-label">Utilization</div>
+            <div class="kpi-change neutral">Flat YoY</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-value">$247</div>
+            <div class="kpi-label">Cost per Unit</div>
+            <div class="kpi-change negative">+18% vs. budget</div>
+          </div>
+        </div>
+
+        <p style="margin-top: var(--space-sm);"><strong>Root cause analysis</strong> identifies three primary drivers: <strong>(1) Process bottlenecks</strong> (56% of gap), <strong>(2) Technology limitations</strong> (28%), and <strong>(3) Workforce optimization</strong> (16%). All three drivers are addressable through targeted interventions.</p>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         COMPLICATION: Why This Matters
+         ===================================================================== -->
+    <div class="scr-section">
+      <span class="scr-label">Complication</span>
+      <div class="scr-content">
+        <p><strong>Without intervention, the performance gap will widen</strong>. Competitors are achieving 15-20% higher efficiency through technology adoption and process automation. Continued underperformance puts $45M in cumulative value at risk over three years and threatens market position.</p>
+
+        <p><strong>Internal constraints amplify the urgency</strong>: legacy systems require replacement within 18 months (end-of-life support), workforce attrition is accelerating (12% annualized turnover vs. 8% industry average), and upcoming contract renewals hinge on demonstrating operational improvements.</p>
+
+        <p style="margin-top: var(--space-sm);"><strong>Key risk</strong>: Delaying action increases implementation complexity and cost while narrowing the window for benefits realization before critical deadlines.</p>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         RESOLUTION: Recommended Actions
+         ===================================================================== -->
+    <div class="scr-section">
+      <span class="scr-label">Resolution</span>
+      <div class="scr-content">
+        <p><strong>Implement a three-pillar transformation program</strong> targeting process redesign, technology modernization, and workforce optimization. This phased approach delivers <strong>$15M in annual savings (ROI: 3.2x)</strong> and <strong>28% efficiency improvement</strong> within 18 months.</p>
+
+        <!-- Decision Framework Table -->
+        <div class="decision-framework">
+          <table>
+            <thead>
+              <tr>
+                <th>Initiative</th>
+                <th>Impact</th>
+                <th>Timeline</th>
+                <th>Investment</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Process Redesign</strong><br><span style="font-size: var(--text-xs); color: var(--color-text-muted);">Streamline workflows, eliminate redundancies</span></td>
+                <td><strong>$8M/year</strong><br>18 ppt efficiency gain</td>
+                <td>6 months</td>
+                <td>$1.2M</td>
+                <td><strong>High</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Technology Upgrade</strong><br><span style="font-size: var(--text-xs); color: var(--color-text-muted);">Replace legacy systems, automate manual tasks</span></td>
+                <td><strong>$5M/year</strong><br>9 ppt efficiency gain</td>
+                <td>12 months</td>
+                <td>$3.5M</td>
+                <td><strong>High</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Workforce Optimization</strong><br><span style="font-size: var(--text-xs); color: var(--color-text-muted);">Training, role clarity, retention programs</span></td>
+                <td><strong>$2M/year</strong><br>5 ppt efficiency gain</td>
+                <td>3 months</td>
+                <td>$0.5M</td>
+                <td><strong>Medium</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-primary" style="margin-top: var(--space-md);">
+          <p style="margin: 0;"><strong>Recommended Approach:</strong> Launch all three initiatives in parallel with staggered completion dates. Process Redesign and Workforce Optimization deliver quick wins (3-6 months) while Technology Upgrade provides long-term foundation (12 months). Total investment: <strong>$5.2M</strong> | Payback period: <strong>4 months</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         NEXT STEPS: Implementation Timeline
+         ===================================================================== -->
+    <div class="scr-section" style="margin-bottom: var(--space-md);">
+      <span class="scr-label">Next Steps</span>
+      <div class="scr-content">
+        <p><strong>Immediate Actions (Next 30 Days):</strong></p>
+        <ul style="margin-bottom: var(--space-md); padding-left: var(--space-lg);">
+          <li><strong>Week 1-2:</strong> Secure executive sponsorship and establish steering committee</li>
+          <li><strong>Week 2-3:</strong> Allocate transformation team (5-7 FTE) and finalize project charters</li>
+          <li><strong>Week 3-4:</strong> Launch Workforce Optimization initiative (quick win)</li>
+          <li><strong>Week 4:</strong> Kickoff Process Redesign and Technology Upgrade workstreams</li>
+        </ul>
+
+        <!-- Compact Timeline -->
+        <div class="timeline-compact">
+          <div class="timeline-item">
+            <div class="timeline-month">Months 1-3</div>
+            <div class="timeline-milestone">Quick Wins</div>
+            <p style="font-size: var(--text-xs); margin-top: 4px; color: var(--color-text-secondary);">Workforce Opt. complete, Process Redesign 50%</p>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-month">Months 4-6</div>
+            <div class="timeline-milestone">Foundation</div>
+            <p style="font-size: var(--text-xs); margin-top: 4px; color: var(--color-text-secondary);">Process Redesign complete, Tech Upgrade 40%</p>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-month">Months 7-12</div>
+            <div class="timeline-milestone">Scale</div>
+            <p style="font-size: var(--text-xs); margin-top: 4px; color: var(--color-text-secondary);">Tech Upgrade complete, full rollout across org</p>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-month">Months 13-18</div>
+            <div class="timeline-milestone">Optimize</div>
+            <p style="font-size: var(--text-xs); margin-top: 4px; color: var(--color-text-secondary);">Continuous improvement, target achievement</p>
+          </div>
+        </div>
+
+        <div class="callout callout-warning" style="margin-top: var(--space-md);">
+          <p style="margin: 0; font-size: var(--text-sm);"><strong>Critical Success Factor:</strong> Technology Upgrade is on the critical path. Any delays beyond Q2 2025 will jeopardize legacy system replacement deadline and cascade to other initiatives. Recommend securing executive commitment and budget approval within 2 weeks.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         KEY ASSUMPTIONS & RISKS
+         ===================================================================== -->
+    <div class="scr-section" style="margin-bottom: var(--space-lg);">
+      <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-sm);">Key Assumptions & Risks</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); font-size: var(--text-sm);">
+        <div>
+          <h4 style="font-size: var(--text-base); margin-bottom: var(--space-xs); color: var(--color-text-primary);">Assumptions</h4>
+          <ul style="margin: 0; padding-left: var(--space-lg); line-height: 1.6;">
+            <li>Transformation team available full-time</li>
+            <li>Executive sponsorship secured within 2 weeks</li>
+            <li>Technology vendors meet SLA commitments</li>
+            <li>No major org restructuring during program</li>
+            <li>Budget approval by end of Q3 2024</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: var(--text-base); margin-bottom: var(--space-xs); color: var(--color-text-primary);">Key Risks & Mitigations</h4>
+          <ul style="margin: 0; padding-left: var(--space-lg); line-height: 1.6;">
+            <li><strong>Change resistance:</strong> Robust change management and communication plan</li>
+            <li><strong>Technology delays:</strong> Agile implementation with phased releases</li>
+            <li><strong>Resource constraints:</strong> Prioritize high-impact initiatives first</li>
+            <li><strong>Scope creep:</strong> Strict governance with steering committee oversight</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         DECISION REQUIRED
+         ===================================================================== -->
+    <div class="insight" style="margin-bottom: var(--space-md);">
+      <div class="insight-label">Decision Required</div>
+      <p class="insight-text" style="font-size: var(--text-xl);">Approve $5.2M investment and authorize transformation team formation to launch by [Date]. Expected benefits: $15M annual savings (3.2x ROI) and 28% efficiency improvement within 18 months.</p>
+    </div>
+
+    <!-- =====================================================================
+         FOOTER: Contact Information
+         ===================================================================== -->
+    <div class="footer">
+      <p style="margin: 0;"><strong>For questions or additional analysis, contact:</strong></p>
+      <p style="margin: 4px 0;">[Lead Partner Name] | [Email] | [Phone]</p>
+      <p style="margin: 4px 0; color: var(--color-text-muted);">Kearney Confidential | This document contains proprietary analysis and recommendations. Do not distribute without authorization.</p>
+    </div>
+
+  </div>
+
+  <!-- Print Button (hidden in print) -->
+  <div style="text-align: center; margin: var(--space-lg) 0;">
+    <button onclick="window.print()" class="btn btn-primary" style="display: inline-block;">Print or Save as PDF</button>
+    <a href="presentation.html" class="btn btn-secondary" style="display: inline-block; margin-left: var(--space-sm);">View Full Presentation</a>
+  </div>
+
+  <script>
+    // Add print button handler
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set dynamic date if placeholder exists
+      const dateElements = document.querySelectorAll('[Date]');
+      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      dateElements.forEach(el => {
+        if (el.textContent === '[Date]') {
+          el.textContent = today;
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

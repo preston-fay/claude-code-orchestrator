@@ -1,0 +1,480 @@
+# Kearney Standards
+#
+# Firm-wide standards and frameworks that apply to ALL client engagements
+# regardless of industry or domain. These are Kearney's quality standards,
+# presentation guidelines, and client engagement principles.
+
+name: kearney_standards
+version: 1.0.0
+scope: firm_wide
+
+description: >
+  Kearney's core standards for analytics, insights, and client deliverables.
+  These apply universally across all industries and practice areas.
+
+# ==============================================================================
+# RAISE FRAMEWORK
+# ==============================================================================
+
+raise_framework:
+  overview: >
+    RAISE is Kearney's framework for ensuring insights are actionable and impactful.
+    Every analysis, finding, and recommendation should pass the RAISE test.
+
+  principles:
+    relevant:
+      definition: "Directly addresses the client's key questions and business priorities"
+      questions:
+        - "Does this insight relate to a decision the client needs to make?"
+        - "Is this tied to a business outcome (revenue, cost, risk, growth)?"
+        - "Would the client care if this finding were different?"
+      anti_patterns:
+        - "Interesting but tangential analyses (analyst curiosity, not client need)"
+        - "Generic insights not specific to client's context"
+        - "Overly technical details that don't inform decisions"
+      best_practices:
+        - "Anchor every analysis to a specific client question or hypothesis"
+        - "Prioritize analyses by potential business impact"
+        - "Ask: 'So what?' - if you can't answer compellingly, revisit relevance"
+
+    actionable:
+      definition: "Provides clear implications and next steps the client can take"
+      questions:
+        - "What should the client do differently based on this insight?"
+        - "Is the recommendation specific enough to act on?"
+        - "Do we provide a clear path forward?"
+      anti_patterns:
+        - "Insights that are interesting but don't suggest action"
+        - "Vague recommendations ('optimize operations', 'improve customer experience')"
+        - "Findings without implications ('Sales declined 15%' - OK, now what?)"
+      best_practices:
+        - "Every chart should have a 'so what' message that drives action"
+        - "Recommendations should be SMART (Specific, Measurable, Achievable, Relevant, Time-bound)"
+        - "Provide implementation guidance, not just strategic direction"
+        - "Include quick wins and longer-term initiatives"
+
+    insightful:
+      definition: "Goes beyond the obvious; reveals something the client didn't already know"
+      questions:
+        - "Is this insight surprising or non-obvious?"
+        - "Does this challenge conventional wisdom or reveal hidden patterns?"
+        - "Does this provide a new lens on the problem?"
+      anti_patterns:
+        - "Confirming what everyone already believes without new evidence"
+        - "Restating data without synthesis or interpretation"
+        - "Surface-level observations that don't explain 'why'"
+      best_practices:
+        - "Look for counter-intuitive findings (the 'aha!' moments)"
+        - "Segment and drill down to find variation (national averages hide regional differences)"
+        - "Compare against benchmarks or expectations to show what's surprising"
+        - "Use 'root cause' thinking to go deeper than symptoms"
+
+    supported:
+      definition: "Backed by rigorous data and sound analytical methodology"
+      questions:
+        - "Is the data source credible and sufficiently comprehensive?"
+        - "Is the analytical approach valid and appropriate?"
+        - "Are alternative explanations considered and ruled out?"
+        - "Can the findings withstand scrutiny?"
+      anti_patterns:
+        - "Cherry-picking data to support a pre-determined conclusion"
+        - "Using anecdotes or small samples to make broad claims"
+        - "Correlation presented as causation without justification"
+        - "Ignoring data quality issues or limitations"
+      best_practices:
+        - "Document data sources, sample sizes, time periods"
+        - "Acknowledge limitations and caveats"
+        - "Use multiple data sources to triangulate findings"
+        - "Apply statistical rigor (significance tests, confidence intervals)"
+        - "Consider alternative hypotheses and test them"
+
+    engaging:
+      definition: "Communicated in a clear, compelling, and visually effective way"
+      questions:
+        - "Can the audience quickly grasp the key message?"
+        - "Is the visualization the right choice for the data?"
+        - "Is the narrative logical and easy to follow?"
+        - "Does the presentation hold attention and drive to action?"
+      anti_patterns:
+        - "Dense slides with too much text or data"
+        - "Confusing or misleading charts"
+        - "Lack of clear storyline or message hierarchy"
+        - "Jargon-heavy language that alienates the audience"
+      best_practices:
+        - "One key message per slide (pyramid principle)"
+        - "Use the right chart for the data (see visualization_standards below)"
+        - "Lead with the headline, support with data"
+        - "Use visual hierarchy (size, color, position) to guide the eye"
+        - "Tell a story with beginning (context), middle (analysis), end (recommendation)"
+
+# ==============================================================================
+# PRESENTATION STANDARDS
+# ==============================================================================
+
+presentation_standards:
+  slide_design:
+    font:
+      standard: "Arial"
+      title: "Arial Bold, 20-24pt"
+      body: "Arial Regular, 12-14pt"
+      footnotes: "Arial Regular, 8-10pt"
+      why: "Clean, professional, universally readable"
+      exceptions: "Client-specific brand guidelines may override"
+
+    color_palette:
+      primary: "Kearney blue (#003A70)"
+      secondary: "Kearney light blue (#00A3E0)"
+      accent_colors: "Use sparingly for emphasis (red for negative, green for positive)"
+      neutral: "Grays for supporting information"
+      avoid: "Default PowerPoint colors (garish, unprofessional)"
+
+    layout:
+      title_placement: "Top-left or centered, depending on template"
+      white_space: "Generous margins, avoid cramming content"
+      alignment: "Left-aligned text, centered charts"
+      consistency: "Same layout structure across similar slides"
+
+    gridlines_and_clutter:
+      gridlines: "NO GRIDLINES (unless absolutely necessary for precision reading)"
+      rationale: "Gridlines add visual noise; data should be labeled directly"
+      borders: "Minimal use; avoid boxing every element"
+      backgrounds: "White or light neutral (no busy backgrounds)"
+
+  chart_design:
+    label_first_approach:
+      principle: "Label data directly on or near visual elements, not in a separate legend"
+      rationale: "Reduces cognitive load; viewer doesn't have to match colors to legend"
+      examples:
+        - "Label bars directly with values"
+        - "Annotate line chart series at their endpoints"
+        - "Use callout boxes for key data points"
+      when_legends_ok: "Many series (>5), color coding is intuitive (heatmaps)"
+
+    chart_selection:
+      comparison:
+        - "Bar charts: Compare categories (horizontal bars for long labels)"
+        - "Column charts: Compare time periods or ordered categories"
+        - "Grouped/stacked bars: Compare sub-categories (max 3-4 groups)"
+
+      composition:
+        - "Pie chart: Show parts of whole (max 5 slices, avoid 3D)"
+        - "Stacked bar/column: Parts of whole over time or categories"
+        - "Waterfall chart: Show cumulative effect of sequential values"
+
+      distribution:
+        - "Histogram: Show distribution of continuous variable"
+        - "Box plot: Compare distributions across groups"
+        - "Violin plot: Show full distribution shape"
+
+      relationship:
+        - "Scatter plot: Show correlation between two variables"
+        - "Bubble chart: Add third dimension via size"
+        - "Heatmap: Show correlation matrix or two-way tables"
+
+      trend:
+        - "Line chart: Show change over time (continuous)"
+        - "Area chart: Show cumulative trends"
+        - "Sparklines: Small inline trends"
+
+      avoid:
+        - "3D charts (distort perception)"
+        - "Dual-axis charts (can mislead, use only if necessary with clear labeling)"
+        - "Pie charts with >5 slices (use bar chart instead)"
+        - "Radar charts (hard to read, use table or bar chart)"
+
+    axis_and_scale:
+      y_axis_zero: "Start at zero for bar charts (or clearly indicate break)"
+      axis_labels: "Clear, concise units (%, $M, thousands)"
+      tick_marks: "Minimal, round numbers"
+      logarithmic_scale: "Only when necessary and clearly labeled"
+
+    color_usage:
+      highlight: "Use color to emphasize key data points, not decorate"
+      consistency: "Same color for same category across slides"
+      accessibility: "Avoid red-green combinations (colorblind-friendly)"
+      gradient: "Use for continuous scales (heatmaps), not categorical"
+
+  slide_titles:
+    headline_approach:
+      principle: "Title states the conclusion, not the topic"
+      good: "'Revenue growth accelerated in Q4 driven by premium segment'"
+      bad: "'Revenue analysis'"
+      why: "Busy executives skim titles - make titles self-sufficient"
+
+    action_titles:
+      when: "Recommendation slides"
+      format: "'We recommend X to achieve Y'"
+      example: "'Expand into Southeast Asia to capture $50M opportunity'"
+
+  data_citations:
+    requirement: "Every chart must cite its data source"
+    format: "'Source: Client transaction data (Jan-Dec 2024), Kearney analysis'"
+    placement: "Bottom-left or bottom-right footnote, 8-10pt font"
+    level_of_detail: "Specific enough to verify, concise enough to read"
+
+  appendix_usage:
+    when_to_use:
+      - "Supporting detail not essential to main narrative"
+      - "Methodology and assumptions"
+      - "Sensitivity analyses and alternative scenarios"
+      - "Detailed data tables"
+    structure: "Clearly labeled, easy to reference from main deck"
+
+# ==============================================================================
+# CLIENT ENGAGEMENT PRINCIPLES
+# ==============================================================================
+
+client_engagement:
+  hypothesis_driven_approach:
+    overview: "Structure work around testable hypotheses, not open-ended exploration"
+    workflow:
+      1: "Understand client's problem and frame key questions"
+      2: "Develop hypotheses (what we believe the answer might be)"
+      3: "Design analyses to test hypotheses"
+      4: "Gather data and conduct tests"
+      5: "Confirm, refute, or refine hypotheses"
+      6: "Synthesize findings into recommendations"
+    benefits:
+      - "Focuses effort on high-impact questions"
+      - "Builds client confidence (we have a point of view)"
+      - "Enables iterative refinement (wrong hypotheses guide next steps)"
+
+  pyramid_principle:
+    overview: "Structure communication top-down: answer first, supporting arguments second"
+    framework:
+      - "Start with the answer (executive summary, recommendation)"
+      - "Support with 3-4 key arguments (MECE: mutually exclusive, collectively exhaustive)"
+      - "Each argument supported by data and sub-points"
+    application:
+      - "Slide deck: Key message on first slide, details follow"
+      - "Written reports: Executive summary first, methodology last"
+      - "Verbal updates: 'Bottom line up front' (BLUF)"
+
+  mece_principle:
+    definition: "Mutually Exclusive, Collectively Exhaustive"
+    mutually_exclusive: "Categories don't overlap (no double-counting)"
+    collectively_exhaustive: "Categories cover all possibilities (nothing left out)"
+    examples:
+      good: "Segment customers by: New, Returning, Churned (MECE)"
+      bad: "Segment customers by: High-value, Frequent buyers, At-risk (overlaps)"
+    why_it_matters: "Clear thinking, no gaps or overlaps in analysis"
+
+  80_20_rule:
+    principle: "Focus on the 20% of analyses that drive 80% of impact"
+    application:
+      - "Prioritize high-impact, high-feasibility recommendations"
+      - "Don't get lost in minutiae; focus on what moves the needle"
+      - "Quick pilots over perfect analyses (test and learn)"
+    when_to_go_deep: "Core strategic questions, irreversible decisions, high-stakes risks"
+
+  client_collaboration:
+    working_sessions:
+      - "Co-create hypotheses and analyses with client teams"
+      - "Build buy-in through involvement, not just presenting results"
+      - "Leverage client's institutional knowledge"
+    feedback_loops:
+      - "Share interim findings early and often (no big reveals)"
+      - "Iterate based on client input"
+      - "Manage expectations (what's in scope, what's not)"
+    stakeholder_management:
+      - "Identify decision-makers and influencers"
+      - "Tailor communication to audience (CFO vs CMO vs frontline)"
+      - "Build coalition for change (champions, skeptics, blockers)"
+
+# ==============================================================================
+# QUALITY GATES
+# ==============================================================================
+
+quality_gates:
+  analysis_checklist:
+    data_quality:
+      - "[ ] Data sources documented and credible"
+      - "[ ] Sample size sufficient for conclusions"
+      - "[ ] Missing values and outliers handled appropriately"
+      - "[ ] Data quality issues flagged and explained"
+
+    analytical_rigor:
+      - "[ ] Methodology appropriate for question"
+      - "[ ] Assumptions documented and validated"
+      - "[ ] Alternative explanations considered"
+      - "[ ] Statistical significance tested (where applicable)"
+      - "[ ] Sensitivity analysis conducted for key assumptions"
+
+    insight_quality:
+      - "[ ] Passes RAISE framework (Relevant, Actionable, Insightful, Supported, Engaging)"
+      - "[ ] Answers client's key questions"
+      - "[ ] Provides clear recommendations"
+      - "[ ] Challenges conventional thinking (where appropriate)"
+
+  deliverable_checklist:
+    slide_deck:
+      - "[ ] Follows Kearney presentation standards (Arial, no gridlines, label-first)"
+      - "[ ] Titles are headlines, not topics"
+      - "[ ] Every chart has a data source citation"
+      - "[ ] Storyline is logical and compelling (pyramid principle)"
+      - "[ ] Recommendations are specific and actionable"
+      - "[ ] Appendix includes supporting detail and methodology"
+      - "[ ] Spell-checked and proofread"
+
+    written_report:
+      - "[ ] Executive summary on first page"
+      - "[ ] Clear section structure with headings"
+      - "[ ] Consistent formatting and style"
+      - "[ ] References and citations complete"
+      - "[ ] Methodology appendix included"
+
+    data_deliverables:
+      - "[ ] Data is clean and validated"
+      - "[ ] Data dictionary provided"
+      - "[ ] File formats agreed with client (Excel, CSV, database)"
+      - "[ ] Privacy and confidentiality requirements met"
+
+  peer_review:
+    when_required: "Before sharing any deliverable with client"
+    what_to_review:
+      - "Analytical soundness (methodology, assumptions, conclusions)"
+      - "RAISE framework compliance"
+      - "Presentation standards (formatting, clarity, visual design)"
+      - "Client context (does this make sense for their business?)"
+    who_reviews: "Senior team member or peer not directly involved in analysis"
+
+# ==============================================================================
+# COMMUNICATION GUIDELINES
+# ==============================================================================
+
+communication:
+  email_etiquette:
+    subject_lines: "Specific and actionable ('Q4 results for review' not 'Update')"
+    structure:
+      - "Bottom line up front (BLUF)"
+      - "Supporting detail below"
+      - "Clear ask or next step"
+    attachments: "Name files clearly (Client_Deliverable_Date_v1.pptx)"
+    response_time: "Within 24 hours (same-day for urgent client requests)"
+
+  meeting_effectiveness:
+    agendas:
+      - "Share agenda in advance with time allocations"
+      - "Include objectives and desired outcomes"
+      - "Assign roles (facilitator, note-taker)"
+    time_management:
+      - "Start on time, end on time"
+      - "Park off-topic items in 'parking lot'"
+      - "Summarize decisions and action items at end"
+    follow_up:
+      - "Send meeting notes within 24 hours"
+      - "Include action items, owners, and deadlines"
+
+  presentation_delivery:
+    preparation:
+      - "Rehearse with team (dry run)"
+      - "Anticipate tough questions and prepare responses"
+      - "Have backup slides ready"
+    during_presentation:
+      - "Start with context and agenda (tell them what you'll tell them)"
+      - "Use pyramid principle (answer first, details second)"
+      - "Pause for questions and discussion (don't rush)"
+      - "Read the room (adjust pacing, depth based on engagement)"
+    handling_questions:
+      - "Acknowledge and validate ('That's a great question')"
+      - "Answer directly and concisely"
+      - "If you don't know, say so and commit to follow-up"
+      - "Redirect off-topic questions politely"
+
+# ==============================================================================
+# DATA PRIVACY & ETHICS
+# ==============================================================================
+
+data_ethics:
+  privacy:
+    pii_handling:
+      - "Never include PII in deliverables without explicit consent"
+      - "Anonymize or aggregate data for presentations"
+      - "Follow client's data governance policies"
+      - "Encrypt sensitive data in transit and at rest"
+    gdpr_ccpa_compliance:
+      - "Understand applicable regulations (GDPR, CCPA, industry-specific)"
+      - "Obtain necessary consents for data use"
+      - "Respect data subject rights (access, deletion, portability)"
+
+  bias_and_fairness:
+    awareness:
+      - "Be aware of potential biases in data (sampling, historical discrimination)"
+      - "Test for disparate impact across protected groups (race, gender, age)"
+      - "Document and disclose known biases and limitations"
+    mitigation:
+      - "Use representative samples"
+      - "Apply fairness-aware algorithms when appropriate"
+      - "Involve diverse perspectives in analysis and interpretation"
+
+  responsible_ai:
+    when_using_ml:
+      - "Ensure transparency (explainability of model decisions)"
+      - "Test for bias and fairness"
+      - "Establish human oversight for high-stakes decisions"
+      - "Document intended use and limitations (model card)"
+    when_using_generative_ai:
+      - "Verify facts (LLMs can hallucinate)"
+      - "Respect copyright and intellectual property"
+      - "Disclose when AI-generated content is used"
+      - "Apply human judgment, don't blindly accept outputs"
+
+# ==============================================================================
+# CONTINUOUS IMPROVEMENT
+# ==============================================================================
+
+continuous_improvement:
+  after_action_reviews:
+    timing: "At end of each project phase or major deliverable"
+    questions:
+      - "What went well?"
+      - "What could have gone better?"
+      - "What did we learn?"
+      - "What will we do differently next time?"
+    documentation: "Capture lessons learned in project repository"
+
+  knowledge_sharing:
+    internal:
+      - "Document reusable methods and templates"
+      - "Share case studies and success stories"
+      - "Contribute to firm's knowledge base"
+    external:
+      - "Publish thought leadership (blogs, white papers)"
+      - "Present at conferences and webinars"
+
+  skill_development:
+    technical_skills:
+      - "Stay current with new tools and techniques"
+      - "Pursue certifications and training"
+      - "Learn from peers (code reviews, pair programming)"
+    soft_skills:
+      - "Practice storytelling and presentation"
+      - "Develop client relationship skills"
+      - "Build cross-functional collaboration"
+
+# ==============================================================================
+# REFERENCES
+# ==============================================================================
+
+references:
+  kearney_resources:
+    - "Kearney brand guidelines and templates (internal portal)"
+    - "RAISE framework training materials"
+    - "Pyramid principle guides"
+
+  external_resources:
+    - title: "The Pyramid Principle"
+      author: "Barbara Minto"
+      focus: "Structured thinking and communication"
+
+    - title: "Say It with Charts"
+      author: "Gene Zelazny"
+      focus: "Visual communication and chart selection"
+
+    - title: "Storytelling with Data"
+      author: "Cole Nussbaumer Knaflic"
+      focus: "Data visualization and narrative"
+
+    - title: "The McKinsey Way"
+      author: "Ethan Rasiel"
+      focus: "Problem-solving and client engagement (similar frameworks)"

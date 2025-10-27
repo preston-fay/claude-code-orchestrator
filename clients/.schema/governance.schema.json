@@ -1,0 +1,423 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Client Governance Configuration",
+  "description": "Schema for client-specific governance, compliance, and quality requirements that override orchestrator defaults",
+  "type": "object",
+  "properties": {
+    "client_name": {
+      "type": "string",
+      "description": "Client organization name (for documentation purposes)",
+      "examples": ["Acme Corporation", "Global Finance Inc"]
+    },
+    "engagement_id": {
+      "type": "string",
+      "description": "Unique engagement identifier (project code, contract number)",
+      "pattern": "^[A-Z0-9-]+$",
+      "examples": ["ENG-2024-001", "PROJ-ABC123"]
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when this governance config becomes active (ISO 8601)"
+    },
+    "quality_gates": {
+      "type": "object",
+      "description": "Quality thresholds that must be met before phase progression",
+      "properties": {
+        "min_hygiene_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum repository hygiene score (0-100) to pass QA gate. Checks for: no large binaries, clean commit history, no secrets, proper .gitignore",
+          "default": 80,
+          "examples": [70, 85, 95]
+        },
+        "require_security_scan": {
+          "type": "boolean",
+          "description": "Whether to require automated security vulnerability scanning (SAST/dependency scanning) before deployment",
+          "default": false
+        },
+        "require_data_classification": {
+          "type": "boolean",
+          "description": "Whether all data files must have classification labels (public, internal, confidential, restricted)",
+          "default": false
+        },
+        "min_test_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum code coverage percentage required (0-100). Applies to unit/integration tests.",
+          "default": 0,
+          "examples": [70, 80, 90]
+        },
+        "require_type_hints": {
+          "type": "boolean",
+          "description": "Whether Python code must include type hints (enforced via mypy or similar)",
+          "default": false
+        },
+        "require_linting": {
+          "type": "boolean",
+          "description": "Whether code must pass linting checks (pylint, flake8, eslint, etc.)",
+          "default": true
+        },
+        "max_complexity": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Maximum cyclomatic complexity allowed per function (lower = simpler code)",
+          "default": 10,
+          "examples": [5, 10, 15]
+        },
+        "require_peer_review": {
+          "type": "boolean",
+          "description": "Whether all code changes require human peer review before merging",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "compliance": {
+      "type": "object",
+      "description": "Regulatory and compliance requirements",
+      "properties": {
+        "frameworks": {
+          "type": "array",
+          "description": "Compliance frameworks that apply to this engagement",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SOC2",
+              "ISO27001",
+              "GDPR",
+              "HIPAA",
+              "PCI-DSS",
+              "CCPA",
+              "NIST",
+              "FedRAMP",
+              "None"
+            ]
+          },
+          "uniqueItems": true,
+          "examples": [["SOC2"], ["GDPR", "CCPA"], ["HIPAA"]]
+        },
+        "pii_handling": {
+          "type": "string",
+          "enum": ["strict", "standard", "minimal", "none"],
+          "description": "PII handling strictness level. strict: encrypt all PII, anonymize for analytics, audit access. standard: document PII fields, access controls. minimal: basic awareness. none: no PII present",
+          "default": "standard"
+        },
+        "data_retention_days": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Number of days to retain project data after engagement ends. Used for auto-archival and deletion policies.",
+          "default": 365,
+          "examples": [90, 180, 365, 2555]
+        },
+        "encryption_at_rest": {
+          "type": "boolean",
+          "description": "Whether data files must be encrypted at rest (applies to sensitive data only)",
+          "default": false
+        },
+        "encryption_in_transit": {
+          "type": "boolean",
+          "description": "Whether data transmission requires TLS/SSL encryption (API calls, file transfers)",
+          "default": true
+        },
+        "audit_logging": {
+          "type": "boolean",
+          "description": "Whether to maintain detailed audit logs of data access and modifications",
+          "default": false
+        },
+        "anonymization_required": {
+          "type": "boolean",
+          "description": "Whether PII must be anonymized/pseudonymized before analysis (GDPR Article 25)",
+          "default": false
+        },
+        "geographic_restrictions": {
+          "type": "array",
+          "description": "ISO 3166-1 alpha-2 country codes where data processing is restricted (e.g., data sovereignty requirements)",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "examples": [["RU", "CN"], ["US"]]
+        }
+      },
+      "additionalProperties": false
+    },
+    "brand_constraints": {
+      "type": "object",
+      "description": "Client branding and presentation requirements",
+      "properties": {
+        "theme_path": {
+          "type": "string",
+          "description": "Path to client-specific design tokens (colors, fonts, spacing) relative to project root",
+          "pattern": "^[a-zA-Z0-9/_.-]+\\.(json|yaml|css)$",
+          "examples": [
+            "clients/acme-corp/theme.json",
+            "design_system/clients/acme/tokens.yaml"
+          ]
+        },
+        "custom_fonts": {
+          "type": "array",
+          "description": "Font families required by client brand guidelines (must be available/licensed)",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["Helvetica Neue", "Arial"], ["Roboto", "Open Sans"]]
+        },
+        "color_restrictions": {
+          "type": "array",
+          "description": "Hex color codes that are forbidden (competitor colors, brand conflicts)",
+          "items": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "examples": [["#FF0000", "#00FF00"], ["#1DA1F2"]]
+        },
+        "logo_path": {
+          "type": "string",
+          "description": "Path to client logo file for inclusion in deliverables",
+          "examples": ["clients/acme-corp/logo.svg", "assets/client-logo.png"]
+        },
+        "forbid_terms": {
+          "type": "array",
+          "description": "Terms/phrases to avoid in documentation/UI (competitors, sensitive topics). Case-insensitive matching.",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["competitor name", "legacy system"],
+            ["blockchain", "AI-powered"]
+          ]
+        },
+        "require_disclaimers": {
+          "type": "boolean",
+          "description": "Whether to include standard legal disclaimers in all deliverables",
+          "default": false
+        },
+        "presentation_template": {
+          "type": "string",
+          "description": "Path to PowerPoint/Keynote template for client deliverables",
+          "examples": ["clients/acme-corp/template.pptx"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "deployment": {
+      "type": "object",
+      "description": "Deployment and release requirements",
+      "properties": {
+        "environments": {
+          "type": "array",
+          "description": "Deployment environments that must exist (in order: dev → staging → prod)",
+          "items": {
+            "type": "string",
+            "enum": [
+              "development",
+              "dev",
+              "staging",
+              "uat",
+              "pre-production",
+              "production",
+              "prod"
+            ]
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "examples": [["dev", "prod"], ["dev", "staging", "prod"]]
+        },
+        "require_approval": {
+          "type": "boolean",
+          "description": "Whether deployments require explicit human approval",
+          "default": false
+        },
+        "approval_threshold": {
+          "type": "string",
+          "enum": ["any-developer", "tech-lead", "client-stakeholder"],
+          "description": "Who can approve deployments if require_approval=true",
+          "default": "tech-lead"
+        },
+        "deployment_window": {
+          "type": "object",
+          "description": "Allowed time windows for production deployments (to avoid business hours)",
+          "properties": {
+            "days": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday"
+                ]
+              },
+              "examples": [["Saturday", "Sunday"], ["Monday", "Wednesday", "Friday"]]
+            },
+            "hours_utc": {
+              "type": "string",
+              "description": "Time range in 24h format UTC (e.g., 02:00-06:00 for early morning deployments)",
+              "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]-([0-1][0-9]|2[0-3]):[0-5][0-9]$",
+              "examples": ["02:00-06:00", "22:00-02:00"]
+            }
+          }
+        },
+        "rollback_required": {
+          "type": "boolean",
+          "description": "Whether automated rollback capability must be implemented",
+          "default": false
+        },
+        "canary_required": {
+          "type": "boolean",
+          "description": "Whether canary/blue-green deployments are required (gradual rollout)",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "documentation": {
+      "type": "object",
+      "description": "Documentation requirements and standards",
+      "properties": {
+        "require_adr": {
+          "type": "boolean",
+          "description": "Whether Architecture Decision Records are required for significant decisions",
+          "default": true
+        },
+        "require_data_dictionary": {
+          "type": "boolean",
+          "description": "Whether data dictionary is required (definitions of all data fields/tables)",
+          "default": false
+        },
+        "min_documentation_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum documentation coverage score (0-100). Measures: README completeness, API docs, inline comments, data dictionary.",
+          "default": 60,
+          "examples": [50, 70, 90]
+        },
+        "require_runbook": {
+          "type": "boolean",
+          "description": "Whether operational runbook is required (how to deploy, monitor, troubleshoot)",
+          "default": false
+        },
+        "require_user_guide": {
+          "type": "boolean",
+          "description": "Whether end-user documentation is required",
+          "default": false
+        },
+        "language": {
+          "type": "string",
+          "description": "Primary language for documentation (ISO 639-1 code)",
+          "pattern": "^[a-z]{2}$",
+          "default": "en",
+          "examples": ["en", "es", "fr", "de", "zh"]
+        },
+        "require_code_comments": {
+          "type": "boolean",
+          "description": "Whether code must include inline comments explaining complex logic",
+          "default": true
+        },
+        "api_documentation_format": {
+          "type": "string",
+          "enum": ["OpenAPI", "Swagger", "Markdown", "Sphinx", "JSDoc", "None"],
+          "description": "Required format for API documentation",
+          "default": "Markdown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notifications": {
+      "type": "object",
+      "description": "Notification and alerting configuration",
+      "properties": {
+        "checkpoint_completion": {
+          "type": "array",
+          "description": "Email addresses to notify when checkpoints are completed",
+          "items": {
+            "type": "string",
+            "format": "email"
+          },
+          "examples": [["pm@client.com", "tech-lead@kearney.com"]]
+        },
+        "quality_gate_failure": {
+          "type": "array",
+          "description": "Email addresses to notify when quality gates fail",
+          "items": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "deployment_notifications": {
+          "type": "array",
+          "description": "Email addresses to notify on production deployments",
+          "items": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "slack_webhook": {
+          "type": "string",
+          "format": "uri",
+          "description": "Slack webhook URL for automated notifications",
+          "examples": ["https://hooks.slack.com/services/XXX/YYY/ZZZ"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "custom_rules": {
+      "type": "array",
+      "description": "Custom validation rules specific to this client (evaluated by QA agent)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "Unique identifier for this rule"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable explanation of what this rule checks"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["error", "warning", "info"],
+            "description": "How to handle violations (error=block, warning=flag, info=log)"
+          },
+          "check_type": {
+            "type": "string",
+            "enum": [
+              "file_pattern",
+              "code_pattern",
+              "data_validation",
+              "manual_review"
+            ],
+            "description": "Type of check to perform"
+          },
+          "pattern": {
+            "type": "string",
+            "description": "Regex pattern or validation logic (syntax depends on check_type)"
+          }
+        },
+        "required": ["rule_id", "description", "severity", "check_type"]
+      },
+      "examples": [
+        [
+          {
+            "rule_id": "no-hardcoded-credentials",
+            "description": "Ensure no API keys or passwords in code",
+            "severity": "error",
+            "check_type": "code_pattern",
+            "pattern": "(api_key|password)\\s*=\\s*['\"][^'\"]+['\"]"
+          }
+        ]
+      ]
+    }
+  },
+  "required": ["client_name"],
+  "additionalProperties": false
+}

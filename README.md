@@ -4,6 +4,89 @@
 
 A meta-framework for coordinating multiple specialized Claude Code subagents to collaboratively build complex software projects through structured, checkpoint-driven workflows.
 
+---
+
+## 🚀 Using as a Template
+
+**Create a new project in seconds:**
+
+```bash
+# Method 1: Bootstrap Command (Recommended)
+orchestrator bootstrap analytics --output ~/projects/my-new-project
+
+# Method 2: GitHub Template Button
+# Click "Use this template" button above ↗️
+```
+
+[![Use this template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/kearney/claude-code-orchestrator/generate)
+
+**Available project templates:**
+- **`analytics`** - Data analysis, insights, statistical modeling
+- **`ml-model`** - Machine learning, predictive modeling, deep learning
+- **`webapp`** - Full-stack web applications, dashboards
+- **`supply-chain`** - Operations research, optimization, logistics
+
+**📖 Full guide:** [TEMPLATE_USAGE.md](TEMPLATE_USAGE.md)
+
+---
+
+## Features
+
+The orchestrator provides a comprehensive framework for building production-grade software with AI agents:
+
+### Skills Framework
+
+Reusable analytical patterns and methodologies that agents can apply across projects. Skills encapsulate proven approaches for common tasks like time-series forecasting, survey analysis, and optimization modeling. Agents load skills on-demand and adapt them to project-specific requirements.
+
+**📖 Learn more:** [.claude/skills/README.md](.claude/skills/README.md)
+
+### Knowledge Base
+
+A three-tier knowledge architecture that provides agents with universal best practices, firm-wide standards, and project-specific domain expertise. Knowledge flows from universal (data science fundamentals) → firm-wide (Kearney RAISE framework) → project-specific (domain terminology, business rules).
+
+**📖 Learn more:** [.claude/knowledge/README.md](.claude/knowledge/README.md)
+
+### Architecture Decision Records (ADRs)
+
+Lightweight documentation of significant technical decisions made during the project lifecycle. ADRs capture context, options considered, decision rationale, and consequences. The orchestrator prompts agents to create ADRs at key decision points.
+
+**📖 Learn more:** [.claude/decisions/README.md](.claude/decisions/README.md)
+
+### Client Governance
+
+YAML-based configuration system for client-specific quality gates, compliance requirements, brand constraints, and deployment policies. Governance rules are validated via JSON Schema and automatically enforced during workflow execution.
+
+**📖 Learn more:** [clients/README.md](clients/README.md)
+
+### C-Suite Templates
+
+Production-ready HTML/CSS/JS templates for executive presentations and one-pagers. Templates enforce Kearney brand compliance (Arial font, no gridlines, purple accent) and include D3.js chart patterns optimized for C-suite audiences.
+
+**📖 Learn more:** [design_system/templates/README.md](design_system/templates/README.md)
+
+---
+
+## Getting Started
+
+**New to the orchestrator?** Start here:
+
+- **[QUICKSTART.md](docs/QUICKSTART.md)** - 5-minute setup guide with hands-on examples
+- **[METHODOLOGY.md](docs/METHODOLOGY.md)** - Deep dive into orchestrator philosophy and architecture
+
+**Want to create a new project?** Use the bootstrap command:
+
+```bash
+# Create a new analytics project in seconds
+orchestrator bootstrap analytics --output ~/projects/my-analysis
+
+# Or use the interactive wizard
+orchestrator intake new
+```
+
+**Already have a project?** Jump to the [Run-Loop Quickstart](#run-loop-quickstart) below.
+
+---
+
 ## Repository Health
 
 ![Hygiene Trend](docs/hygiene_trend.png)
@@ -347,7 +430,24 @@ Automatically includes:
 - Quality gates report (`quality_gates_report.json`)
 - Full changelog (`CHANGELOG.md`)
 
-### Quick Start with Natural Language
+### Quick Start Options
+
+**Option 1: Bootstrap Command (Fastest)**
+
+```bash
+# Create a complete project structure in seconds
+orchestrator bootstrap analytics --output ~/projects/my-project
+cd ~/projects/my-project
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start orchestration
+orchestrator run start --intake intake.yaml
+orchestrator run next
+```
+
+**Option 2: Natural Language in Claude Code**
 
 1. In Claude Code, type: **"new project"**
 2. Follow the interactive wizard to select project type and configure
@@ -357,4 +457,8 @@ Automatically includes:
 6. Start orchestration: `orchestrator run start --intake intake/<project>.intake.yaml`
 7. Execute workflow: `orchestrator run next` (repeat until complete)
 
-See [docs/intake.md](docs/intake.md) for detailed intake documentation.
+**📖 See also:**
+- [Bootstrap Command Guide](docs/bootstrap.md) - Complete bootstrap documentation
+- [Intake Documentation](docs/intake.md) - Detailed intake configuration guide
+- [QUICKSTART.md](docs/QUICKSTART.md) - 5-minute hands-on tutorial
+- [METHODOLOGY.md](docs/METHODOLOGY.md) - Understanding the orchestrator approach
