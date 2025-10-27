@@ -100,3 +100,58 @@ format:
 	black src/ tests/ scripts/
 	ruff check --fix src/ tests/
 	cd apps/web && npm run format
+
+# === Orchestrator Task Controls ==============================================
+# Usage:
+#   make review-task  PROJECT=white_mold_scenario_planner TASK=02_DATA_EXPORT
+#   make approve-task PROJECT=white_mold_scenario_planner TASK=02_DATA_EXPORT
+
+# Root where project repos live
+PROJECTS_ROOT := /Users/pfay01/Projects
+
+# Derived paths
+PROJECT_DIR   := $(PROJECTS_ROOT)/$(PROJECT)
+ART_DIR       := $(PROJECT_DIR)/TASKS/_artifacts
+STATUS_DIR    := $(PROJECT_DIR)/TASKS/_status
+STATUS_FILE   := $(STATUS_DIR)/$(TASK).status
+RESULTS_MD    := $(ART_DIR)/$(shell echo $(TASK) | sed 's/_/-/g')_RESULTS.md
+
+# Helper: current timestamp (portable)
+NOW := $(shell date +"%Y-%m-%dT%H:%M:%S%z")
+
+.PHONY: review-task approve-task show-task
+
+review-task:
+	@if [ -z "$(PROJECT)" ] || [ -z "$(TASK)" ]; then \
+		echo "❌ Set PROJECT= and TASK= (e.g., TASK=02_DATA_EXPORT)"; exit 1; fi
+	@mkdir -p "$(STATUS_DIR)"
+	@echo "STATUS: READY_FOR_REVIEW" > "$(STATUS_FILE)"
+	@echo "TASK: $(TASK)"           >> "$(STATUS_FILE)"
+	@echo "PROJECT: $(PROJECT)"     >> "$(STATUS_FILE)"
+	@echo "UPDATED: $(NOW)"         >> "$(STATUS_FILE)"
+	@# Soft-annotate results MD if present (non-fatal if missing)
+	@if [ -f "$(RESULTS_MD)" ]; then \
+		grep -q "READY_FOR_REVIEW" "$(RESULTS_MD)" || echo "\n\nSTATUS: READY_FOR_REVIEW ($(NOW))" >> "$(RESULTS_MD)"; \
+	fi
+	@echo "✅ Marked $(PROJECT):$(TASK) as READY_FOR_REVIEW"
+	@echo " → $(STATUS_FILE)"
+
+approve-task:
+	@if [ -z "$(PROJECT)" ] || [ -z "$(TASK)" ]; then \
+		echo "❌ Set PROJECT= and TASK= (e.g., TASK=02_DATA_EXPORT)"; exit 1; fi
+	@mkdir -p "$(STATUS_DIR)"
+	@echo "STATUS: APPROVED"        >  "$(STATUS_FILE)"
+	@echo "TASK: $(TASK)"           >> "$(STATUS_FILE)"
+	@echo "PROJECT: $(PROJECT)"     >> "$(STATUS_FILE)"
+	@echo "UPDATED: $(NOW)"         >> "$(STATUS_FILE)"
+	@# Add approval token to results MD if present
+	@if [ -f "$(RESULTS_MD)" ]; then \
+		grep -q "APPROVED" "$(RESULTS_MD)" || echo "\n\n✅ $(TASK) APPROVED ($(NOW))" >> "$(RESULTS_MD)"; \
+	fi
+	@echo "🔒 Approved $(PROJECT):$(TASK)"
+	@echo " → $(STATUS_FILE)"
+
+show-task:
+	@if [ -z "$(PROJECT)" ] || [ -z "$(TASK)" ]; then \
+		echo "❌ Set PROJECT= and TASK="; exit 1; fi
+	@cat "$(STATUS_FILE)" 2>/dev/null || echo "No status file at $(STATUS_FILE)"

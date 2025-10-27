@@ -414,9 +414,11 @@ import { CategoricalBarChart } from './components/CategoricalBarChart';
 
 ### Critical Requirements
 
-1. **No Emojis**
+1. **No Emojis - Use Feather Icons Only**
    - Never use emojis in UI, docs, or code comments
-   - Use text symbols: ▲ (up), ▼ (down), ─ (neutral)
+   - **REQUIRED**: Use Feather Icons (https://feathericons.com/) for all UI icons
+   - React: `import { Play, Pause, ChevronLeft, ChevronRight } from 'react-feather'`
+   - Fallback text symbols only if Feather has no match: ▲ (up), ▼ (down), ─ (neutral)
 
 2. **No Gridlines**
    - Charts: No background grid
