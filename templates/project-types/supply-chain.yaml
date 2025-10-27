@@ -1,0 +1,143 @@
+# Supply Chain / Operations Project Template
+name: "Supply Chain Optimization"
+type: "supply-chain"
+description: "Analytics and optimization for supply chain and operations"
+
+directory_structure:
+  - ".claude/"
+  - "data/raw/"
+  - "data/processed/"
+  - "models/optimization/"
+  - "notebooks/"
+  - "src/data/"
+  - "src/optimization/"
+  - "src/simulation/"
+  - "tests/"
+  - "reports/"
+  - "docs/"
+
+copy_files:
+  - source: ".claude/knowledge/analytics_best_practices.yaml"
+    destination: ".claude/knowledge/analytics_best_practices.yaml"
+  - source: ".claude/knowledge/kearney_standards.yaml"
+    destination: ".claude/knowledge/kearney_standards.yaml"
+  - source: ".claude/skills/optimization_modeling.yaml"
+    destination: ".claude/skills/optimization_modeling.yaml"
+  - source: ".claude/decisions/template.md"
+    destination: ".claude/decisions/template.md"
+  - source: "design_system/"
+    destination: "design_system/"
+    recursive: true
+  - source: ".pre-commit-config.yaml"
+    destination: ".pre-commit-config.yaml"
+
+agents:
+  - name: "Architect"
+    role: "Design optimization approach and data requirements"
+    phases: ["planning", "consensus"]
+  - name: "Data"
+    role: "Data pipeline and feature engineering"
+    phases: ["data-engineering"]
+  - name: "Optimization Engineer"
+    role: "Build optimization models (LP, MILP, simulation)"
+    phases: ["optimization"]
+  - name: "Developer"
+    role: "Implement solution and deployment"
+    phases: ["implementation"]
+  - name: "QA"
+    role: "Validate model outputs and constraints"
+    phases: ["qa"]
+  - name: "Documentarian"
+    role: "Create documentation and recommendations"
+    phases: ["documentation"]
+
+phases:
+  - name: "planning"
+    description: "Define optimization objectives and constraints"
+    agents: ["Architect"]
+    parallel: false
+    require_consensus: true
+  - name: "consensus"
+    description: "Review optimization approach"
+    agents: ["Consensus"]
+    parallel: false
+  - name: "data-engineering"
+    description: "Prepare and validate input data"
+    agents: ["Data"]
+    parallel: false
+  - name: "optimization"
+    description: "Build and solve optimization models"
+    agents: ["Optimization Engineer"]
+    parallel: false
+  - name: "implementation"
+    description: "Implement solution and dashboards"
+    agents: ["Developer"]
+    parallel: false
+  - name: "qa"
+    description: "Validate optimization results"
+    agents: ["QA"]
+    parallel: false
+  - name: "documentation"
+    description: "Create recommendations and documentation"
+    agents: ["Documentarian"]
+    parallel: false
+
+intake_template:
+  project:
+    name: "{{PROJECT_NAME}}"
+    type: "supply-chain"
+    description: "{{PROJECT_DESCRIPTION}}"
+  requirements:
+    functional:
+      - "Optimize {{OPTIMIZATION_OBJECTIVE}}"
+      - "Subject to {{KEY_CONSTRAINTS}}"
+      - "Analyze scenarios and sensitivities"
+    technical:
+      - "Use PuLP/Gurobi for optimization"
+      - "Implement simulation for stochastic elements"
+      - "Create interactive dashboards"
+
+dependencies:
+  python:
+    - "pandas>=2.0.0"
+    - "numpy>=1.24.0"
+    - "pulp>=2.7.0"
+    - "scipy>=1.10.0"
+    - "matplotlib>=3.7.0"
+    - "seaborn>=0.12.0"
+    - "jupyter>=1.0.0"
+    - "duckdb>=0.9.0"
+    - "simpy>=4.1.0"
+    - "networkx>=3.1"
+
+config_files:
+  - name: ".gitignore"
+    content: |
+      __pycache__/
+      *.py[cod]
+      data/raw/*
+      *.csv
+      *.xlsx
+      .env
+      .venv
+  - name: "README.md"
+    content: |
+      # {{PROJECT_NAME}}
+      {{PROJECT_DESCRIPTION}}
+
+      ## Optimization Problem
+      - **Objective:** {{OBJECTIVE}}
+      - **Decision Variables:** {{VARIABLES}}
+      - **Constraints:** {{CONSTRAINTS}}
+
+      ## Getting Started
+      ```bash
+      pip install -r requirements.txt
+      orchestrator run start --intake intake.yaml
+      ```
+
+next_steps:
+  - "Install optimization solver (PuLP/Gurobi)"
+  - "Place input data in data/raw/"
+  - "Define optimization objective in intake.yaml"
+  - "Start workflow: `orchestrator run start --intake intake.yaml`"

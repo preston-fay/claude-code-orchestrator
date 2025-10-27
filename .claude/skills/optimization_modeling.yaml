@@ -1,0 +1,737 @@
+# Optimization Modeling Skill
+#
+# Generic operations research patterns applicable to ANY resource allocation problem.
+# This skill teaches HOW to formulate and solve optimization problems, not WHAT
+# specific problems to solve. Adapt to staffing, budgeting, routing, scheduling,
+# portfolio selection, or any decision problem with constraints.
+
+name: optimization_modeling
+version: 1.0.0
+category: operations_research
+
+description: >
+  Universal optimization modeling patterns for resource allocation, scheduling,
+  routing, and decision-making under constraints. Learn how to formulate linear,
+  integer, and nonlinear programs applicable to any business or operational context.
+
+# ==============================================================================
+# CORE CAPABILITIES
+# ==============================================================================
+
+capabilities:
+  - name: linear_programming
+    description: Optimize linear objective subject to linear constraints
+    techniques:
+      - Simplex algorithm (classical LP solver)
+      - Interior point methods (faster for large problems)
+      - Sensitivity analysis (shadow prices, ranges)
+      - Duality theory (primal-dual relationships)
+    when_to_use:
+      - "Continuous decision variables (production quantities, budget allocation)"
+      - "Linear objective and constraints"
+      - "Problems like: minimize cost, maximize profit, meet demand"
+    problem_structure:
+      - "Decision variables: x₁, x₂, ..., xₙ (continuous, ≥ 0)"
+      - "Objective: minimize cᵀx or maximize cᵀx"
+      - "Constraints: Ax ≤ b, Ax ≥ b, Ax = b"
+    applications:
+      - "Production planning (how much to produce?)"
+      - "Diet problem (meet nutrition at minimum cost)"
+      - "Blending problem (mix ingredients optimally)"
+      - "Transportation (ship from sources to destinations)"
+    libraries:
+      - pulp>=2.7  # Free, uses CBC solver
+      - scipy.optimize.linprog>=1.11
+      - cvxpy>=1.4  # Convex optimization
+
+  - name: integer_programming
+    description: Optimize with discrete decision variables (yes/no, counts)
+    techniques:
+      - Branch and bound algorithm
+      - Cutting planes
+      - Mixed-integer linear programming (MILP)
+      - Binary variables for logical decisions
+      - Big-M method for conditional constraints
+    when_to_use:
+      - "Yes/no decisions (build facility or not, hire person or not)"
+      - "Integer counts (number of machines, number of employees)"
+      - "Logical constraints (if X then Y, choose K from N options)"
+    problem_structure:
+      - "Decision variables: some or all must be integers"
+      - "Binary variables: xᵢ ∈ {0, 1}"
+      - "Integer variables: xᵢ ∈ {0, 1, 2, 3, ...}"
+    applications:
+      - "Facility location (which sites to open?)"
+      - "Staff scheduling (which shifts to assign?)"
+      - "Project selection (which projects to fund?)"
+      - "Knapsack problem (which items to include?)"
+    libraries:
+      - pulp>=2.7
+      - python-mip>=1.15
+      - gurobipy>=10.0  # Commercial, requires license
+      - cvxpy>=1.4
+
+  - name: network_optimization
+    description: Optimize flows, paths, and connectivity in networks
+    techniques:
+      - Shortest path (Dijkstra, Bellman-Ford, A*)
+      - Maximum flow (Ford-Fulkerson, Dinic)
+      - Minimum cost flow
+      - Network simplex
+      - Traveling salesman problem (TSP) heuristics
+      - Vehicle routing problem (VRP) variants
+    when_to_use:
+      - "Routing (deliveries, telecommunications, logistics)"
+      - "Network design (build roads, pipelines, cables)"
+      - "Flow problems (supply chain, traffic, data networks)"
+    problem_structure:
+      - "Nodes: Locations, facilities, computers"
+      - "Edges: Routes, connections, links"
+      - "Flows: Goods, data, vehicles"
+      - "Costs: Distance, time, money per unit flow"
+    applications:
+      - "Delivery routing (minimize total distance)"
+      - "Supply chain network (factory → warehouse → customer)"
+      - "Telecommunication network design"
+      - "Traffic routing"
+    libraries:
+      - networkx>=3.1
+      - scipy.optimize>=1.11
+      - ortools>=9.7  # Google OR-Tools
+
+  - name: assignment_and_matching
+    description: Optimally assign entities to tasks or match entities together
+    techniques:
+      - Hungarian algorithm (optimal assignment)
+      - Auction algorithm
+      - Stable matching (Gale-Shapley)
+      - Generalized assignment problem
+    when_to_use:
+      - "Assign workers to tasks (one-to-one matching)"
+      - "Assign students to schools (many-to-one)"
+      - "Match buyers and sellers"
+    problem_structure:
+      - "Two sets: Workers and Tasks (or Students and Schools)"
+      - "Costs or preferences for each pairing"
+      - "Constraints: Each worker to one task, capacity limits"
+    applications:
+      - "Employee-to-project assignment"
+      - "Sales territory assignment"
+      - "Ad placement (match ads to users)"
+      - "Organ donor matching"
+    libraries:
+      - scipy.optimize.linear_sum_assignment>=1.11
+      - networkx>=3.1
+      - pulp>=2.7
+
+  - name: scheduling_problems
+    description: Sequence tasks over time to meet deadlines and resource constraints
+    techniques:
+      - Job shop scheduling
+      - Flow shop scheduling
+      - Resource-constrained project scheduling (RCPSP)
+      - Shift scheduling
+      - Timetabling
+    when_to_use:
+      - "Schedule production jobs on machines"
+      - "Create employee work schedules"
+      - "Plan project activities with resource limits"
+    problem_structure:
+      - "Tasks: Activities to complete"
+      - "Resources: Machines, workers, rooms"
+      - "Constraints: Precedence, capacity, deadlines"
+      - "Objective: Minimize makespan, maximize utilization"
+    applications:
+      - "Manufacturing job scheduling"
+      - "Nurse/staff shift scheduling"
+      - "University course timetabling"
+      - "Project planning (PERT/CPM)"
+    libraries:
+      - pulp>=2.7
+      - ortools>=9.7
+      - python-mip>=1.15
+
+  - name: portfolio_optimization
+    description: Select mix of items/projects to maximize value within constraints
+    techniques:
+      - Knapsack problem (0/1, fractional, multiple)
+      - Mean-variance optimization (Markowitz)
+      - Capital budgeting
+      - Multi-objective optimization (Pareto frontier)
+    when_to_use:
+      - "Select projects given budget constraint"
+      - "Choose product mix to maximize profit"
+      - "Investment portfolio allocation"
+    problem_structure:
+      - "Items: Projects, investments, products"
+      - "Value: Profit, return, benefit"
+      - "Cost: Budget, time, resources required"
+      - "Constraint: Limited budget, capacity, or resources"
+    applications:
+      - "R&D project portfolio selection"
+      - "Marketing campaign budget allocation"
+      - "Product assortment optimization"
+      - "Financial portfolio allocation"
+    libraries:
+      - pulp>=2.7
+      - cvxpy>=1.4
+      - scipy.optimize>=1.11
+
+  - name: scenario_optimization
+    description: Optimize decisions under uncertainty (stochastic, robust)
+    techniques:
+      - Two-stage stochastic programming
+      - Robust optimization (min-max, min-max regret)
+      - Chance constraints (probabilistic constraints)
+      - Monte Carlo simulation for scenario generation
+    when_to_use:
+      - "Uncertain demand, costs, or parameters"
+      - "Want robust decisions (perform well across scenarios)"
+      - "Risk-averse decision-making"
+    problem_structure:
+      - "First-stage decisions: Made before uncertainty resolves"
+      - "Second-stage decisions: Made after observing scenario"
+      - "Scenarios: Possible futures with probabilities"
+      - "Objective: Minimize expected cost or worst-case cost"
+    applications:
+      - "Production planning under demand uncertainty"
+      - "Inventory management with uncertain supply"
+      - "Facility location considering future growth scenarios"
+    libraries:
+      - pyomo>=6.6  # Supports stochastic programming
+      - cvxpy>=1.4
+      - scipy>=1.11
+
+# ==============================================================================
+# METHODOLOGY PATTERNS (Domain-Agnostic)
+# ==============================================================================
+
+methodology_patterns:
+  pattern_1_basic_lp_formulation:
+    description: "Standard linear programming problem setup"
+    workflow:
+      step_1_define_variables:
+        - "What are you deciding? (quantities, allocations, flows)"
+        - "Example: x₁ = units of Product A, x₂ = units of Product B"
+        - "Bounds: xᵢ ≥ 0 (non-negativity), or xᵢ ∈ [lower, upper]"
+      step_2_define_objective:
+        - "What are you optimizing? (minimize cost, maximize profit)"
+        - "Example: maximize 3x₁ + 5x₂ (profit)"
+        - "Must be linear in decision variables"
+      step_3_define_constraints:
+        - "What limits your decisions? (capacity, demand, budget)"
+        - "Example: 2x₁ + 4x₂ ≤ 40 (labor hours)"
+        - "Each constraint must be linear"
+      step_4_implement:
+        - "Use PuLP or SciPy to code the model"
+        - "Add variables, objective, constraints"
+        - "Solve with appropriate solver (CBC, GLPK)"
+      step_5_interpret:
+        - "Extract optimal solution values"
+        - "Check shadow prices (value of relaxing constraints)"
+        - "Perform sensitivity analysis"
+    generic_example: "Resource allocation (labor, budget) to maximize output"
+
+  pattern_2_binary_decision_milp:
+    description: "Yes/no decisions with logical constraints"
+    workflow:
+      step_1_define_binary_variables:
+        - "yᵢ ∈ {0, 1}: 1 if option i selected, 0 otherwise"
+        - "Example: y₁ = 1 if build facility at Site 1"
+      step_2_model_fixed_costs:
+        - "Objective includes fixed costs: minimize Σ fixed_cost_i * yᵢ + variable costs"
+      step_3_add_logical_constraints:
+        - "At most K selections: Σ yᵢ ≤ K"
+        - "If-then: If y₁ = 1 then y₂ = 0 → y₁ + y₂ ≤ 1"
+        - "Conditional: Variable cost only if yᵢ = 1 → use Big-M"
+      step_4_solve_milp:
+        - "Use branch-and-bound solver (CBC, Gurobi)"
+        - "Be aware: MILP harder than LP (NP-hard)"
+      step_5_validate_solution:
+        - "Check all binary variables are 0 or 1"
+        - "Verify logical constraints are satisfied"
+    generic_example: "Facility location, project selection, on/off decisions"
+
+  pattern_3_transportation_problem:
+    description: "Ship from sources to destinations at minimum cost"
+    formulation:
+      decision_variables: "xᵢⱼ = amount shipped from source i to destination j"
+      objective: "minimize Σᵢ Σⱼ cost_ij * xᵢⱼ"
+      constraints:
+        - "Supply: Σⱼ xᵢⱼ ≤ supply_i (can't ship more than available)"
+        - "Demand: Σᵢ xᵢⱼ ≥ demand_j (must meet destination demand)"
+        - "Non-negativity: xᵢⱼ ≥ 0"
+    workflow:
+      step_1: "Define sources (factories, warehouses) and destinations (customers, stores)"
+      step_2: "Create cost matrix (cost per unit from i to j)"
+      step_3: "Specify supply at each source and demand at each destination"
+      step_4: "Formulate as LP (PuLP or scipy.optimize.linprog)"
+      step_5: "Solve and extract shipping plan"
+    generic_example: "Distribution planning, logistics, resource transfer"
+
+  pattern_4_assignment_problem:
+    description: "Assign workers to tasks (one-to-one) to minimize cost or maximize benefit"
+    formulation:
+      decision_variables: "xᵢⱼ ∈ {0, 1}: 1 if worker i assigned to task j"
+      objective: "minimize Σᵢ Σⱼ cost_ij * xᵢⱼ"
+      constraints:
+        - "Each worker to one task: Σⱼ xᵢⱼ = 1 for all i"
+        - "Each task to one worker: Σᵢ xᵢⱼ = 1 for all j"
+    workflow:
+      step_1: "Define cost/benefit matrix (rows = workers, cols = tasks)"
+      step_2: "Use Hungarian algorithm (scipy.optimize.linear_sum_assignment)"
+      step_3: "Extract optimal assignment"
+    generic_example: "Employee-project assignment, sales territory assignment"
+
+  pattern_5_knapsack_problem:
+    description: "Select subset of items to maximize value within capacity"
+    formulation:
+      decision_variables: "xᵢ ∈ {0, 1}: 1 if item i selected"
+      objective: "maximize Σᵢ value_i * xᵢ"
+      constraints:
+        - "Capacity: Σᵢ weight_i * xᵢ ≤ capacity"
+    workflow:
+      step_1: "List items with (value, weight/cost) pairs"
+      step_2: "Define capacity constraint (budget, space, time)"
+      step_3: "Formulate as 0/1 integer program"
+      step_4: "Solve with MILP solver"
+      step_5: "Extract selected items"
+    generic_example: "Project selection, product assortment, investment portfolio"
+
+  pattern_6_multi_period_planning:
+    description: "Optimize decisions over multiple time periods"
+    formulation:
+      decision_variables: "xₜ = decision in period t"
+      objective: "minimize Σₜ cost_t * xₜ (sum over all periods)"
+      constraints:
+        - "Inventory balance: inventory_t = inventory_{t-1} + production_t - demand_t"
+        - "Capacity: production_t ≤ capacity_t"
+        - "Non-negativity: inventory_t, production_t ≥ 0"
+    workflow:
+      step_1: "Define time horizon (T periods: weeks, months, quarters)"
+      step_2: "Create decision variables for each period"
+      step_3: "Link periods via inventory or state variables"
+      step_4: "Add period-specific constraints"
+      step_5: "Solve as large LP or MILP"
+    generic_example: "Production planning, inventory management, workforce scheduling"
+
+# ==============================================================================
+# PROBLEM FORMULATION TEMPLATES
+# ==============================================================================
+
+problem_templates:
+  template_1_resource_allocation:
+    description: "Allocate limited resources to activities to maximize benefit"
+    formulation: |
+      Decision variables:
+        xⱼ = amount of resource allocated to activity j
+
+      Objective:
+        maximize Σⱼ benefit_j * xⱼ
+
+      Constraints:
+        Σⱼ resource_usage_ij * xⱼ ≤ resource_limit_i  (for each resource i)
+        xⱼ ≥ 0
+
+    example_adaptations:
+      - "Budget allocation across marketing channels (maximize conversions)"
+      - "Labor allocation across projects (maximize profit)"
+      - "Server allocation across services (maximize throughput)"
+
+  template_2_covering_problem:
+    description: "Select minimum set to cover all requirements"
+    formulation: |
+      Decision variables:
+        yⱼ ∈ {0, 1}: 1 if option j is selected
+
+      Objective:
+        minimize Σⱼ cost_j * yⱼ
+
+      Constraints:
+        Σⱼ coverage_ij * yⱼ ≥ 1  (for each requirement i)
+
+    example_adaptations:
+      - "Facility location (ensure all customers within distance)"
+      - "Staff scheduling (cover all shifts)"
+      - "Sensor placement (monitor all areas)"
+
+  template_3_blending_problem:
+    description: "Mix ingredients to meet specifications at minimum cost"
+    formulation: |
+      Decision variables:
+        xⱼ = quantity of ingredient j
+
+      Objective:
+        minimize Σⱼ cost_j * xⱼ
+
+      Constraints:
+        Σⱼ attribute_ij * xⱼ ≥ min_requirement_i  (for each attribute i)
+        Σⱼ attribute_ij * xⱼ ≤ max_requirement_i
+        Σⱼ xⱼ = total_quantity
+        xⱼ ≥ 0
+
+    example_adaptations:
+      - "Diet problem (meet nutrition requirements)"
+      - "Fuel blending (meet octane, emissions specs)"
+      - "Investment portfolio (meet return, risk targets)"
+
+  template_4_routing_problem:
+    description: "Find minimum cost routes visiting all locations"
+    formulation: |
+      Decision variables:
+        xᵢⱼ ∈ {0, 1}: 1 if edge (i,j) is used in route
+
+      Objective:
+        minimize Σᵢ Σⱼ distance_ij * xᵢⱼ
+
+      Constraints:
+        Each location visited exactly once
+        Subtour elimination (depends on problem variant)
+
+    example_adaptations:
+      - "Delivery routing (minimize total distance)"
+      - "Service technician routing (minimize time)"
+      - "Sales territory planning"
+
+# ==============================================================================
+# BEST PRACTICES
+# ==============================================================================
+
+best_practices:
+  problem_formulation:
+    - "Start simple: Formulate basic version first, add complexity incrementally"
+    - "Validate model logic: Test on small example by hand before coding"
+    - "Use meaningful variable names: x_product_A better than x1"
+    - "Document all assumptions: What are you assuming? What are constraints based on?"
+
+  data_preparation:
+    - "Clean data before modeling: Garbage in, garbage out"
+    - "Validate inputs: Check for negative costs, infeasible demand/supply"
+    - "Use consistent units: Don't mix hours and days, dollars and thousands"
+
+  solving:
+    - "Start with simple solver: CBC (free) before Gurobi (commercial)"
+    - "Check solver status: Optimal, feasible, infeasible, unbounded?"
+    - "Set time limits for large problems: Don't wait forever for optimal"
+    - "Use warm starts: Initialize with previous solution for similar problems"
+
+  validation:
+    - "Sanity check results: Do they make business sense?"
+    - "Compare to baseline: Is optimization better than current practice?"
+    - "Check constraint satisfaction: Are all constraints truly met?"
+    - "Sensitivity analysis: How robust is solution to parameter changes?"
+
+  communication:
+    - "Explain in plain language: Avoid jargon when presenting to stakeholders"
+    - "Visualize solution: Maps for routing, charts for allocations"
+    - "Quantify benefit: '$X cost savings vs current approach'"
+    - "Acknowledge limitations: Model assumptions and what's not included"
+
+# ==============================================================================
+# COMMON PITFALLS
+# ==============================================================================
+
+common_pitfalls:
+  - pitfall: "Infeasible problem"
+    symptom: "Solver reports 'No solution'"
+    causes:
+      - "Conflicting constraints (demand > supply)"
+      - "Overly restrictive constraints"
+      - "Data errors (negative capacities)"
+    solutions:
+      - "Relax constraints one at a time to identify culprit"
+      - "Add slack variables to understand infeasibility"
+      - "Check data for errors"
+
+  - pitfall: "Unbounded problem"
+    symptom: "Objective can increase to infinity"
+    causes:
+      - "Missing constraints (no capacity limits)"
+      - "Incorrect objective sign (minimizing negative cost → unbounded)"
+    solutions:
+      - "Add realistic bounds on variables"
+      - "Review problem formulation"
+
+  - pitfall: "Slow solving"
+    symptom: "Solver takes hours or doesn't finish"
+    causes:
+      - "Too many integer variables (combinatorial explosion)"
+      - "Weak LP relaxation (loose bounds)"
+      - "Large problem size (millions of variables)"
+    solutions:
+      - "Simplify model (fewer variables, tighter constraints)"
+      - "Use commercial solver (Gurobi faster than CBC)"
+      - "Decompose into smaller sub-problems"
+      - "Use heuristics for very large problems"
+
+  - pitfall: "Non-linear constraints coded incorrectly"
+    symptom: "LP solver fails or gives wrong results"
+    problem: "Trying to multiply two decision variables in LP (x * y)"
+    solution: "Use specialized non-linear solver or reformulate problem"
+
+  - pitfall: "Ignoring integrality gaps"
+    symptom: "LP relaxation gives fractional solution (x = 2.7) but need integer"
+    problem: "Solved LP instead of MILP"
+    solution: "Explicitly declare variables as integer or binary"
+
+  - pitfall: "Overfitting to current data"
+    symptom: "Optimal solution is brittle, breaks with small data changes"
+    problem: "Not accounting for uncertainty"
+    solution: "Add robustness (safety margins, scenario planning)"
+
+# ==============================================================================
+# SOLVER SELECTION GUIDE
+# ==============================================================================
+
+solver_selection:
+  open_source:
+    cbc:
+      - "Good general-purpose MILP solver"
+      - "Free, bundled with PuLP"
+      - "Reasonable performance for small/medium problems"
+      - "Recommend as starting point"
+
+    glpk:
+      - "Older, slower than CBC"
+      - "Widely available"
+      - "Use if CBC not available"
+
+    scip:
+      - "Academic solver, strong for research"
+      - "Free for academic use"
+
+  commercial:
+    gurobi:
+      - "Industry-leading MILP solver"
+      - "10-100x faster than open-source for large problems"
+      - "Free academic license available"
+      - "Recommend for production use if budget allows"
+
+    cplex:
+      - "IBM solver, comparable to Gurobi"
+      - "Widely used in industry"
+      - "Free academic license"
+
+    xpress:
+      - "FICO solver, very fast"
+      - "Good for large-scale problems"
+
+  recommendation:
+    - "Start with CBC (free) via PuLP"
+    - "If solving is slow (>1 hour), upgrade to Gurobi"
+    - "For network problems, consider specialized algorithms (NetworkX)"
+
+# ==============================================================================
+# EVALUATION METRICS
+# ==============================================================================
+
+evaluation_metrics:
+  solution_quality:
+    optimality_gap:
+      - "For MILP: (best_bound - best_solution) / best_solution"
+      - "Gap = 0% means provably optimal"
+      - "Gap < 1% usually acceptable for practical purposes"
+
+    objective_value:
+      - "Absolute value of objective (cost, profit, etc.)"
+      - "Compare to baseline (current approach)"
+      - "% improvement over baseline"
+
+  computational_performance:
+    solve_time:
+      - "Seconds or minutes to find solution"
+      - "Acceptable time depends on use case (real-time vs offline)"
+
+    memory_usage:
+      - "RAM required (matters for very large problems)"
+
+  robustness:
+    sensitivity:
+      - "How much can parameters change before solution changes?"
+      - "Shadow prices: Value of relaxing each constraint"
+
+    scenario_analysis:
+      - "Test solution under different demand/cost scenarios"
+      - "Evaluate worst-case and expected-case performance"
+
+# ==============================================================================
+# GENERIC EXAMPLE USE CASES
+# ==============================================================================
+
+example_use_cases:
+  - name: resource_allocation_optimization
+    description: "Allocate limited resources (budget, labor, equipment) to maximize output"
+    generic_scenario: "You have R resources and A activities, want to maximize total benefit"
+    workflow:
+      1: "Define decision variables: x_a = amount allocated to activity a"
+      2: "Objective: maximize Σ benefit_a * x_a"
+      3: "Constraints: Σ resource_usage_ra * x_a ≤ resource_limit_r for each resource"
+      4: "Solve LP, extract optimal allocations"
+      5: "Perform sensitivity analysis (shadow prices)"
+    adaptable_to:
+      - "Marketing budget allocation across channels"
+      - "Labor hours across projects"
+      - "Server capacity across applications"
+      - "Investment capital across opportunities"
+
+  - name: facility_location_problem
+    description: "Decide which facilities to open and how to serve customers"
+    generic_scenario: "N potential sites, M customers, minimize total cost (fixed + variable)"
+    workflow:
+      1: "Binary variables: y_i = 1 if open site i"
+      2: "Flow variables: x_ij = amount served from site i to customer j"
+      3: "Objective: minimize Σ fixed_cost_i * y_i + Σ Σ variable_cost_ij * x_ij"
+      4: "Constraints: Each customer's demand met, can't serve from closed site"
+      5: "Solve MILP, determine which sites to open"
+    adaptable_to:
+      - "Warehouse location selection"
+      - "Retail store site selection"
+      - "Data center placement"
+      - "Service center location"
+
+  - name: workforce_scheduling
+    description: "Assign employees to shifts to cover demand at minimum cost"
+    generic_scenario: "E employees, S shifts, must meet coverage requirements"
+    workflow:
+      1: "Binary variables: x_es = 1 if employee e works shift s"
+      2: "Objective: minimize total labor cost or maximize coverage"
+      3: "Constraints: Each shift has minimum coverage, employee hours limits"
+      4: "Solve MILP, generate shift schedule"
+    adaptable_to:
+      - "Nurse scheduling"
+      - "Call center staffing"
+      - "Retail shift planning"
+      - "Restaurant crew scheduling"
+
+  - name: project_portfolio_selection
+    description: "Choose which projects to fund given budget constraint"
+    generic_scenario: "P projects with costs and benefits, limited budget B"
+    workflow:
+      1: "Binary variables: y_p = 1 if fund project p"
+      2: "Objective: maximize Σ benefit_p * y_p"
+      3: "Constraint: Σ cost_p * y_p ≤ budget"
+      4: "Add dependencies: If project A then must do project B"
+      5: "Solve MILP, determine optimal portfolio"
+    adaptable_to:
+      - "R&D project selection"
+      - "Capital investment decisions"
+      - "Product roadmap prioritization"
+      - "Marketing campaign selection"
+
+  - name: supply_distribution_network
+    description: "Optimize flow from suppliers through facilities to customers"
+    generic_scenario: "Multi-echelon network with shipping costs at each stage"
+    workflow:
+      1: "Flow variables: x_ij = amount from node i to node j"
+      2: "Objective: minimize total shipping cost Σ Σ cost_ij * x_ij"
+      3: "Constraints: Flow balance at each node, supply/demand limits"
+      4: "Solve as network flow LP"
+      5: "Visualize optimal flows on network diagram"
+    adaptable_to:
+      - "Supply chain network design"
+      - "Distribution planning"
+      - "Logistics optimization"
+      - "Data routing in networks"
+
+# ==============================================================================
+# ADAPTING TO YOUR DOMAIN
+# ==============================================================================
+
+adaptation_guide:
+  step_1_identify_decision_type:
+    questions:
+      - "What am I deciding? (quantities, yes/no, assignments, schedules, routes)"
+      - "Are decisions continuous (any value) or discrete (integers, binary)?"
+      - "Single time period or multiple periods?"
+
+  step_2_define_objective:
+    questions:
+      - "What am I optimizing? (minimize cost, maximize profit, minimize time)"
+      - "Is objective linear in decision variables?"
+      - "Are there multiple objectives (cost vs quality)?"
+
+  step_3_identify_constraints:
+    questions:
+      - "What limits my decisions? (budget, capacity, time, regulations)"
+      - "Are constraints linear?"
+      - "Any logical constraints (if-then, exactly K selections)?"
+
+  step_4_select_problem_type:
+    if_continuous_decisions:
+      - "Use Linear Programming (LP)"
+    if_discrete_decisions:
+      - "Use Integer Programming (IP) or MILP"
+    if_network_structure:
+      - "Use specialized network algorithms (faster)"
+    if_nonlinear:
+      - "Use non-linear optimization (CVXPY, SciPy)"
+
+  step_5_implement_and_iterate:
+    - "Start with simplest formulation"
+    - "Solve small test problem by hand to validate"
+    - "Code in PuLP or SciPy"
+    - "Test on small dataset first"
+    - "Scale up to full problem"
+    - "Add complexity (more constraints, periods) incrementally"
+
+# ==============================================================================
+# DEPENDENCIES
+# ==============================================================================
+
+dependencies:
+  core:
+    - python: ">=3.10"
+    - numpy: ">=1.24"
+    - pandas: ">=2.0"
+
+  optimization:
+    - pulp: ">=2.7"  # LP/MILP with CBC solver
+    - scipy: ">=1.11"  # scipy.optimize
+    - cvxpy: ">=1.4"  # Convex optimization
+
+  commercial_solvers:
+    - gurobipy: ">=10.0"  # Requires license
+    - cplex: ">=22.1"  # Requires license
+
+  network:
+    - networkx: ">=3.1"
+
+  utilities:
+    - python-mip: ">=1.15"
+    - pyomo: ">=6.6"  # Algebraic modeling
+    - ortools: ">=9.7"  # Google OR-Tools
+
+  visualization:
+    - matplotlib: ">=3.7"
+    - seaborn: ">=0.12"
+
+# ==============================================================================
+# REFERENCES
+# ==============================================================================
+
+references:
+  books:
+    - title: "Introduction to Operations Research (10th ed)"
+      authors: "Hillier & Lieberman"
+      publisher: "McGraw-Hill"
+
+    - title: "Linear Programming and Network Flows (4th ed)"
+      authors: "Bazaraa, Jarvis & Sherali"
+      publisher: "Wiley"
+
+    - title: "Optimization in Operations Research (2nd ed)"
+      authors: "Rardin"
+      publisher: "Pearson"
+
+  online_resources:
+    - name: "PuLP Documentation"
+      url: "https://coin-or.github.io/pulp/"
+
+    - name: "CVXPY Documentation"
+      url: "https://www.cvxpy.org/"
+
+    - name: "Google OR-Tools"
+      url: "https://developers.google.com/optimization"
+
+    - name: "NetworkX Documentation"
+      url: "https://networkx.org/"

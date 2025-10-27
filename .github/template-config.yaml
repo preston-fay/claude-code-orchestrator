@@ -1,0 +1,312 @@
+# GitHub Template Repository Configuration
+#
+# This file defines what gets included when creating a new repository from this template.
+# GitHub uses this to determine which files to copy and which to exclude.
+#
+# Note: GitHub also respects .gitattributes for binary file handling.
+
+# ==============================================================================
+# FILES AND DIRECTORIES TO INCLUDE
+# ==============================================================================
+
+include:
+  # Core orchestrator framework
+  - ".claude/"
+  - ".claude/knowledge/"
+  - ".claude/skills/"
+  - ".claude/decisions/"
+  - ".claude/checkpoints/.gitkeep"
+  - ".claude/consensus/.gitkeep"
+
+  # Design system and brand templates
+  - "design_system/"
+  - "design_system/web/"
+  - "design_system/templates/"
+
+  # CI/CD and automation
+  - ".github/workflows/"
+  - ".github/ISSUE_TEMPLATE/"
+  - ".github/PULL_REQUEST_TEMPLATE.md"
+
+  # Scripts and utilities
+  - "scripts/"
+  - "scripts/hygiene/"
+  - "scripts/validation/"
+
+  # Documentation
+  - "docs/"
+  - "docs/*.md"
+  - "TEMPLATE_USAGE.md"
+  - "CLAUDE.md"
+
+  # Project templates for bootstrap command
+  - "templates/"
+  - "templates/project-types/"
+
+  # Default client governance
+  - "clients/.schema/"
+  - "clients/kearney-default/"
+  - "clients/README.md"
+
+  # Source code (orchestrator CLI and agents)
+  - "src/"
+  - "src/orchestrator/"
+  - "src/intake/"
+  - "src/steward/"
+  - "src/cli.py"
+
+  # Configuration files
+  - ".pre-commit-config.yaml"
+  - ".tidyignore"
+  - ".markdownlint.json"
+  - ".gitignore"
+  - ".gitattributes"
+
+  # Python package configuration
+  - "pyproject.toml"
+  - "setup.py"
+  - "requirements.txt"
+  - "requirements-dev.txt"
+
+  # Project metadata
+  - "README.md"
+  - "LICENSE"
+  - "CONTRIBUTING.md"
+  - ".editorconfig"
+
+# ==============================================================================
+# FILES AND DIRECTORIES TO EXCLUDE
+# ==============================================================================
+
+exclude:
+  # Project-specific artifacts (should not be in template)
+  - "backups/"
+  - "backups/**/*"
+
+  # Data directories (user will create their own)
+  - "data/"
+  - "data/**/*"
+  - "datasets/"
+
+  # Model artifacts (too large, project-specific)
+  - "models/"
+  - "models/**/*"
+  - "*.pkl"
+  - "*.h5"
+  - "*.pt"
+  - "*.onnx"
+
+  # Environment and secrets
+  - ".env"
+  - ".env.local"
+  - ".env.*.local"
+  - "credentials.json"
+  - "*.pem"
+  - "*.key"
+
+  # Python compiled files
+  - "*.pyc"
+  - "*.pyo"
+  - "*.pyd"
+  - "__pycache__/"
+  - "__pycache__/**/*"
+  - ".pytest_cache/"
+  - ".pytest_cache/**/*"
+  - "*.egg-info/"
+  - "*.egg-info/**/*"
+  - ".eggs/"
+
+  # JavaScript/Node artifacts
+  - "node_modules/"
+  - "node_modules/**/*"
+  - "dist/"
+  - "dist/**/*"
+  - "build/"
+  - "build/**/*"
+  - "package-lock.json"
+  - "yarn.lock"
+
+  # IDE and editor files
+  - ".vscode/"
+  - ".vscode/**/*"
+  - ".idea/"
+  - ".idea/**/*"
+  - "*.swp"
+  - "*.swo"
+  - "*~"
+  - ".DS_Store"
+  - "Thumbs.db"
+
+  # Test coverage and reports
+  - "htmlcov/"
+  - "htmlcov/**/*"
+  - ".coverage"
+  - ".coverage.*"
+  - "coverage.xml"
+  - "*.cover"
+
+  # Jupyter notebook checkpoints
+  - ".ipynb_checkpoints"
+  - ".ipynb_checkpoints/**/*"
+  - "**/.ipynb_checkpoints/"
+
+  # Client-specific configurations (except kearney-default)
+  - "clients/*/"
+  - "!clients/.schema/"
+  - "!clients/kearney-default/"
+  - "!clients/README.md"
+  - "clients/example-client/"
+  - "clients/acme-corp/"
+  - "clients/*/governance.yaml"
+
+  # Example intake files (user will create their own)
+  - "intake/*.yaml"
+  - "intake/*.yml"
+  - "!intake/.gitkeep"
+
+  # Orchestrator state and metrics (runtime artifacts)
+  - ".claude/state.json"
+  - ".claude/metrics/"
+  - ".claude/metrics/**/*"
+
+  # Reports (generated, not template content)
+  - "reports/"
+  - "reports/**/*"
+  - "!reports/.gitkeep"
+
+  # Notebooks (examples are project-specific)
+  - "notebooks/*.ipynb"
+  - "!notebooks/.gitkeep"
+
+  # Analytics artifacts
+  - "analytics/"
+  - "analytics/**/*"
+
+  # Temporary files
+  - "tmp/"
+  - "temp/"
+  - "*.tmp"
+  - "*.temp"
+  - "*.log"
+
+  # Virtual environments
+  - "venv/"
+  - "venv/**/*"
+  - "env/"
+  - "ENV/"
+  - ".venv/"
+  - ".venv/**/*"
+
+  # Git-specific files
+  - ".git/"
+  - ".git/**/*"
+  - ".gitmodules"
+
+# ==============================================================================
+# FILE TRANSFORMATIONS
+# ==============================================================================
+
+transforms:
+  # Add template notice to README
+  - file: "README.md"
+    action: "prepend_template_notice"
+    content: |
+      > **Note:** This project was created from the [Claude Code Orchestrator](https://github.com/kearney/claude-code-orchestrator) template.
+      > See [TEMPLATE_USAGE.md](TEMPLATE_USAGE.md) for setup instructions.
+
+  # Add project placeholders to CLAUDE.md
+  - file: "CLAUDE.md"
+    action: "add_project_placeholders"
+    placeholders:
+      - "{{PROJECT_NAME}}"
+      - "{{PROJECT_DESCRIPTION}}"
+      - "{{PROJECT_TYPE}}"
+      - "{{CLIENT_NAME}}"
+
+  # Update pyproject.toml with template project name
+  - file: "pyproject.toml"
+    action: "replace_project_name"
+    pattern: 'name = "claude-code-orchestrator"'
+    replacement: 'name = "{{PROJECT_NAME}}"'
+
+  # Clear intake directory (keep structure)
+  - file: "intake/"
+    action: "keep_gitkeep_only"
+
+# ==============================================================================
+# POST-CREATION ACTIONS
+# ==============================================================================
+
+post_creation:
+  # Automatically create issues for new project setup
+  - action: "create_issue_from_template"
+    template: ".github/ISSUE_TEMPLATE/new-project-checklist.md"
+    title: "New Project Setup Checklist"
+    labels: ["setup", "documentation"]
+
+  # Enable GitHub Pages for documentation
+  - action: "enable_github_pages"
+    branch: "main"
+    path: "/docs"
+
+  # Configure branch protection
+  - action: "enable_branch_protection"
+    branch: "main"
+    require_reviews: 1
+    require_status_checks: true
+
+# ==============================================================================
+# REPOSITORY SETTINGS
+# ==============================================================================
+
+settings:
+  # Template-specific settings
+  is_template: true
+  default_branch: "main"
+
+  # Features to enable
+  features:
+    wiki: false
+    issues: true
+    projects: true
+    discussions: false
+
+  # Repository visibility
+  visibility: "private"  # Change to "public" if open-sourcing
+
+  # Topics/tags for discoverability
+  topics:
+    - "claude-code"
+    - "orchestrator"
+    - "project-template"
+    - "consulting"
+    - "analytics"
+    - "ml-ops"
+
+# ==============================================================================
+# USAGE NOTES
+# ==============================================================================
+
+# This configuration file serves multiple purposes:
+#
+# 1. GitHub Template Documentation: Defines what's included in template
+# 2. Bootstrap Command Reference: Used by `orchestrator bootstrap` command
+# 3. Maintenance Guide: Documents template structure for contributors
+#
+# When updating this file:
+# - Add comments explaining why files are included/excluded
+# - Keep include/exclude lists alphabetically sorted within sections
+# - Test template creation to verify configuration works
+# - Update TEMPLATE_USAGE.md if changing template structure
+#
+# Template testing:
+# 1. Create test repository from template via GitHub UI
+# 2. Clone test repository
+# 3. Verify expected files present and excluded files absent
+# 4. Delete test repository
+#
+# Bootstrap command testing:
+# 1. Run: orchestrator bootstrap analytics --output /tmp/test-project --dry-run
+# 2. Review what would be copied
+# 3. Run without --dry-run and verify structure
+# 4. Delete test project

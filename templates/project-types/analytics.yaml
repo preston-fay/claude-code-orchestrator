@@ -1,0 +1,384 @@
+# Analytics Project Template
+#
+# Template for data science and analytics projects including exploratory
+# data analysis, statistical modeling, and insights generation.
+#
+# Use case: Customer segmentation, forecasting, A/B testing, descriptive analytics
+
+name: "Analytics Project"
+type: "analytics"
+description: "Data science and analytics project template"
+
+# Directory structure to create
+directory_structure:
+  - ".claude/"
+  - ".claude/decisions/"
+  - ".claude/checkpoints/"
+  - ".claude/consensus/"
+  - ".claude/knowledge/"
+  - ".claude/skills/"
+  - ".github/workflows/"
+  - "data/raw/"
+  - "data/interim/"
+  - "data/processed/"
+  - "notebooks/"
+  - "src/data/"
+  - "src/features/"
+  - "src/visualization/"
+  - "tests/"
+  - "docs/"
+  - "reports/"
+  - "scripts/"
+  - "configs/"
+
+# Files to copy from orchestrator
+copy_files:
+  - source: ".claude/knowledge/analytics_best_practices.yaml"
+    destination: ".claude/knowledge/analytics_best_practices.yaml"
+  - source: ".claude/knowledge/kearney_standards.yaml"
+    destination: ".claude/knowledge/kearney_standards.yaml"
+  - source: ".claude/knowledge/projects/README.md"
+    destination: ".claude/knowledge/projects/README.md"
+  - source: ".claude/skills/time_series_analytics.yaml"
+    destination: ".claude/skills/time_series_analytics.yaml"
+  - source: ".claude/skills/survey_data_processing.yaml"
+    destination: ".claude/skills/survey_data_processing.yaml"
+  - source: ".claude/decisions/template.md"
+    destination: ".claude/decisions/template.md"
+  - source: ".claude/decisions/README.md"
+    destination: ".claude/decisions/README.md"
+  - source: "design_system/"
+    destination: "design_system/"
+    recursive: true
+  - source: ".github/workflows/ci.yaml"
+    destination: ".github/workflows/ci.yaml"
+    optional: true
+  - source: ".pre-commit-config.yaml"
+    destination: ".pre-commit-config.yaml"
+  - source: ".tidyignore"
+    destination: ".tidyignore"
+  - source: ".markdownlint.json"
+    destination: ".markdownlint.json"
+    optional: true
+
+# Agents to include in workflow
+agents:
+  - name: "Architect"
+    role: "Design data pipeline architecture and analytical approach"
+    phases: ["planning", "consensus"]
+
+  - name: "Data"
+    role: "Data engineering, ETL, feature engineering, and data quality"
+    phases: ["data-engineering"]
+
+  - name: "Developer"
+    role: "Implement analytical code, visualizations, and reporting"
+    phases: ["development"]
+
+  - name: "QA"
+    role: "Validate data quality, test analytical logic, verify outputs"
+    phases: ["qa"]
+
+  - name: "Documentarian"
+    role: "Create README, data dictionary, methodology documentation"
+    phases: ["documentation"]
+
+# Workflow phases
+phases:
+  - name: "planning"
+    description: "Define analytical approach, data requirements, and success metrics"
+    agents: ["Architect"]
+    parallel: false
+    require_consensus: true
+    expected_artifacts:
+      - "docs/analysis_plan.md"
+      - ".claude/decisions/ADR-*.md"
+
+  - name: "consensus"
+    description: "Review and approve analytical approach"
+    agents: ["Consensus"]
+    parallel: false
+    require_consensus: false
+
+  - name: "data-engineering"
+    description: "Ingest, clean, validate, and transform data"
+    agents: ["Data"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "data/processed/*.csv"
+      - "data/processed/*.parquet"
+      - "docs/data_dictionary.md"
+      - "reports/data_quality_report.md"
+
+  - name: "development"
+    description: "Perform analysis, create visualizations, generate insights"
+    agents: ["Developer"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "notebooks/*.ipynb"
+      - "src/**/*.py"
+      - "reports/*.html"
+      - "reports/*.md"
+
+  - name: "qa"
+    description: "Validate analysis, test code, verify insights"
+    agents: ["QA"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "reports/qa_report.md"
+      - "tests/test_*.py"
+
+  - name: "documentation"
+    description: "Create comprehensive documentation and final report"
+    agents: ["Documentarian"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "README.md"
+      - "docs/methodology.md"
+      - "docs/findings.md"
+
+# Default intake configuration for analytics projects
+intake_template:
+  project:
+    name: "{{PROJECT_NAME}}"
+    type: "analytics"
+    description: "{{PROJECT_DESCRIPTION}}"
+    directory: "./"
+
+  requirements:
+    functional:
+      - "Perform exploratory data analysis on provided dataset"
+      - "Identify key patterns, trends, and insights"
+      - "Create visualizations to communicate findings"
+      - "Generate executive summary with actionable recommendations"
+
+    technical:
+      - "Use Python with pandas, numpy, matplotlib/seaborn"
+      - "Follow data quality validation best practices"
+      - "Ensure reproducible analysis (version control, documentation)"
+      - "Apply statistical rigor (significance testing, confidence intervals)"
+
+    data:
+      - "Data source: {{DATA_SOURCE}}"
+      - "Expected data volume: {{DATA_VOLUME}}"
+      - "Data quality requirements: clean, validated, documented"
+
+  constraints:
+    timeline: "{{TIMELINE}}"
+    budget: "N/A"
+    technical:
+      - "No PII in version control (use .env for credentials)"
+      - "Follow Kearney presentation standards for deliverables"
+      - "Ensure analysis is reproducible by client team"
+
+  success_criteria:
+    - "Data quality score > 85%"
+    - "At least 3 actionable insights identified"
+    - "Visualizations meet Kearney brand standards (no gridlines, Arial font)"
+    - "Executive summary follows RAISE framework"
+    - "Analysis documented and reproducible"
+
+# Python dependencies for analytics projects
+dependencies:
+  python:
+    - "pandas>=2.0.0"
+    - "numpy>=1.24.0"
+    - "matplotlib>=3.7.0"
+    - "seaborn>=0.12.0"
+    - "scipy>=1.10.0"
+    - "statsmodels>=0.14.0"
+    - "scikit-learn>=1.3.0"
+    - "jupyter>=1.0.0"
+    - "jupyterlab>=4.0.0"
+    - "duckdb>=0.9.0"
+    - "pytest>=7.4.0"
+    - "black>=23.0.0"
+    - "flake8>=6.0.0"
+
+# Configuration files to generate
+config_files:
+  - name: ".gitignore"
+    content: |
+      # Python
+      __pycache__/
+      *.py[cod]
+      *$py.class
+      *.so
+      .Python
+      env/
+      venv/
+      ENV/
+      .venv
+
+      # Jupyter
+      .ipynb_checkpoints
+      *.ipynb_checkpoints/
+
+      # Data files (don't commit raw data)
+      data/raw/*
+      data/interim/*
+      !data/raw/.gitkeep
+      !data/interim/.gitkeep
+      *.csv
+      *.parquet
+      *.pkl
+      *.h5
+      *.db
+
+      # IDE
+      .vscode/
+      .idea/
+      *.swp
+      *.swo
+      *~
+      .DS_Store
+
+      # Testing
+      .pytest_cache/
+      .coverage
+      htmlcov/
+
+      # Environment
+      .env
+      .env.local
+      credentials.json
+      *.pem
+
+      # Reports (generated)
+      reports/*.html
+      !reports/.gitkeep
+
+      # Orchestrator state
+      .claude/state.json
+      .claude/metrics/
+
+  - name: "requirements.txt"
+    content: |
+      # Generated by orchestrator bootstrap
+      # Analytics project dependencies
+      pandas>=2.0.0
+      numpy>=1.24.0
+      matplotlib>=3.7.0
+      seaborn>=0.12.0
+      scipy>=1.10.0
+      statsmodels>=0.14.0
+      scikit-learn>=1.3.0
+      jupyter>=1.0.0
+      jupyterlab>=4.0.0
+      duckdb>=0.9.0
+      pytest>=7.4.0
+      black>=23.0.0
+      flake8>=6.0.0
+
+  - name: "README.md"
+    content: |
+      # {{PROJECT_NAME}}
+
+      {{PROJECT_DESCRIPTION}}
+
+      ## Project Structure
+
+      ```
+      .
+      ├── data/
+      │   ├── raw/          # Original, immutable data
+      │   ├── interim/      # Intermediate transformed data
+      │   └── processed/    # Final data for analysis
+      ├── notebooks/        # Jupyter notebooks for exploration
+      ├── src/              # Source code
+      │   ├── data/         # Data loading and processing
+      │   ├── features/     # Feature engineering
+      │   └── visualization/ # Plotting functions
+      ├── tests/            # Automated tests
+      ├── reports/          # Analysis reports and findings
+      └── docs/             # Documentation
+      ```
+
+      ## Getting Started
+
+      1. **Install dependencies:**
+         ```bash
+         pip install -r requirements.txt
+         ```
+
+      2. **Place raw data:**
+         ```bash
+         # Copy your data files to data/raw/
+         ```
+
+      3. **Run analysis:**
+         ```bash
+         # Option 1: Run orchestrator workflow
+         orchestrator run start --intake intake.yaml
+         orchestrator run next
+
+         # Option 2: Run notebooks manually
+         jupyter lab
+         ```
+
+      ## Development
+
+      - **Code style:** Run `black src/ tests/` before committing
+      - **Linting:** Run `flake8 src/ tests/` to check code quality
+      - **Testing:** Run `pytest tests/` to run test suite
+
+      ## Data
+
+      See `docs/data_dictionary.md` for complete data documentation.
+
+      ## Findings
+
+      Analysis findings and recommendations are documented in:
+      - `reports/findings.md` - Detailed analysis results
+      - `reports/executive_summary.html` - Executive presentation
+
+      ## License
+
+      This project is confidential and proprietary.
+
+  - name: "data/raw/.gitkeep"
+    content: ""
+
+  - name: "data/interim/.gitkeep"
+    content: ""
+
+  - name: "data/processed/.gitkeep"
+    content: ""
+
+  - name: "reports/.gitkeep"
+    content: ""
+
+# Validation checks after bootstrap
+validations:
+  - check: "directory_exists"
+    path: ".claude/"
+    message: "Orchestrator directory created"
+
+  - check: "directory_exists"
+    path: "data/raw/"
+    message: "Data directories created"
+
+  - check: "file_exists"
+    path: "requirements.txt"
+    message: "Dependencies file created"
+
+  - check: "file_exists"
+    path: ".gitignore"
+    message: "Git ignore file created"
+
+  - check: "file_exists"
+    path: "README.md"
+    message: "README created"
+
+# Post-bootstrap instructions
+next_steps:
+  - "Install dependencies: `pip install -r requirements.txt`"
+  - "Place raw data files in `data/raw/`"
+  - "Create project-specific knowledge: `cp .claude/knowledge/projects/README.md .claude/knowledge/projects/{{PROJECT_SLUG}}.yaml`"
+  - "Update intake.yaml with project requirements"
+  - "Start workflow: `orchestrator run start --intake intake.yaml`"
+  - "Execute first phase: `orchestrator run next`"

@@ -1,0 +1,686 @@
+# Survey Data Processing Skill
+#
+# Generic patterns for processing survey-structured data from ANY domain.
+# This skill teaches HOW to clean, match, and analyze survey responses,
+# not WHAT surveys to analyze. Adapt to customer feedback, employee surveys,
+# market research, or any questionnaire-based data collection.
+
+name: survey_data_processing
+version: 1.0.0
+category: data_engineering
+
+description: >
+  Universal survey data processing patterns applicable to any questionnaire-based data.
+  Learn entity resolution, data cleaning, text analysis, and categorical analysis
+  techniques that work across customer, employee, market research, and academic surveys.
+
+# ==============================================================================
+# CORE CAPABILITIES
+# ==============================================================================
+
+capabilities:
+  - name: entity_resolution
+    description: Match and deduplicate entities (people, companies, locations) across datasets
+    techniques:
+      - Fuzzy string matching (Levenshtein, Jaro-Winkler, cosine similarity)
+      - Blocking and indexing for scalability
+      - Probabilistic record linkage (Fellegi-Sunter model)
+      - Clustering for grouping duplicates (hierarchical, DBSCAN)
+      - Active learning for disambiguation (human-in-the-loop)
+      - Graph-based resolution (connected components)
+    when_to_use:
+      - "Matching respondents across multiple survey waves"
+      - "Deduplicating records with typos or variations"
+      - "Linking survey responses to other datasets (CRM, transactions)"
+      - "Resolving company names or locations with inconsistent formats"
+    challenges:
+      - "Name variations (nicknames, misspellings, married names)"
+      - "Missing data in matching fields"
+      - "Computational complexity (O(n²) comparisons)"
+    solutions:
+      - "Use multiple matching strategies (name + location, name + ID)"
+      - "Apply blocking to reduce comparison space"
+      - "Tune similarity thresholds for precision-recall tradeoff"
+    libraries:
+      - recordlinkage>=0.15
+      - fuzzywuzzy>=0.18
+      - dedupe>=2.0
+      - python-levenshtein>=0.21
+
+  - name: data_cleaning
+    description: Handle data quality issues in survey responses
+    techniques:
+      - Missing value analysis and imputation
+      - Outlier detection and treatment (IQR, Z-score, domain rules)
+      - Data type validation and coercion
+      - Constraint checking (range, format, logical consistency)
+      - Duplicate detection and removal
+      - Standardization (names, formats, categories)
+      - Skip logic validation (did respondent answer correctly based on routing?)
+    when_to_use:
+      - "Survey data from paper forms (OCR errors)"
+      - "Mobile app surveys (inconsistent data entry)"
+      - "Web surveys (missing responses, straight-lining)"
+      - "Any survey with data quality concerns"
+    best_practices:
+      - "Profile data first (understand the mess before cleaning)"
+      - "Document all cleaning decisions (reproducibility)"
+      - "Keep raw data unchanged (clean in separate pipeline)"
+      - "Generate data quality reports for stakeholders"
+    libraries:
+      - pandas>=2.0
+      - great_expectations>=0.18
+      - pyjanitor>=0.26
+      - ftfy>=6.1  # Fix text encoding
+
+  - name: fuzzy_matching
+    description: Match text fields despite typos, abbreviations, and format differences
+    techniques:
+      - Phonetic matching (Soundex, Metaphone, NYSIIS)
+      - Edit distance (Levenshtein, Damerau-Levenshtein, Hamming)
+      - Token-based similarity (Jaccard, Dice, cosine)
+      - Character n-gram matching
+      - Hybrid approaches (combine multiple algorithms)
+      - Threshold optimization (precision vs recall)
+    when_to_use:
+      - "Matching free-text responses (company names, locations, job titles)"
+      - "Handling transliteration differences (Arabic, Chinese, accents)"
+      - "Dealing with OCR errors from scanned forms"
+      - "Standardizing categorical responses entered as text"
+    applications:
+      - "Match 'IBM Corporation' vs 'IBM Corp.' vs 'I.B.M.'"
+      - "Standardize job titles ('VP Sales' vs 'Vice President of Sales')"
+      - "Geocode addresses with typos or missing components"
+    libraries:
+      - fuzzywuzzy>=0.18
+      - jellyfish>=1.0
+      - textdistance>=4.5
+      - rapidfuzz>=3.0  # Faster alternative to fuzzywuzzy
+
+  - name: text_analysis
+    description: Process open-ended survey responses with NLP
+    techniques:
+      - Text preprocessing (tokenization, lemmatization, stopword removal)
+      - Language detection and translation
+      - Named entity recognition (extract people, places, organizations)
+      - Topic modeling (LDA, NMF, BERTopic)
+      - Keyword extraction (TF-IDF, RAKE, YAKE)
+      - Text classification (categorize responses into themes)
+      - Summarization (condense long responses)
+    when_to_use:
+      - "Open-ended 'comments' or 'suggestions' fields"
+      - "Free-text explanations (Why did you choose X?)"
+      - "Multi-language surveys (detect and translate)"
+      - "Large volume of text requiring automated analysis"
+    workflow:
+      1: "Clean text (lowercase, remove special chars, fix encoding)"
+      2: "Detect language (if multi-lingual)"
+      3: "Tokenize and remove stopwords"
+      4: "Apply analysis (sentiment, topics, keywords)"
+      5: "Validate with sample manual review"
+    libraries:
+      - spacy>=3.6
+      - nltk>=3.8
+      - transformers>=4.30  # BERT, RoBERTa
+      - bertopic>=0.15
+      - gensim>=4.3
+
+  - name: sentiment_analysis
+    description: Measure sentiment (positive, neutral, negative) in text responses
+    techniques:
+      - Lexicon-based (VADER, TextBlob, AFINN)
+      - Machine learning classifiers (logistic regression, SVM)
+      - Deep learning (fine-tuned BERT, RoBERTa)
+      - Aspect-based sentiment (sentiment per topic)
+      - Emotion detection (joy, anger, sadness, fear, etc.)
+    when_to_use:
+      - "Customer feedback ('How was your experience?')"
+      - "Employee surveys ('What do you like/dislike about working here?')"
+      - "Product reviews or testimonials"
+      - "Net Promoter Score (NPS) comment analysis"
+    considerations:
+      - "Sarcasm and irony are difficult to detect"
+      - "Domain-specific sentiment (financial news vs social media)"
+      - "Multi-lingual sentiment requires language-specific models"
+    libraries:
+      - vaderSentiment>=3.3
+      - textblob>=0.17
+      - transformers>=4.30
+      - flair>=0.12
+
+  - name: categorical_analysis
+    description: Analyze multiple-choice, Likert scales, and categorical responses
+    techniques:
+      - Frequency tables and cross-tabulations
+      - Chi-square tests for independence
+      - Cramér's V for association strength
+      - Correspondence analysis (visualize category relationships)
+      - Ordinal regression (for Likert scales: 1-5, Strongly Disagree to Strongly Agree)
+      - Multiple response analysis (check-all-that-apply questions)
+    when_to_use:
+      - "Analyzing rating scales (satisfaction, agreement, likelihood)"
+      - "Cross-tabulating demographics with outcomes"
+      - "Testing associations between categorical variables"
+      - "Understanding response patterns across groups"
+    best_practices:
+      - "Visualize with bar charts, stacked bars, or heatmaps"
+      - "Report percentages, not just counts (account for group sizes)"
+      - "Test significance, but also assess practical importance"
+    libraries:
+      - pandas>=2.0
+      - scipy>=1.11
+      - statsmodels>=0.14
+
+  - name: survey_weighting
+    description: Apply weights to correct for sampling bias and non-response
+    techniques:
+      - Design-based weighting (inverse probability weighting)
+      - Post-stratification adjustments
+      - Raking (iterative proportional fitting)
+      - Calibration to known population totals
+      - Non-response bias correction
+      - Variance estimation (Taylor series, bootstrap)
+    when_to_use:
+      - "Sample is not representative of population"
+      - "Response rates differ across groups"
+      - "Want to generalize to broader population"
+    workflow:
+      1: "Identify auxiliary variables (demographics, geography)"
+      2: "Obtain population benchmarks (census, administrative data)"
+      3: "Calculate weights (e.g., % in population / % in sample)"
+      4: "Apply weights to all analyses"
+      5: "Check effective sample size (weights shouldn't vary too much)"
+    libraries:
+      - statsmodels>=0.14
+      - numpy>=1.24
+
+# ==============================================================================
+# METHODOLOGY PATTERNS (Domain-Agnostic)
+# ==============================================================================
+
+methodology_patterns:
+  pattern_1_entity_resolution_workflow:
+    description: "Match entities across datasets despite name variations"
+    when_applicable:
+      - "Longitudinal surveys (same respondents over time)"
+      - "Linking survey to transactional data (match customer names)"
+      - "Deduplicating survey responses (remove accidental duplicates)"
+    workflow:
+      step_1_standardize:
+        - "Normalize text (uppercase, remove punctuation, trim whitespace)"
+        - "Expand abbreviations (St → Street, Dr → Doctor)"
+        - "Fix encoding issues (é, ñ, ü)"
+      step_2_blocking:
+        - "Reduce comparisons by grouping similar records"
+        - "Block by: first 3 letters of name, zip code, birth year"
+        - "Only compare within blocks (reduces O(n²) to manageable)"
+      step_3_comparison:
+        - "Calculate similarity for candidate pairs"
+        - "Use Jaro-Winkler for names (weights start of string)"
+        - "Use exact match for IDs or codes"
+        - "Use Haversine distance for coordinates"
+      step_4_classification:
+        - "Decide which pairs are matches (threshold-based or ML)"
+        - "Rule: Match if name_similarity > 0.85 AND zip_code matches"
+        - "Or train classifier on labeled examples"
+      step_5_clustering:
+        - "Group all matching records into entities"
+        - "Use connected components (transitive closure)"
+        - "Assign master entity ID"
+      step_6_validation:
+        - "Manually review sample of matches and non-matches"
+        - "Calculate precision, recall, F1"
+        - "Iterate on thresholds or features"
+    generic_example:
+      - "Match customer responses across Wave 1 and Wave 2 surveys"
+      - "Link employee survey to HR system records"
+      - "Deduplicate company names in market research data"
+
+  pattern_2_data_quality_pipeline:
+    description: "Systematically clean and validate survey responses"
+    when_applicable: "Any survey data with quality concerns (99% of surveys!)"
+    workflow:
+      step_1_profile:
+        - "Generate automated data quality report"
+        - "Identify: missing rates, outliers, cardinality, distributions"
+      step_2_validate_schema:
+        - "Check expected columns present"
+        - "Validate data types (numeric, date, categorical)"
+        - "Check value ranges (age 0-120, ratings 1-5)"
+      step_3_validate_logic:
+        - "Skip logic: Did respondent answer correctly based on routing?"
+        - "Cross-field: Start date < end date, sum of parts = total"
+        - "Referential integrity: IDs exist in lookup tables"
+      step_4_handle_missing:
+        - "Distinguish: skipped (by design) vs refused vs missing (error)"
+        - "Impute only if appropriate (random missingness)"
+        - "Create missing indicators if informative"
+      step_5_handle_outliers:
+        - "Investigate outliers (data error vs extreme response)"
+        - "Cap (winsorize) or remove only if justified"
+        - "Document all decisions"
+      step_6_standardize:
+        - "Consistent formats (dates, phone numbers, categories)"
+        - "Recode free text to standard categories"
+        - "Normalize scales (reverse-coded items)"
+      step_7_document:
+        - "Data quality report for stakeholders"
+        - "Cleaning log (what was changed and why)"
+    generic_example:
+      - "Clean customer satisfaction survey from mobile app"
+      - "Validate employee engagement survey from web platform"
+      - "Standardize market research data from multiple fielding vendors"
+
+  pattern_3_text_analysis_workflow:
+    description: "Extract insights from open-ended responses"
+    when_applicable: "Surveys with free-text 'comments' or 'suggestions' fields"
+    workflow:
+      step_1_preprocess:
+        - "Fix encoding (UTF-8)"
+        - "Remove HTML tags, URLs, special characters"
+        - "Lowercase and tokenize"
+      step_2_language_detect:
+        - "Detect language for each response (if multi-lingual)"
+        - "Translate to common language (English) if needed"
+      step_3_clean_tokens:
+        - "Remove stopwords (language-specific)"
+        - "Lemmatize (running → run, better → good)"
+        - "Filter by POS tags (keep nouns, verbs, adjectives)"
+      step_4_analyze:
+        - "Sentiment: Positive, neutral, negative per response"
+        - "Topics: LDA or BERTopic to find themes"
+        - "Keywords: TF-IDF to identify important terms"
+        - "Entities: Extract mentioned products, locations, people"
+      step_5_aggregate:
+        - "Sentiment distribution (% positive/neutral/negative)"
+        - "Top topics and their prevalence"
+        - "Most frequent keywords"
+      step_6_validate:
+        - "Manually review sample (do topics make sense?)"
+        - "Adjust preprocessing or models based on review"
+    generic_example:
+      - "Analyze NPS 'Why did you give this score?' responses"
+      - "Extract themes from employee 'What should we improve?' feedback"
+      - "Categorize product review comments"
+
+  pattern_4_likert_scale_analysis:
+    description: "Analyze ordinal rating scales (1-5, Strongly Disagree to Agree)"
+    when_applicable: "Surveys with agreement, satisfaction, or likelihood scales"
+    workflow:
+      step_1_descriptive:
+        - "Calculate mean, median, mode per question"
+        - "Distribution (% at each level)"
+        - "Top-2-box (% Agree + Strongly Agree)"
+        - "Bottom-2-box (% Disagree + Strongly Disagree)"
+      step_2_visualize:
+        - "Stacked bar charts (show full distribution)"
+        - "Diverging stacked bars (neutral in center)"
+        - "Avoid pie charts for ordinal data!"
+      step_3_test_differences:
+        - "Compare groups (demographics, cohorts): Mann-Whitney U or Kruskal-Wallis"
+        - "Avoid t-tests (Likert data not truly continuous)"
+      step_4_correlations:
+        - "Spearman correlation (ordinal-appropriate)"
+        - "Identify related items (factor analysis or PCA)"
+      step_5_report:
+        - "Focus on top-2-box % for clarity"
+        - "Show trends over time or differences across groups"
+    generic_example:
+      - "Analyze customer satisfaction ratings (Very Dissatisfied to Very Satisfied)"
+      - "Employee engagement survey (Strongly Disagree to Strongly Agree)"
+      - "Product preference ratings (Not at all Likely to Extremely Likely)"
+
+  pattern_5_cross_tabulation:
+    description: "Explore relationships between categorical variables"
+    when_applicable: "Understanding how responses vary by demographics or other categories"
+    workflow:
+      step_1_create_crosstab:
+        - "Rows: Independent variable (e.g., age group)"
+        - "Columns: Dependent variable (e.g., satisfaction level)"
+        - "Cells: Count or percentage"
+      step_2_choose_percentage:
+        - "Row %: Show how each group distributes across columns"
+        - "Column %: Show composition of each column"
+        - "Total %: Less useful, avoid"
+      step_3_test_independence:
+        - "Chi-square test: Is there a relationship?"
+        - "Cramér's V: How strong is the association? (0=none, 1=perfect)"
+      step_4_visualize:
+        - "Stacked bar chart (composition)"
+        - "Grouped bar chart (comparison)"
+        - "Heatmap (for large crosstabs)"
+      step_5_interpret:
+        - "Look for patterns (e.g., younger respondents more satisfied)"
+        - "Assess practical significance (not just statistical)"
+    generic_example:
+      - "Satisfaction by demographic (age, gender, region)"
+      - "Product preference by income level"
+      - "Employee engagement by department or tenure"
+
+# ==============================================================================
+# DATA QUALITY FRAMEWORK
+# ==============================================================================
+
+data_quality:
+  dimensions:
+    completeness:
+      - "% of expected responses received (response rate)"
+      - "% of questions answered (item completion rate)"
+      - "Missing data patterns (random vs systematic)"
+
+    consistency:
+      - "Skip logic followed correctly"
+      - "Cross-field validation (sum checks, date order)"
+      - "Response patterns (not all same answer = straight-lining)"
+
+    validity:
+      - "Responses within expected ranges (age, ratings)"
+      - "Categorical responses match expected values"
+      - "Open-text responses are meaningful (not gibberish)"
+
+  common_issues:
+    - issue: "Straight-lining"
+      description: "Respondent selects same answer for all questions"
+      detection: "Variance = 0 across Likert items, or all same category"
+      treatment: "Flag and potentially remove (disengaged respondent)"
+
+    - issue: "Speeders"
+      description: "Respondent completes survey too quickly (not reading)"
+      detection: "Survey completion time < expected minimum"
+      treatment: "Flag and review; set time threshold (e.g., < 50% of median)"
+
+    - issue: "Inconsistent responses"
+      description: "Contradictory answers (e.g., 'I love X' but rates X very low)"
+      detection: "Logical checks, correlation analysis"
+      treatment: "Investigate; may indicate misunderstanding or poor question design"
+
+    - issue: "Missing not at random (MNAR)"
+      description: "Missingness is related to the unobserved value (e.g., high earners refuse income question)"
+      detection: "Compare respondents vs non-respondents on observable characteristics"
+      treatment: "Weighting, sensitivity analysis, or acknowledge limitation"
+
+  quality_gates:
+    bronze_raw:
+      - "All responses have unique IDs"
+      - "Timestamp fields present"
+      - "No catastrophic format errors (file readable)"
+
+    silver_cleaned:
+      - "Missing value rates documented and acceptable"
+      - "Outliers investigated and treated"
+      - "Formats standardized (dates, categories)"
+      - "Skip logic validated"
+
+    gold_analytics_ready:
+      - "Weights calculated (if applicable)"
+      - "Text responses cleaned and analyzed"
+      - "Derived variables created (scores, indices)"
+      - "Data dictionary complete"
+
+# ==============================================================================
+# EVALUATION METRICS
+# ==============================================================================
+
+evaluation_metrics:
+  entity_resolution:
+    precision: "% of predicted matches that are true matches"
+    recall: "% of true matches that were predicted"
+    f1_score: "Harmonic mean of precision and recall"
+    reduction_ratio: "% of comparisons avoided by blocking"
+
+  text_classification:
+    accuracy: "% correctly classified (if balanced classes)"
+    macro_f1: "Average F1 across categories (equal weight per category)"
+    cohen_kappa: "Agreement vs chance (good for imbalanced data)"
+
+  sentiment_analysis:
+    accuracy_vs_human: "% agreement with human-labeled sample"
+    correlation: "Correlation between automated scores and human ratings"
+
+# ==============================================================================
+# GENERIC EXAMPLE USE CASES
+# ==============================================================================
+
+example_use_cases:
+  - name: customer_feedback_analysis
+    description: "Analyze satisfaction survey with ratings + open-ended comments"
+    data_structure:
+      - "Columns: [response_id, timestamp, rating_1_5, nps_score, comments, demographics]"
+      - "Response count: 1,000 - 10,000"
+    workflow:
+      1: "Clean data (validate ratings, handle missing)"
+      2: "Analyze ratings (mean scores, top-2-box %)"
+      3: "Segment by demographics (satisfaction by age, region)"
+      4: "Text analysis on comments (sentiment, topics)"
+      5: "Identify key drivers (correlate ratings with sentiment)"
+      6: "Generate insights report for stakeholders"
+    adaptable_to:
+      - "Customer satisfaction (CSAT), Net Promoter Score (NPS)"
+      - "Post-transaction surveys, service feedback"
+      - "Product reviews, app store ratings"
+
+  - name: employee_engagement_survey
+    description: "Analyze annual engagement survey with Likert scales + open feedback"
+    data_structure:
+      - "Columns: [employee_id, department, tenure, engagement_items_1_5, comments]"
+      - "Likert items: 20-50 questions (Strongly Disagree to Strongly Agree)"
+    workflow:
+      1: "Reverse-code negatively worded items"
+      2: "Calculate engagement index (average across items)"
+      3: "Segment by department, tenure, role"
+      4: "Identify problem areas (low-scoring items)"
+      5: "Text analysis on open feedback (themes, sentiment)"
+      6: "Benchmark against previous years or industry norms"
+    adaptable_to:
+      - "Employee satisfaction, culture surveys"
+      - "Pulse surveys (short, frequent check-ins)"
+      - "Exit interviews (departing employees)"
+
+  - name: market_research_survey
+    description: "Analyze product preference or brand perception survey"
+    data_structure:
+      - "Columns: [respondent_id, demographics, brand_awareness, purchase_intent, preferences]"
+      - "Mix of multiple choice, ratings, and open-ended"
+    workflow:
+      1: "Weight responses to match population demographics"
+      2: "Crosstab: Awareness/preference by demographic"
+      3: "Conjoint or MaxDiff analysis (if preference ranking data)"
+      4: "Segment respondents (cluster analysis based on preferences)"
+      5: "Identify target segments and positioning opportunities"
+    adaptable_to:
+      - "Brand tracking, ad testing, concept testing"
+      - "Pricing research (willingness-to-pay)"
+      - "Usage and attitude studies"
+
+  - name: longitudinal_survey_matching
+    description: "Track same respondents across multiple survey waves"
+    scenario: "Annual survey, want to measure change over time at individual level"
+    workflow:
+      1: "Load responses from Wave 1 and Wave 2"
+      2: "Standardize matching fields (name, email, ID)"
+      3: "Apply entity resolution (fuzzy matching on name + exact on email)"
+      4: "Create matched dataset (one row per person, columns for each wave)"
+      5: "Analyze change: % who improved, stayed same, declined"
+      6: "Identify factors associated with change"
+    adaptable_to:
+      - "Customer loyalty tracking (churn, satisfaction trends)"
+      - "Employee engagement over time (retention, improvement)"
+      - "Panel studies (same respondents, multiple timepoints)"
+
+  - name: multi_language_survey
+    description: "Process survey fielded in multiple languages"
+    workflow:
+      1: "Detect language for each response (langdetect, fasttext)"
+      2: "Translate open-text responses to common language (Google Translate API)"
+      3: "Use language-specific sentiment models (if available)"
+      4: "Analyze ratings (language-agnostic) and combined text"
+      5: "Report by language/region, note any cultural differences"
+    adaptable_to:
+      - "Global customer surveys (multi-country)"
+      - "Multinational employee surveys"
+      - "International market research"
+
+# ==============================================================================
+# BEST PRACTICES
+# ==============================================================================
+
+best_practices:
+  - practice: "Always profile data first"
+    rationale: "Understand the mess before cleaning; avoid blind transformations"
+
+  - practice: "Document all cleaning decisions"
+    rationale: "Reproducibility and transparency; defend choices to stakeholders"
+
+  - practice: "Keep raw data immutable"
+    rationale: "Clean in pipeline, never overwrite original data"
+
+  - practice: "Generate data quality reports"
+    rationale: "Share with stakeholders; manage expectations about data limitations"
+
+  - practice: "Validate entity resolution manually"
+    rationale: "Review sample of matches; tune thresholds for precision-recall"
+
+  - practice: "Use domain-appropriate NLP models"
+    rationale: "Social media sentiment ≠ formal survey sentiment; choose accordingly"
+
+  - practice: "Report percentages, not just counts"
+    rationale: "Account for different group sizes in crosstabs"
+
+  - practice: "Test significance AND practical importance"
+    rationale: "Statistically significant ≠ meaningful; assess effect size"
+
+  - practice: "Visualize distributions, not just averages"
+    rationale: "Mean rating = 3.5 hides bimodal distribution (love it or hate it)"
+
+# ==============================================================================
+# COMMON PITFALLS
+# ==============================================================================
+
+common_pitfalls:
+  - pitfall: "Treating Likert scales as continuous"
+    problem: "Using means, t-tests on ordinal data (technically inappropriate)"
+    solution: "Use medians, non-parametric tests; or acknowledge limitation"
+
+  - pitfall: "Ignoring survey weights"
+    problem: "Unweighted analysis if sample is non-representative"
+    solution: "Apply weights for population inference; document when used"
+
+  - pitfall: "Over-interpreting small differences"
+    problem: "3.7 vs 3.6 rating not meaningfully different"
+    solution: "Report confidence intervals; set minimum practical difference threshold"
+
+  - pitfall: "Cherry-picking results"
+    problem: "Only reporting significant findings (p-hacking)"
+    solution: "Pre-register analysis plan; report null results too"
+
+  - pitfall: "Ignoring straight-lining and speeders"
+    problem: "Including disengaged responses biases results downward"
+    solution: "Flag and exclude; report exclusion rates"
+
+  - pitfall: "Using accuracy for imbalanced text classification"
+    problem: "95% accuracy meaningless if 95% of data is one class"
+    solution: "Use macro-F1, precision/recall per class, confusion matrix"
+
+  - pitfall: "Forgetting cultural context in text analysis"
+    problem: "Sentiment models trained on English social media don't work for formal Japanese surveys"
+    solution: "Use language/domain-appropriate models; validate with native speakers"
+
+# ==============================================================================
+# ADAPTING TO YOUR DOMAIN
+# ==============================================================================
+
+adaptation_guide:
+  step_1_understand_survey_structure:
+    questions:
+      - "What question types? (multiple choice, Likert, open-text, ranking)"
+      - "How many respondents? (hundreds, thousands, millions)"
+      - "Single wave or longitudinal?"
+      - "Single language or multi-lingual?"
+      - "Any weighting needed (representative sample)?"
+
+  step_2_identify_key_analyses:
+    - "Descriptive stats (frequencies, means, distributions)"
+    - "Segmentation (compare groups: demographics, cohorts)"
+    - "Trends over time (if longitudinal)"
+    - "Text analysis (if open-ended questions)"
+    - "Drivers analysis (what predicts satisfaction, engagement, etc.)"
+
+  step_3_select_techniques:
+    if_mostly_ratings:
+      - "Focus on categorical analysis, crosstabs, Likert analysis"
+    if_lots_of_text:
+      - "Invest in NLP pipeline (sentiment, topics, keywords)"
+    if_longitudinal:
+      - "Entity resolution critical to track individuals"
+    if_multi_lingual:
+      - "Language detection, translation, multi-lingual models"
+
+  step_4_customize_workflows:
+    - "Adapt cleaning rules to your survey platform's quirks"
+    - "Define domain-specific validation rules (age ranges, rating scales)"
+    - "Incorporate survey-specific skip logic checks"
+    - "Use domain terminology in reporting (NPS, CSAT, eNPS)"
+
+# ==============================================================================
+# DEPENDENCIES
+# ==============================================================================
+
+dependencies:
+  core:
+    - python: ">=3.10"
+    - pandas: ">=2.0"
+    - numpy: ">=1.24"
+
+  entity_resolution:
+    - recordlinkage: ">=0.15"
+    - fuzzywuzzy: ">=0.18"
+    - python-levenshtein: ">=0.21"
+    - dedupe: ">=2.0"
+    - jellyfish: ">=1.0"
+
+  data_quality:
+    - great_expectations: ">=0.18"
+    - pyjanitor: ">=0.26"
+    - ftfy: ">=6.1"
+
+  text_analysis:
+    - spacy: ">=3.6"
+    - nltk: ">=3.8"
+    - transformers: ">=4.30"
+    - bertopic: ">=0.15"
+
+  sentiment:
+    - vaderSentiment: ">=3.3"
+    - textblob: ">=0.17"
+
+  statistical:
+    - scipy: ">=1.11"
+    - statsmodels: ">=0.14"
+
+  visualization:
+    - matplotlib: ">=3.7"
+    - seaborn: ">=0.12"
+
+# ==============================================================================
+# REFERENCES
+# ==============================================================================
+
+references:
+  books:
+    - title: "Survey Methodology (2nd ed)"
+      authors: "Groves et al."
+      publisher: "Wiley"
+
+    - title: "Applied Text Analysis with Python"
+      authors: "Bengfort, Bilbro & Ojeda"
+      publisher: "O'Reilly"
+
+  online_resources:
+    - name: "Python Record Linkage Toolkit"
+      url: "https://recordlinkage.readthedocs.io/"
+
+    - name: "spaCy Documentation"
+      url: "https://spacy.io/"
+
+    - name: "VADER Sentiment Analysis"
+      url: "https://github.com/cjhutto/vaderSentiment"

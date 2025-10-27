@@ -466,9 +466,465 @@ A: All changes are Git commits. Revert with `git revert <commit>`. Tests run aft
 **Q: How do I skip hygiene CI checks temporarily?**
 A: Add `[skip hygiene]` to your commit message (configure in `.github/workflows/ci.yml`).
 
+## Framework Validation
+
+Beyond file cleanliness, the hygiene system validates the orchestrator framework components:
+
+### Skills Validation
+
+**Location:** `.claude/skills/*.yaml`
+
+**Checks:**
+
+1. **YAML Syntax**: All skill files parse correctly
+2. **Required Fields**: `name`, `category`, `description`, `methodology`, `when_to_use`
+3. **Category Values**: Must be one of: `analytics`, `ml`, `optimization`, `survey`
+4. **Methodology Structure**: Array of steps with `step` and `rationale` fields
+5. **No Duplicates**: No two skills with same name
+
+**Example validation:**
+
+```python
+def validate_skills():
+    skills_dir = Path('.claude/skills/')
+    violations = []
+
+    for skill_file in skills_dir.glob('*.yaml'):
+        try:
+            skill = yaml.safe_load(skill_file.read_text())
+        except yaml.YAMLError as e:
+            violations.append(f"{skill_file}: Invalid YAML syntax - {e}")
+            continue
+
+        # Check required fields
+        required = ['name', 'category', 'description', 'methodology', 'when_to_use']
+        for field in required:
+            if field not in skill:
+                violations.append(f"{skill_file}: Missing required field '{field}'")
+
+        # Validate category
+        valid_categories = ['analytics', 'ml', 'optimization', 'survey']
+        if skill.get('category') not in valid_categories:
+            violations.append(
+                f"{skill_file}: Invalid category '{skill.get('category')}'. "
+                f"Must be one of: {valid_categories}"
+            )
+
+        # Validate methodology structure
+        methodology = skill.get('methodology', [])
+        if not isinstance(methodology, list):
+            violations.append(f"{skill_file}: 'methodology' must be a list")
+        else:
+            for i, step in enumerate(methodology):
+                if not isinstance(step, dict):
+                    violations.append(f"{skill_file}: methodology[{i}] must be a dict")
+                elif 'step' not in step:
+                    violations.append(f"{skill_file}: methodology[{i}] missing 'step'")
+
+    return violations
+```
+
+**Hygiene Report Includes:**
+
+```markdown
+## Skills Validation
+
+✓ 12 skills validated
+✗ 2 issues found:
+
+- .claude/skills/custom_skill.yaml: Missing required field 'when_to_use'
+- .claude/skills/old_skill.yaml: Invalid category 'legacy'. Must be: analytics, ml, optimization, survey
+```
+
+---
+
+### Knowledge Base Validation
+
+**Location:** `.claude/knowledge/**/*.yaml`
+
+**Checks:**
+
+1. **YAML Syntax**: All knowledge files parse correctly
+2. **Directory Structure**: Universal, firm-wide, project-specific tiers exist
+3. **No Empty Files**: Knowledge files have content (> 100 bytes)
+4. **No Secrets**: No API keys, credentials in knowledge files
+5. **Naming Convention**: Project knowledge follows `<project-slug>.yaml` pattern
+
+**Example validation:**
+
+```python
+def validate_knowledge():
+    knowledge_dir = Path('.claude/knowledge/')
+    violations = []
+
+    # Check directory structure
+    required_dirs = ['universal', 'kearney', 'projects']
+    for dir_name in required_dirs:
+        dir_path = knowledge_dir / dir_name
+        if not dir_path.exists():
+            violations.append(f"Missing required directory: {dir_path}")
+
+    # Validate YAML files
+    for yaml_file in knowledge_dir.rglob('*.yaml'):
+        if yaml_file.name == 'README.md':
+            continue
+
+        # Check file size
+        if yaml_file.stat().st_size < 100:
+            violations.append(f"{yaml_file}: File too small (< 100 bytes)")
+
+        # Check YAML syntax
+        try:
+            content = yaml.safe_load(yaml_file.read_text())
+        except yaml.YAMLError as e:
+            violations.append(f"{yaml_file}: Invalid YAML - {e}")
+            continue
+
+        # Check for secrets
+        text = yaml_file.read_text()
+        secret_patterns = ['api_key', 'password', 'secret', 'token']
+        for pattern in secret_patterns:
+            if pattern in text.lower():
+                violations.append(
+                    f"{yaml_file}: Potential secret detected ('{pattern}')"
+                )
+
+    return violations
+```
+
+**Hygiene Report Includes:**
+
+```markdown
+## Knowledge Base Validation
+
+✓ Universal knowledge validated (3 files)
+✓ Firm-wide knowledge validated (2 files)
+✓ Project-specific knowledge validated (5 files)
+✗ 1 issue found:
+
+- .claude/knowledge/projects/old-project.yaml: File too small (< 100 bytes)
+```
+
+---
+
+### ADR Validation
+
+**Location:** `.claude/decisions/ADR-*.md`
+
+**Checks:**
+
+1. **Naming Convention**: `ADR-###-title.md` format
+2. **Required Sections**: Status, Context, Decision, Rationale, Alternatives, Consequences
+3. **Valid Status**: Proposed, Accepted, Deprecated, Superseded
+4. **Sequential Numbering**: ADR-001, ADR-002, ADR-003 (gaps OK)
+5. **No Empty ADRs**: Each section has content
+
+**Example validation:**
+
+```python
+def validate_adrs():
+    decisions_dir = Path('.claude/decisions/')
+    violations = []
+
+    adr_files = sorted(decisions_dir.glob('ADR-*.md'))
+
+    for adr_file in adr_files:
+        # Check naming convention
+        if not re.match(r'ADR-\d{3}-.+\.md', adr_file.name):
+            violations.append(
+                f"{adr_file}: Invalid naming. Use 'ADR-###-title.md'"
+            )
+
+        # Read content
+        content = adr_file.read_text()
+
+        # Check required sections
+        required_sections = [
+            '## Status',
+            '## Context',
+            '## Decision',
+            '## Rationale',
+            '## Alternatives',
+            '## Consequences'
+        ]
+
+        for section in required_sections:
+            if section not in content:
+                violations.append(f"{adr_file}: Missing section '{section}'")
+
+        # Validate status
+        status_match = re.search(r'## Status\s+(\w+)', content)
+        if status_match:
+            status = status_match.group(1)
+            valid_statuses = ['Proposed', 'Accepted', 'Deprecated', 'Superseded']
+            if status not in valid_statuses:
+                violations.append(
+                    f"{adr_file}: Invalid status '{status}'. "
+                    f"Must be: {valid_statuses}"
+                )
+
+    # Check for numbering gaps (informational, not error)
+    adr_numbers = []
+    for adr_file in adr_files:
+        match = re.match(r'ADR-(\d{3})', adr_file.name)
+        if match:
+            adr_numbers.append(int(match.group(1)))
+
+    if adr_numbers:
+        expected = list(range(1, max(adr_numbers) + 1))
+        gaps = set(expected) - set(adr_numbers)
+        if gaps:
+            violations.append(
+                f"ADR numbering gaps (not critical): {sorted(gaps)}"
+            )
+
+    return violations
+```
+
+**Hygiene Report Includes:**
+
+```markdown
+## ADR Validation
+
+✓ 15 ADRs validated
+✗ 3 issues found:
+
+- .claude/decisions/ADR-007-cache-strategy.md: Missing section '## Alternatives'
+- .claude/decisions/ADR-012-api-versioning.md: Invalid status 'Draft'. Must be: Proposed, Accepted, Deprecated, Superseded
+- ADR numbering gaps (not critical): [5, 9]
+```
+
+---
+
+### Client Governance Validation
+
+**Location:** `clients/*/governance.yaml`
+
+**Checks:**
+
+1. **Schema Compliance**: Validates against `clients/.schema/governance.schema.json`
+2. **Required Fields**: `client_name`, `quality_gates`, `compliance`, `brand_constraints`
+3. **Valid Values**: Test coverage 0-100, valid compliance frameworks (GDPR, HIPAA, SOC2)
+4. **Color Format**: Hex colors match `#[0-9A-Fa-f]{6}` pattern
+5. **Email Format**: Notification emails valid
+
+**Example validation:**
+
+```python
+import jsonschema
+
+def validate_governance():
+    schema_file = Path('clients/.schema/governance.schema.json')
+    schema = json.loads(schema_file.read_text())
+
+    violations = []
+
+    for gov_file in Path('clients').glob('*/governance.yaml'):
+        if gov_file.parent.name in ['.schema', 'README.md']:
+            continue
+
+        try:
+            governance = yaml.safe_load(gov_file.read_text())
+        except yaml.YAMLError as e:
+            violations.append(f"{gov_file}: Invalid YAML - {e}")
+            continue
+
+        # Validate against JSON schema
+        try:
+            jsonschema.validate(governance, schema)
+        except jsonschema.ValidationError as e:
+            violations.append(f"{gov_file}: Schema validation failed - {e.message}")
+
+        # Additional checks
+        # Test coverage range
+        coverage = governance.get('quality_gates', {}).get('min_test_coverage')
+        if coverage is not None and not (0 <= coverage <= 100):
+            violations.append(
+                f"{gov_file}: min_test_coverage must be 0-100, got {coverage}"
+            )
+
+        # Color format
+        colors = governance.get('brand_constraints', {}).get('colors', [])
+        for color in colors:
+            if not re.match(r'^#[0-9A-Fa-f]{6}$', color):
+                violations.append(
+                    f"{gov_file}: Invalid color format '{color}'. Use #RRGGBB"
+                )
+
+        # Email format
+        emails = governance.get('notifications', {}).get('email', [])
+        for email in emails:
+            if '@' not in email or '.' not in email.split('@')[1]:
+                violations.append(f"{gov_file}: Invalid email '{email}'")
+
+    return violations
+```
+
+**Hygiene Report Includes:**
+
+```markdown
+## Client Governance Validation
+
+✓ kearney-default governance validated
+✓ acme-corp governance validated
+✗ 2 issues found:
+
+- clients/new-client/governance.yaml: min_test_coverage must be 0-100, got 105
+- clients/old-client/governance.yaml: Invalid color format 'purple'. Use #RRGGBB
+```
+
+---
+
+### Template Compliance Validation
+
+**Location:** `design_system/templates/**/*.html`, `design_system/templates/**/*.css`
+
+**Checks:**
+
+1. **Font Compliance**: Arial for presentations, Inter for web apps
+2. **Color Palette**: Only approved colors used
+3. **No Gridlines**: D3.js charts don't use gridlines
+4. **Brand Terms**: No forbidden terminology in user-facing text
+5. **File Size**: Templates < 500KB (reasonable for version control)
+
+**Example validation:**
+
+```python
+def validate_templates():
+    templates_dir = Path('design_system/templates/')
+    violations = []
+
+    # Load governance for brand constraints
+    governance = yaml.safe_load(
+        Path('clients/kearney-default/governance.yaml').read_text()
+    )
+    brand = governance.get('brand_constraints', {})
+
+    # Check CSS files
+    for css_file in templates_dir.rglob('*.css'):
+        content = css_file.read_text()
+
+        # Font compliance
+        if 'presentation' in css_file.parts or 'c-suite' in css_file.parts:
+            # Presentations must use Arial
+            if 'font-family' in content and 'Arial' not in content:
+                violations.append(
+                    f"{css_file}: Presentations must use Arial font"
+                )
+        elif 'web' in css_file.parts or 'app' in css_file.parts:
+            # Web apps must use Inter
+            if 'font-family' in content and 'Inter' not in content:
+                violations.append(
+                    f"{css_file}: Web applications must use Inter font"
+                )
+
+        # Color compliance
+        colors_found = re.findall(r'#[0-9A-Fa-f]{6}', content)
+        allowed_colors = [c.upper() for c in brand.get('colors', [])]
+        for color in colors_found:
+            if color.upper() not in allowed_colors:
+                violations.append(
+                    f"{css_file}: Unapproved color {color}. "
+                    f"Allowed: {allowed_colors}"
+                )
+
+    # Check HTML files
+    for html_file in templates_dir.rglob('*.html'):
+        content = html_file.read_text()
+
+        # Gridlines check (D3.js charts)
+        if '.tickLine' in content or 'grid: true' in content:
+            violations.append(
+                f"{html_file}: Charts must not use gridlines (Kearney standard)"
+            )
+
+        # Forbidden terms
+        forbidden = brand.get('forbidden_terms', [])
+        text_lower = content.lower()
+        for term in forbidden:
+            if term.lower() in text_lower:
+                violations.append(
+                    f"{html_file}: Contains forbidden term '{term}'"
+                )
+
+        # File size check
+        size_kb = html_file.stat().st_size / 1024
+        if size_kb > 500:
+            violations.append(
+                f"{html_file}: File too large ({size_kb:.1f} KB > 500 KB)"
+            )
+
+    return violations
+```
+
+**Hygiene Report Includes:**
+
+```markdown
+## Template Compliance Validation
+
+✓ C-suite templates validated (3 files)
+✓ Web templates validated (5 files)
+✗ 2 issues found:
+
+- design_system/templates/c-suite/old-presentation.html: Charts must not use gridlines (Kearney standard)
+- design_system/templates/web/app.css: Unapproved color #FF5733. Allowed: ['#7823DC', '#FFFFFF', '#000000']
+```
+
+---
+
+### Running Framework Validation
+
+**Included in standard hygiene scan:**
+
+```bash
+orchestrator run repo-hygiene
+```
+
+**Standalone validation:**
+
+```bash
+# Validate specific components
+python3 scripts/validate_skills.py
+python3 scripts/validate_knowledge.py
+python3 scripts/validate_adrs.py
+python3 scripts/validate_governance.py
+python3 scripts/validate_templates.py
+```
+
+**CI Integration:**
+
+Add to `.github/workflows/ci.yml`:
+
+```yaml
+framework-validation:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - name: Validate framework components
+      run: |
+        python3 scripts/validate_skills.py
+        python3 scripts/validate_knowledge.py
+        python3 scripts/validate_adrs.py
+        python3 scripts/validate_governance.py
+        python3 scripts/validate_templates.py
+    - name: Check for violations
+      run: |
+        if grep -q "✗" reports/framework_validation.md; then
+          echo "Framework validation failed"
+          exit 1
+        fi
+```
+
+---
+
 ## See Also
 
 - [Steward Agent Specification](.claude/agents/steward.md)
 - [Hygiene Configuration](../configs/hygiene.yaml)
 - [Tidyignore Patterns](../.tidyignore)
 - [PR Template](../.github/PULL_REQUEST_TEMPLATE.md)
+- [Skills README](../.claude/skills/README.md)
+- [Knowledge Base README](../.claude/knowledge/README.md)
+- [ADR System](../.claude/decisions/README.md)
+- [Client Governance](../clients/README.md)
+- [Template Documentation](../design_system/templates/README.md)

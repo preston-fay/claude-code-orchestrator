@@ -1,0 +1,519 @@
+# ML Model Project Template
+#
+# Template for machine learning and AI projects including model training,
+# evaluation, deployment, and monitoring.
+#
+# Use case: Predictive modeling, classification, regression, deep learning
+
+name: "ML Model Project"
+type: "ml-model"
+description: "Machine learning and AI model development template"
+
+# Directory structure to create
+directory_structure:
+  - ".claude/"
+  - ".claude/decisions/"
+  - ".claude/checkpoints/"
+  - ".claude/consensus/"
+  - ".claude/knowledge/"
+  - ".claude/skills/"
+  - ".github/workflows/"
+  - "data/raw/"
+  - "data/interim/"
+  - "data/processed/"
+  - "data/features/"
+  - "models/"
+  - "models/experiments/"
+  - "models/checkpoints/"
+  - "notebooks/"
+  - "src/data/"
+  - "src/features/"
+  - "src/models/"
+  - "src/evaluation/"
+  - "src/deployment/"
+  - "tests/"
+  - "docs/"
+  - "reports/"
+  - "scripts/"
+  - "configs/"
+
+# Files to copy from orchestrator
+copy_files:
+  - source: ".claude/knowledge/analytics_best_practices.yaml"
+    destination: ".claude/knowledge/analytics_best_practices.yaml"
+  - source: ".claude/knowledge/kearney_standards.yaml"
+    destination: ".claude/knowledge/kearney_standards.yaml"
+  - source: ".claude/knowledge/projects/README.md"
+    destination: ".claude/knowledge/projects/README.md"
+  - source: ".claude/skills/time_series_analytics.yaml"
+    destination: ".claude/skills/time_series_analytics.yaml"
+  - source: ".claude/decisions/template.md"
+    destination: ".claude/decisions/template.md"
+  - source: ".claude/decisions/README.md"
+    destination: ".claude/decisions/README.md"
+  - source: "design_system/"
+    destination: "design_system/"
+    recursive: true
+  - source: ".github/workflows/ci.yaml"
+    destination: ".github/workflows/ci.yaml"
+    optional: true
+  - source: ".pre-commit-config.yaml"
+    destination: ".pre-commit-config.yaml"
+  - source: ".tidyignore"
+    destination: ".tidyignore"
+
+# Agents to include in workflow
+agents:
+  - name: "Architect"
+    role: "Design ML pipeline architecture, model selection strategy"
+    phases: ["planning", "consensus"]
+
+  - name: "Data"
+    role: "Data pipeline, feature engineering, data versioning"
+    phases: ["data-pipeline"]
+
+  - name: "ML Engineer"
+    role: "Model training, hyperparameter tuning, experiment tracking"
+    phases: ["training"]
+
+  - name: "Evaluator"
+    role: "Model evaluation, performance analysis, fairness assessment"
+    phases: ["evaluation"]
+
+  - name: "Developer"
+    role: "Model deployment, API development, monitoring"
+    phases: ["deployment"]
+
+  - name: "Documentarian"
+    role: "Model cards, API documentation, methodology docs"
+    phases: ["documentation"]
+
+# Workflow phases
+phases:
+  - name: "planning"
+    description: "Define ML problem, success metrics, model selection criteria"
+    agents: ["Architect"]
+    parallel: false
+    require_consensus: true
+    expected_artifacts:
+      - "docs/ml_plan.md"
+      - "docs/model_requirements.md"
+      - ".claude/decisions/ADR-*.md"
+
+  - name: "consensus"
+    description: "Review and approve ML approach"
+    agents: ["Consensus"]
+    parallel: false
+    require_consensus: false
+
+  - name: "data-pipeline"
+    description: "Build data pipeline, feature engineering, train/val/test split"
+    agents: ["Data"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "data/processed/train.parquet"
+      - "data/processed/val.parquet"
+      - "data/processed/test.parquet"
+      - "src/data/pipeline.py"
+      - "docs/feature_documentation.md"
+
+  - name: "training"
+    description: "Train models, hyperparameter tuning, experiment tracking"
+    agents: ["ML Engineer"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "models/*.pkl"
+      - "models/experiments/*.json"
+      - "models/metadata.json"
+      - "reports/training_log.md"
+
+  - name: "evaluation"
+    description: "Evaluate model performance, fairness, robustness"
+    agents: ["Evaluator"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "models/metrics.json"
+      - "reports/evaluation_report.md"
+      - "reports/confusion_matrix.png"
+
+  - name: "deployment"
+    description: "Deploy model, create API, setup monitoring"
+    agents: ["Developer"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "src/deployment/api.py"
+      - "src/deployment/inference.py"
+      - "docs/deployment_guide.md"
+
+  - name: "documentation"
+    description: "Create model card, API docs, maintenance guide"
+    agents: ["Documentarian"]
+    parallel: false
+    require_consensus: false
+    expected_artifacts:
+      - "README.md"
+      - "docs/model_card.md"
+      - "docs/api_reference.md"
+
+# Default intake configuration for ML projects
+intake_template:
+  project:
+    name: "{{PROJECT_NAME}}"
+    type: "ml-model"
+    description: "{{PROJECT_DESCRIPTION}}"
+    directory: "./"
+
+  requirements:
+    functional:
+      - "Train ML model to predict {{TARGET_VARIABLE}}"
+      - "Achieve minimum {{METRIC_NAME}} of {{METRIC_TARGET}}"
+      - "Handle data imbalance/edge cases appropriately"
+      - "Provide interpretability and explainability"
+
+    technical:
+      - "Use Python with scikit-learn/TensorFlow/PyTorch"
+      - "Implement proper train/val/test split"
+      - "Track experiments with MLflow or similar"
+      - "Ensure reproducible training (random seeds, versioning)"
+      - "Deploy as REST API or batch inference"
+
+    data:
+      - "Data source: {{DATA_SOURCE}}"
+      - "Expected samples: {{SAMPLE_SIZE}}"
+      - "Features: {{FEATURE_COUNT}}"
+      - "Target variable: {{TARGET_VARIABLE}}"
+
+  constraints:
+    timeline: "{{TIMELINE}}"
+    budget: "{{COMPUTE_BUDGET}}"
+    technical:
+      - "Model inference latency < {{LATENCY_TARGET}}ms"
+      - "Model size < {{SIZE_TARGET}}MB"
+      - "No PII in model artifacts or logs"
+
+  success_criteria:
+    - "{{METRIC_NAME}} >= {{METRIC_TARGET}} on hold-out test set"
+    - "Model generalizes to unseen data"
+    - "No significant fairness issues across subgroups"
+    - "Model documented with model card"
+    - "Deployment ready with API and monitoring"
+
+# Python dependencies for ML projects
+dependencies:
+  python:
+    - "pandas>=2.0.0"
+    - "numpy>=1.24.0"
+    - "scikit-learn>=1.3.0"
+    - "xgboost>=2.0.0"
+    - "lightgbm>=4.0.0"
+    - "matplotlib>=3.7.0"
+    - "seaborn>=0.12.0"
+    - "jupyter>=1.0.0"
+    - "mlflow>=2.8.0"
+    - "shap>=0.43.0"
+    - "optuna>=3.4.0"
+    - "duckdb>=0.9.0"
+    - "fastapi>=0.104.0"
+    - "pydantic>=2.5.0"
+    - "pytest>=7.4.0"
+    - "black>=23.0.0"
+    - "flake8>=6.0.0"
+
+  optional:
+    - "tensorflow>=2.14.0  # For deep learning"
+    - "torch>=2.1.0  # For PyTorch models"
+    - "transformers>=4.35.0  # For NLP models"
+
+# Configuration files to generate
+config_files:
+  - name: ".gitignore"
+    content: |
+      # Python
+      __pycache__/
+      *.py[cod]
+      *$py.class
+      *.so
+      .Python
+      env/
+      venv/
+      ENV/
+      .venv
+
+      # Jupyter
+      .ipynb_checkpoints
+      *.ipynb_checkpoints/
+
+      # Data files
+      data/raw/*
+      data/interim/*
+      !data/raw/.gitkeep
+      !data/interim/.gitkeep
+      *.csv
+      *.parquet
+
+      # Model artifacts (use MLflow/DVC for versioning)
+      models/*.pkl
+      models/*.h5
+      models/*.pt
+      models/*.onnx
+      models/checkpoints/*
+      !models/.gitkeep
+
+      # Experiment tracking
+      mlruns/
+      experiments/
+
+      # IDE
+      .vscode/
+      .idea/
+      *.swp
+      *.swo
+      *~
+      .DS_Store
+
+      # Testing
+      .pytest_cache/
+      .coverage
+      htmlcov/
+
+      # Environment
+      .env
+      .env.local
+      credentials.json
+      *.pem
+
+      # Orchestrator state
+      .claude/state.json
+      .claude/metrics/
+
+  - name: "requirements.txt"
+    content: |
+      # Generated by orchestrator bootstrap
+      # ML model project dependencies
+      pandas>=2.0.0
+      numpy>=1.24.0
+      scikit-learn>=1.3.0
+      xgboost>=2.0.0
+      lightgbm>=4.0.0
+      matplotlib>=3.7.0
+      seaborn>=0.12.0
+      jupyter>=1.0.0
+      mlflow>=2.8.0
+      shap>=0.43.0
+      optuna>=3.4.0
+      duckdb>=0.9.0
+      fastapi>=0.104.0
+      pydantic>=2.5.0
+      pytest>=7.4.0
+      black>=23.0.0
+      flake8>=6.0.0
+
+  - name: "README.md"
+    content: |
+      # {{PROJECT_NAME}}
+
+      {{PROJECT_DESCRIPTION}}
+
+      ## Project Structure
+
+      ```
+      .
+      ├── data/
+      │   ├── raw/          # Original, immutable data
+      │   ├── interim/      # Intermediate transformed data
+      │   ├── processed/    # Final feature-engineered data
+      │   └── features/     # Feature metadata and definitions
+      ├── models/           # Trained models and artifacts
+      │   ├── experiments/  # Experiment tracking logs
+      │   └── checkpoints/  # Model checkpoints during training
+      ├── notebooks/        # Jupyter notebooks for exploration
+      ├── src/
+      │   ├── data/         # Data loading and processing
+      │   ├── features/     # Feature engineering
+      │   ├── models/       # Model training and evaluation
+      │   ├── evaluation/   # Performance analysis
+      │   └── deployment/   # Deployment and inference code
+      ├── tests/            # Automated tests
+      ├── reports/          # Model evaluation reports
+      └── docs/             # Documentation
+      ```
+
+      ## Getting Started
+
+      1. **Install dependencies:**
+         ```bash
+         pip install -r requirements.txt
+         ```
+
+      2. **Place raw data:**
+         ```bash
+         # Copy your data files to data/raw/
+         ```
+
+      3. **Run ML pipeline:**
+         ```bash
+         # Option 1: Run orchestrator workflow
+         orchestrator run start --intake intake.yaml
+         orchestrator run next
+
+         # Option 2: Run pipeline manually
+         python src/data/pipeline.py      # Feature engineering
+         python src/models/train.py       # Model training
+         python src/evaluation/evaluate.py  # Model evaluation
+         ```
+
+      ## Model Information
+
+      - **Model Type:** {{MODEL_TYPE}}
+      - **Target Variable:** {{TARGET_VARIABLE}}
+      - **Performance Metric:** {{METRIC_NAME}}
+      - **Target Performance:** {{METRIC_TARGET}}
+
+      See `docs/model_card.md` for complete model documentation.
+
+      ## Development
+
+      - **Code style:** Run `black src/ tests/` before committing
+      - **Linting:** Run `flake8 src/ tests/` to check code quality
+      - **Testing:** Run `pytest tests/` to run test suite
+      - **Experiments:** View MLflow UI with `mlflow ui`
+
+      ## Deployment
+
+      See `docs/deployment_guide.md` for deployment instructions.
+
+      **Quick Start API:**
+      ```bash
+      python src/deployment/api.py
+      # API will be available at http://localhost:8000
+      ```
+
+      ## License
+
+      This project is confidential and proprietary.
+
+  - name: "models/.gitkeep"
+    content: ""
+
+  - name: "models/metadata.json"
+    content: |
+      {
+        "model_name": "{{PROJECT_NAME}}",
+        "model_version": "0.1.0",
+        "created_at": "{{TIMESTAMP}}",
+        "model_type": "{{MODEL_TYPE}}",
+        "framework": "scikit-learn",
+        "target_variable": "{{TARGET_VARIABLE}}",
+        "features": [],
+        "performance_metrics": {},
+        "training_config": {
+          "random_seed": 42,
+          "train_test_split": 0.8,
+          "cross_validation_folds": 5
+        }
+      }
+
+  - name: "docs/model_card.md"
+    content: |
+      # Model Card: {{PROJECT_NAME}}
+
+      ## Model Details
+
+      - **Model Name:** {{PROJECT_NAME}}
+      - **Model Version:** 0.1.0
+      - **Model Type:** {{MODEL_TYPE}}
+      - **Framework:** scikit-learn / TensorFlow / PyTorch
+      - **Date:** {{DATE}}
+      - **Authors:** {{AUTHORS}}
+
+      ## Intended Use
+
+      ### Primary Use Cases
+      - Predict {{TARGET_VARIABLE}} for {{USE_CASE_DESCRIPTION}}
+      - Support decision-making in {{BUSINESS_CONTEXT}}
+
+      ### Out-of-Scope Uses
+      - Should not be used for {{OUT_OF_SCOPE_1}}
+      - Not intended for {{OUT_OF_SCOPE_2}}
+
+      ## Training Data
+
+      - **Data Source:** {{DATA_SOURCE}}
+      - **Sample Size:** {{SAMPLE_SIZE}} records
+      - **Features:** {{FEATURE_COUNT}} features
+      - **Time Period:** {{TIME_PERIOD}}
+      - **Geographic Scope:** {{GEOGRAPHY}}
+
+      ## Evaluation Data
+
+      - **Test Set Size:** {{TEST_SIZE}} records
+      - **Test Set Period:** {{TEST_PERIOD}}
+      - **Hold-out Method:** {{HOLDOUT_METHOD}}
+
+      ## Performance Metrics
+
+      ### Overall Performance
+      - **{{METRIC_NAME}}:** {{METRIC_VALUE}}
+      - **Precision:** {{PRECISION}}
+      - **Recall:** {{RECALL}}
+      - **F1 Score:** {{F1_SCORE}}
+
+      ### Performance by Subgroup
+      *(Add fairness analysis across different demographic/business segments)*
+
+      ## Ethical Considerations
+
+      ### Risks and Limitations
+      - **Bias:** {{BIAS_CONSIDERATIONS}}
+      - **Fairness:** {{FAIRNESS_ANALYSIS}}
+      - **Privacy:** {{PRIVACY_CONSIDERATIONS}}
+
+      ### Mitigations
+      - {{MITIGATION_1}}
+      - {{MITIGATION_2}}
+
+      ## Caveats and Recommendations
+
+      - Model performance may degrade if data distribution shifts
+      - Recommend retraining every {{RETRAIN_FREQUENCY}}
+      - Monitor performance metrics in production
+      - Human review recommended for high-stakes decisions
+
+      ## Maintenance
+
+      - **Monitoring:** {{MONITORING_APPROACH}}
+      - **Retraining Trigger:** {{RETRAIN_TRIGGER}}
+      - **Owner:** {{MODEL_OWNER}}
+      - **Contact:** {{CONTACT_EMAIL}}
+
+# Validation checks after bootstrap
+validations:
+  - check: "directory_exists"
+    path: ".claude/"
+    message: "Orchestrator directory created"
+
+  - check: "directory_exists"
+    path: "models/"
+    message: "Models directory created"
+
+  - check: "file_exists"
+    path: "requirements.txt"
+    message: "Dependencies file created"
+
+  - check: "file_exists"
+    path: "docs/model_card.md"
+    message: "Model card template created"
+
+# Post-bootstrap instructions
+next_steps:
+  - "Install dependencies: `pip install -r requirements.txt`"
+  - "Place raw data files in `data/raw/`"
+  - "Update `docs/model_card.md` with project-specific details"
+  - "Configure MLflow tracking: `mlflow ui`"
+  - "Update intake.yaml with model requirements"
+  - "Start workflow: `orchestrator run start --intake intake.yaml`"
+  - "Execute first phase: `orchestrator run next`"

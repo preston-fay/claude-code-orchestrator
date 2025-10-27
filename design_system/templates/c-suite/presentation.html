@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C-Suite Presentation | Kearney</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Additional presentation-specific styles */
+    .presentation-wrapper {
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: 100vh;
+    }
+
+    .slide {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2xl) 0;
+    }
+
+    .slide-content {
+      width: 100%;
+      max-width: 1200px;
+      padding: 0 var(--space-lg);
+    }
+
+    /* Slide navigation indicator */
+    .slide-nav {
+      position: fixed;
+      right: var(--space-lg);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+    }
+
+    .slide-nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: var(--color-border);
+      margin: var(--space-sm) 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .slide-nav-dot.active {
+      background-color: var(--color-primary);
+      transform: scale(1.3);
+    }
+
+    /* Fade-in animation for scroll */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Slide Navigation Dots -->
+  <div class="slide-nav">
+    <div class="slide-nav-dot active" data-slide="0"></div>
+    <div class="slide-nav-dot" data-slide="1"></div>
+    <div class="slide-nav-dot" data-slide="2"></div>
+    <div class="slide-nav-dot" data-slide="3"></div>
+    <div class="slide-nav-dot" data-slide="4"></div>
+  </div>
+
+  <!-- Presentation Wrapper -->
+  <div class="presentation-wrapper">
+
+    <!-- ===================================================================
+         SLIDE 1: HERO - KEY INSIGHT
+         =================================================================== -->
+    <section class="slide" id="slide-1">
+      <div class="slide-content">
+        <div class="hero">
+          <h1 class="hero-title fade-in">Transforming Operations Through Data-Driven Insights</h1>
+          <p class="hero-subtitle fade-in">Strategic recommendations to unlock $X million in value over Y months</p>
+
+          <div class="hero-insight fade-in">
+            "Three strategic initiatives can deliver 25-30% efficiency gains while reducing operational costs by $15M annually"
+          </div>
+
+          <div class="mt-xl fade-in">
+            <p class="text-muted">Prepared for [Client Name] Executive Leadership</p>
+            <p class="text-muted text-small">Kearney Analysis | [Date]</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SLIDE 2: SITUATION - CURRENT STATE ANALYSIS
+         =================================================================== -->
+    <section class="slide" id="slide-2">
+      <div class="slide-content">
+        <h2 class="fade-in">Current State: Performance Trends Reveal Opportunity</h2>
+        <p class="lead fade-in">Analysis of 18 months of operational data identifies three key patterns driving inefficiency</p>
+
+        <!-- KPI Dashboard -->
+        <div class="metrics-grid fade-in">
+          <div class="metric-card">
+            <div class="metric-label">Operational Efficiency</div>
+            <div class="metric-value">68%</div>
+            <div class="metric-change negative trend-down">-12% vs. target</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Process Cycle Time</div>
+            <div class="metric-value">4.2 days</div>
+            <div class="metric-change negative trend-up">+35% vs. industry benchmark</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Resource Utilization</div>
+            <div class="metric-value">72%</div>
+            <div class="metric-change neutral trend-flat">Flat vs. prior year</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Cost per Unit</div>
+            <div class="metric-value">$247</div>
+            <div class="metric-change negative trend-up">+18% vs. budget</div>
+          </div>
+        </div>
+
+        <!-- Trend Chart -->
+        <div class="chart-container fade-in">
+          <h3 class="chart-title">Performance Trend: 18-Month Historical View</h3>
+          <p class="chart-subtitle">Efficiency declining while costs increase</p>
+          <div class="chart-wrapper" id="trendChart"></div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color" style="background-color: var(--color-chart-primary);"></span>
+              <span>Operational Efficiency</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background-color: var(--color-chart-secondary);"></span>
+              <span>Cost per Unit (Indexed)</span>
+            </div>
+          </div>
+          <p class="chart-caption">Source: Internal operational data (Jan 2023 - Jun 2024)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SLIDE 3: ROOT CAUSE - DIAGNOSTIC FINDINGS
+         =================================================================== -->
+    <section class="slide" id="slide-3">
+      <div class="slide-content">
+        <h2 class="fade-in">Root Cause Analysis: Three Critical Bottlenecks</h2>
+        <p class="lead fade-in">Quantitative analysis reveals specific drivers of performance gaps</p>
+
+        <!-- Waterfall Chart -->
+        <div class="chart-container fade-in">
+          <h3 class="chart-title">Efficiency Gap Decomposition</h3>
+          <p class="chart-subtitle">Breakdown of 32 percentage point efficiency gap vs. target (100%)</p>
+          <div class="chart-wrapper" id="waterfallChart"></div>
+          <p class="chart-caption">Baseline efficiency: 68% | Target efficiency: 100% | Gap: 32 percentage points</p>
+        </div>
+
+        <!-- Key Findings -->
+        <div class="fade-in mt-lg">
+          <div class="callout callout-primary">
+            <div class="callout-title">Key Finding</div>
+            <p><strong>Process bottlenecks account for 18 percentage points (56%) of the total gap</strong>, followed by technology limitations (9 points, 28%) and workforce optimization opportunities (5 points, 16%).</p>
+          </div>
+        </div>
+
+        <!-- Breakdown Table -->
+        <div class="fade-in mt-lg">
+          <table>
+            <thead>
+              <tr>
+                <th>Root Cause</th>
+                <th>Impact (% points)</th>
+                <th>Contribution</th>
+                <th>Addressability</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Process Bottlenecks</strong></td>
+                <td>18</td>
+                <td>56%</td>
+                <td>High</td>
+              </tr>
+              <tr>
+                <td><strong>Technology Gaps</strong></td>
+                <td>9</td>
+                <td>28%</td>
+                <td>Medium</td>
+              </tr>
+              <tr>
+                <td><strong>Workforce Optimization</strong></td>
+                <td>5</td>
+                <td>16%</td>
+                <td>High</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SLIDE 4: RECOMMENDATIONS - STRATEGIC INITIATIVES
+         =================================================================== -->
+    <section class="slide" id="slide-4">
+      <div class="slide-content">
+        <h2 class="fade-in">Strategic Recommendations: Three-Pillar Transformation</h2>
+        <p class="lead fade-in">Prioritized initiatives targeting high-impact, high-addressability opportunities</p>
+
+        <!-- Initiative Comparison -->
+        <div class="chart-container fade-in">
+          <h3 class="chart-title">Initiative Impact vs. Implementation Effort</h3>
+          <p class="chart-subtitle">Bubble size represents estimated annual value ($M)</p>
+          <div class="chart-wrapper" id="bubbleChart"></div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color" style="background-color: var(--color-chart-primary);"></span>
+              <span>High Priority (Quick Wins)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background-color: var(--color-chart-secondary);"></span>
+              <span>Medium Priority (Strategic)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background-color: var(--color-chart-tertiary);"></span>
+              <span>Lower Priority (Long-term)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Initiative Details -->
+        <div class="steps fade-in">
+          <div class="step" data-step="1">
+            <h4 class="step-title">Process Redesign</h4>
+            <p class="step-description"><strong>Impact:</strong> $8M annual savings<br><strong>Timeline:</strong> 6 months<br><strong>Effort:</strong> Medium</p>
+          </div>
+          <div class="step" data-step="2">
+            <h4 class="step-title">Technology Upgrade</h4>
+            <p class="step-description"><strong>Impact:</strong> $5M annual savings<br><strong>Timeline:</strong> 12 months<br><strong>Effort:</strong> High</p>
+          </div>
+          <div class="step" data-step="3">
+            <h4 class="step-title">Workforce Optimization</h4>
+            <p class="step-description"><strong>Impact:</strong> $2M annual savings<br><strong>Timeline:</strong> 3 months<br><strong>Effort:</strong> Low</p>
+          </div>
+        </div>
+
+        <!-- Expected Outcomes -->
+        <div class="insight fade-in">
+          <div class="insight-label">Expected Outcome</div>
+          <p class="insight-text">Combined impact: 28% efficiency improvement and $15M annual cost reduction within 18 months</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SLIDE 5: NEXT STEPS - IMPLEMENTATION ROADMAP
+         =================================================================== -->
+    <section class="slide" id="slide-5">
+      <div class="slide-content">
+        <h2 class="fade-in">Implementation Roadmap: 18-Month Plan</h2>
+        <p class="lead fade-in">Phased approach with clear milestones and accountability</p>
+
+        <!-- Gantt Chart -->
+        <div class="chart-container fade-in">
+          <h3 class="chart-title">Initiative Timeline and Dependencies</h3>
+          <p class="chart-subtitle">Sequenced for maximum value realization</p>
+          <div class="chart-wrapper" id="ganttChart"></div>
+          <p class="chart-caption">Assumes Q3 2024 start date | Milestones subject to resource availability</p>
+        </div>
+
+        <!-- Critical Path -->
+        <div class="callout callout-warning fade-in">
+          <div class="callout-title">Critical Path</div>
+          <p><strong>Technology Upgrade</strong> is on the critical path. Any delays will impact overall timeline and benefits realization. Recommend securing executive sponsorship and resources immediately.</p>
+        </div>
+
+        <!-- Next Steps Checklist -->
+        <div class="fade-in mt-lg">
+          <h3>Immediate Next Steps (Next 30 Days)</h3>
+          <ul class="list-check">
+            <li>Secure executive sponsorship and steering committee</li>
+            <li>Allocate dedicated transformation team (5-7 FTE)</li>
+            <li>Finalize detailed project plans for Phase 1 initiatives</li>
+            <li>Establish baseline metrics and monitoring dashboard</li>
+            <li>Communicate transformation vision to broader organization</li>
+          </ul>
+        </div>
+
+        <!-- Final CTA -->
+        <div class="text-center mt-xl fade-in">
+          <h3>Ready to Begin?</h3>
+          <p class="text-muted mb-md">Let's schedule a follow-up session to finalize implementation details</p>
+          <a href="#contact" class="btn btn-primary">Schedule Follow-Up</a>
+          <a href="#appendix" class="btn btn-secondary">View Detailed Analysis</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- D3.js Library (CDN) -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <!-- Inline JavaScript for Charts -->
+  <script>
+    // =========================================================================
+    // FADE-IN ANIMATION ON SCROLL
+    // =========================================================================
+    const observerOptions = {
+      threshold: 0.2,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // =========================================================================
+    // SLIDE NAVIGATION
+    // =========================================================================
+    const slides = document.querySelectorAll('.slide');
+    const navDots = document.querySelectorAll('.slide-nav-dot');
+
+    // Update active dot on scroll
+    const updateActiveSlide = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+      slides.forEach((slide, index) => {
+        const slideTop = slide.offsetTop;
+        const slideBottom = slideTop + slide.offsetHeight;
+
+        if (scrollPosition >= slideTop && scrollPosition < slideBottom) {
+          navDots.forEach(dot => dot.classList.remove('active'));
+          navDots[index].classList.add('active');
+        }
+      });
+    };
+
+    window.addEventListener('scroll', updateActiveSlide);
+
+    // Click navigation
+    navDots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        slides[index].scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // =========================================================================
+    // CHART 1: TREND LINE CHART (NO GRIDLINES)
+    // =========================================================================
+    const createTrendChart = () => {
+      const container = document.getElementById('trendChart');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = { top: 20, right: 20, bottom: 50, left: 60 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      // Sample data (18 months)
+      const data = [
+        { month: 'Jan 23', efficiency: 78, cost: 100 },
+        { month: 'Feb 23', efficiency: 76, cost: 102 },
+        { month: 'Mar 23', efficiency: 75, cost: 105 },
+        { month: 'Apr 23', efficiency: 74, cost: 107 },
+        { month: 'May 23', efficiency: 73, cost: 110 },
+        { month: 'Jun 23', efficiency: 72, cost: 112 },
+        { month: 'Jul 23', efficiency: 71, cost: 115 },
+        { month: 'Aug 23', efficiency: 70, cost: 117 },
+        { month: 'Sep 23', efficiency: 69, cost: 120 },
+        { month: 'Oct 23', efficiency: 69, cost: 122 },
+        { month: 'Nov 23', efficiency: 68, cost: 125 },
+        { month: 'Dec 23', efficiency: 68, cost: 127 },
+        { month: 'Jan 24', efficiency: 67, cost: 130 },
+        { month: 'Feb 24', efficiency: 67, cost: 132 },
+        { month: 'Mar 24', efficiency: 68, cost: 135 },
+        { month: 'Apr 24', efficiency: 68, cost: 138 },
+        { month: 'May 24', efficiency: 68, cost: 140 },
+        { month: 'Jun 24', efficiency: 68, cost: 143 }
+      ];
+
+      const svg = d3.select('#trendChart')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      const g = svg.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Scales
+      const x = d3.scaleBand()
+        .domain(data.map(d => d.month))
+        .range([0, innerWidth])
+        .padding(0.1);
+
+      const yEfficiency = d3.scaleLinear()
+        .domain([60, 80])
+        .range([innerHeight, 0]);
+
+      const yCost = d3.scaleLinear()
+        .domain([90, 150])
+        .range([innerHeight, 0]);
+
+      // Axes (NO GRIDLINES)
+      const xAxis = d3.axisBottom(x).tickValues(x.domain().filter((d, i) => i % 3 === 0));
+      const yAxisLeft = d3.axisLeft(yEfficiency).ticks(5);
+      const yAxisRight = d3.axisRight(yCost).ticks(5);
+
+      g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0,${innerHeight})`)
+        .call(xAxis)
+        .selectAll('text')
+        .attr('transform', 'rotate(-45)')
+        .style('text-anchor', 'end');
+
+      g.append('g')
+        .attr('class', 'axis')
+        .call(yAxisLeft);
+
+      g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(${innerWidth},0)`)
+        .call(yAxisRight);
+
+      // Axis labels
+      g.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', -innerHeight / 2)
+        .attr('y', -45)
+        .attr('transform', 'rotate(-90)')
+        .attr('text-anchor', 'middle')
+        .text('Efficiency (%)');
+
+      g.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', innerWidth + 45)
+        .attr('y', innerHeight / 2)
+        .attr('transform', 'rotate(90)')
+        .attr('transform-origin', `${innerWidth} ${innerHeight / 2}`)
+        .attr('text-anchor', 'middle')
+        .text('Cost Index');
+
+      // Line generators
+      const lineEfficiency = d3.line()
+        .x(d => x(d.month) + x.bandwidth() / 2)
+        .y(d => yEfficiency(d.efficiency))
+        .curve(d3.curveMonotoneX);
+
+      const lineCost = d3.line()
+        .x(d => x(d.month) + x.bandwidth() / 2)
+        .y(d => yCost(d.cost))
+        .curve(d3.curveMonotoneX);
+
+      // Draw lines
+      g.append('path')
+        .datum(data)
+        .attr('fill', 'none')
+        .attr('stroke', 'var(--color-chart-primary)')
+        .attr('stroke-width', 3)
+        .attr('d', lineEfficiency);
+
+      g.append('path')
+        .datum(data)
+        .attr('fill', 'none')
+        .attr('stroke', 'var(--color-chart-secondary)')
+        .attr('stroke-width', 3)
+        .attr('stroke-dasharray', '5,5')
+        .attr('d', lineCost);
+    };
+
+    // =========================================================================
+    // CHART 2: WATERFALL CHART
+    // =========================================================================
+    const createWaterfallChart = () => {
+      const container = document.getElementById('waterfallChart');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = { top: 20, right: 20, bottom: 60, left: 60 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const data = [
+        { label: 'Baseline', value: 68, cumulative: 68, isBase: true },
+        { label: 'Process Bottlenecks', value: 18, cumulative: 86, isPositive: true },
+        { label: 'Technology Gaps', value: 9, cumulative: 95, isPositive: true },
+        { label: 'Workforce Opt.', value: 5, cumulative: 100, isPositive: true },
+        { label: 'Target', value: 100, cumulative: 100, isTarget: true }
+      ];
+
+      const svg = d3.select('#waterfallChart')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      const g = svg.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const x = d3.scaleBand()
+        .domain(data.map(d => d.label))
+        .range([0, innerWidth])
+        .padding(0.3);
+
+      const y = d3.scaleLinear()
+        .domain([0, 110])
+        .range([innerHeight, 0]);
+
+      // Axes
+      g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0,${innerHeight})`)
+        .call(d3.axisBottom(x))
+        .selectAll('text')
+        .style('text-anchor', 'middle');
+
+      g.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(y).ticks(10));
+
+      // Axis label
+      g.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', -innerHeight / 2)
+        .attr('y', -45)
+        .attr('transform', 'rotate(-90)')
+        .attr('text-anchor', 'middle')
+        .text('Efficiency (%)');
+
+      // Bars
+      const bars = g.selectAll('.bar')
+        .data(data)
+        .enter();
+
+      bars.append('rect')
+        .attr('class', 'bar')
+        .attr('x', d => x(d.label))
+        .attr('y', d => {
+          if (d.isBase || d.isTarget) return y(d.value);
+          return y(d.cumulative);
+        })
+        .attr('width', x.bandwidth())
+        .attr('height', d => {
+          if (d.isBase || d.isTarget) return innerHeight - y(d.value);
+          return innerHeight - y(d.value);
+        })
+        .attr('fill', d => {
+          if (d.isBase) return 'var(--color-chart-muted)';
+          if (d.isTarget) return 'var(--color-chart-primary)';
+          return 'var(--color-chart-secondary)';
+        })
+        .attr('opacity', 0.8);
+
+      // Connecting lines
+      for (let i = 0; i < data.length - 1; i++) {
+        if (!data[i].isBase && !data[i + 1].isTarget) {
+          g.append('line')
+            .attr('x1', x(data[i].label) + x.bandwidth())
+            .attr('y1', y(data[i].cumulative))
+            .attr('x2', x(data[i + 1].label))
+            .attr('y2', y(data[i].cumulative))
+            .attr('stroke', 'var(--color-border)')
+            .attr('stroke-width', 1)
+            .attr('stroke-dasharray', '3,3');
+        }
+      }
+
+      // Value labels
+      bars.append('text')
+        .attr('x', d => x(d.label) + x.bandwidth() / 2)
+        .attr('y', d => {
+          if (d.isBase || d.isTarget) return y(d.value) - 5;
+          return y(d.cumulative) - 5;
+        })
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '12px')
+        .attr('font-weight', '700')
+        .attr('fill', 'var(--color-text-primary)')
+        .text(d => d.isBase || d.isTarget ? `${d.value}%` : `+${d.value}`);
+    };
+
+    // =========================================================================
+    // CHART 3: BUBBLE CHART (IMPACT VS EFFORT)
+    // =========================================================================
+    const createBubbleChart = () => {
+      const container = document.getElementById('bubbleChart');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = { top: 20, right: 20, bottom: 60, left: 80 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const data = [
+        { initiative: 'Process Redesign', impact: 85, effort: 60, value: 8, priority: 'high' },
+        { initiative: 'Technology Upgrade', impact: 75, effort: 85, value: 5, priority: 'medium' },
+        { initiative: 'Workforce Optimization', impact: 65, effort: 30, value: 2, priority: 'high' },
+        { initiative: 'Data Infrastructure', impact: 50, effort: 70, value: 3, priority: 'medium' },
+        { initiative: 'Training Programs', impact: 40, effort: 25, value: 1, priority: 'low' }
+      ];
+
+      const svg = d3.select('#bubbleChart')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      const g = svg.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const x = d3.scaleLinear()
+        .domain([0, 100])
+        .range([0, innerWidth]);
+
+      const y = d3.scaleLinear()
+        .domain([0, 100])
+        .range([innerHeight, 0]);
+
+      const size = d3.scaleSqrt()
+        .domain([0, 10])
+        .range([0, 40]);
+
+      const colorMap = {
+        'high': 'var(--color-chart-primary)',
+        'medium': 'var(--color-chart-secondary)',
+        'low': 'var(--color-chart-tertiary)'
+      };
+
+      // Axes
+      g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0,${innerHeight})`)
+        .call(d3.axisBottom(x).ticks(10));
+
+      g.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(y).ticks(10));
+
+      // Axis labels
+      g.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', innerWidth / 2)
+        .attr('y', innerHeight + 45)
+        .attr('text-anchor', 'middle')
+        .text('Implementation Effort (Complexity & Resources)');
+
+      g.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', -innerHeight / 2)
+        .attr('y', -60)
+        .attr('transform', 'rotate(-90)')
+        .attr('text-anchor', 'middle')
+        .text('Expected Impact (Value & Strategic Importance)');
+
+      // Quadrant lines (subtle)
+      g.append('line')
+        .attr('x1', x(50))
+        .attr('x2', x(50))
+        .attr('y1', 0)
+        .attr('y2', innerHeight)
+        .attr('stroke', 'var(--color-border)')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '5,5')
+        .attr('opacity', 0.3);
+
+      g.append('line')
+        .attr('x1', 0)
+        .attr('x2', innerWidth)
+        .attr('y1', y(50))
+        .attr('y2', y(50))
+        .attr('stroke', 'var(--color-border)')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '5,5')
+        .attr('opacity', 0.3);
+
+      // Bubbles
+      const bubbles = g.selectAll('.bubble')
+        .data(data)
+        .enter()
+        .append('g')
+        .attr('class', 'bubble');
+
+      bubbles.append('circle')
+        .attr('cx', d => x(d.effort))
+        .attr('cy', d => y(d.impact))
+        .attr('r', d => size(d.value))
+        .attr('fill', d => colorMap[d.priority])
+        .attr('opacity', 0.7)
+        .attr('stroke', d => colorMap[d.priority])
+        .attr('stroke-width', 2);
+
+      // Labels
+      bubbles.append('text')
+        .attr('x', d => x(d.effort))
+        .attr('y', d => y(d.impact) - size(d.value) - 10)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '11px')
+        .attr('font-weight', '600')
+        .attr('fill', 'var(--color-text-primary)')
+        .text(d => d.initiative);
+
+      // Value labels
+      bubbles.append('text')
+        .attr('x', d => x(d.effort))
+        .attr('y', d => y(d.impact))
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', '12px')
+        .attr('font-weight', '700')
+        .attr('fill', 'white')
+        .text(d => `$${d.value}M`);
+    };
+
+    // =========================================================================
+    // CHART 4: GANTT CHART (SIMPLIFIED)
+    // =========================================================================
+    const createGanttChart = () => {
+      const container = document.getElementById('ganttChart');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = { top: 20, right: 20, bottom: 50, left: 180 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const tasks = [
+        { task: 'Process Redesign', start: 0, duration: 6, phase: 1 },
+        { task: 'Technology Upgrade', start: 3, duration: 12, phase: 1 },
+        { task: 'Workforce Optimization', start: 0, duration: 3, phase: 1 },
+        { task: 'Pilot Testing', start: 6, duration: 2, phase: 2 },
+        { task: 'Full Rollout', start: 8, duration: 4, phase: 2 },
+        { task: 'Change Management', start: 0, duration: 18, phase: 3 }
+      ];
+
+      const svg = d3.select('#ganttChart')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      const g = svg.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const x = d3.scaleLinear()
+        .domain([0, 18])
+        .range([0, innerWidth]);
+
+      const y = d3.scaleBand()
+        .domain(tasks.map(d => d.task))
+        .range([0, innerHeight])
+        .padding(0.3);
+
+      const colorMap = {
+        1: 'var(--color-chart-primary)',
+        2: 'var(--color-chart-secondary)',
+        3: 'var(--color-chart-tertiary)'
+      };
+
+      // Axes
+      g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0,${innerHeight})`)
+        .call(d3.axisBottom(x).ticks(18).tickFormat(d => `M${d + 1}`));
+
+      g.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(y));
+
+      // Axis label
+      g.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', innerWidth / 2)
+        .attr('y', innerHeight + 40)
+        .attr('text-anchor', 'middle')
+        .text('Timeline (Months)');
+
+      // Bars
+      g.selectAll('.task-bar')
+        .data(tasks)
+        .enter()
+        .append('rect')
+        .attr('class', 'task-bar')
+        .attr('x', d => x(d.start))
+        .attr('y', d => y(d.task))
+        .attr('width', d => x(d.duration))
+        .attr('height', y.bandwidth())
+        .attr('fill', d => colorMap[d.phase])
+        .attr('opacity', 0.8)
+        .attr('rx', 3);
+
+      // Duration labels
+      g.selectAll('.duration-label')
+        .data(tasks)
+        .enter()
+        .append('text')
+        .attr('x', d => x(d.start) + x(d.duration) / 2)
+        .attr('y', d => y(d.task) + y.bandwidth() / 2)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', '11px')
+        .attr('font-weight', '600')
+        .attr('fill', 'white')
+        .text(d => `${d.duration}mo`);
+    };
+
+    // =========================================================================
+    // INITIALIZE CHARTS ON LOAD
+    // =========================================================================
+    window.addEventListener('load', () => {
+      createTrendChart();
+      createWaterfallChart();
+      createBubbleChart();
+      createGanttChart();
+    });
+
+    // Resize handler
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        // Clear existing charts
+        d3.selectAll('#trendChart svg').remove();
+        d3.selectAll('#waterfallChart svg').remove();
+        d3.selectAll('#bubbleChart svg').remove();
+        d3.selectAll('#ganttChart svg').remove();
+
+        // Recreate charts
+        createTrendChart();
+        createWaterfallChart();
+        createBubbleChart();
+        createGanttChart();
+      }, 300);
+    });
+  </script>
+
+</body>
+</html>
