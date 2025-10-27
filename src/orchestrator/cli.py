@@ -50,6 +50,13 @@ try:
 except ImportError as e:
     console.print(f"[yellow]Warning: Could not import governance CLI: {e}[/yellow]")
 
+# Add bootstrap command
+try:
+    from src.orchestrator.commands.bootstrap import main as bootstrap_main
+    app.command(name="bootstrap")(bootstrap_main)
+except ImportError as e:
+    console.print(f"[yellow]Warning: Could not import bootstrap command: {e}[/yellow]")
+
 # Add data command group (import commands from existing src/cli.py)
 try:
     from src.cli import app as data_cli_app
