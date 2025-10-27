@@ -464,19 +464,20 @@ class Orchestrator:
 
         return results
 
-    def invoke_agent(self, agent_name: str, phase_name: str) -> AgentOutcome:
+    def invoke_agent(self, agent_name: str, phase_name: str, timeout_override: Optional[float] = None) -> AgentOutcome:
         """
         Invoke a single agent within a phase (sync wrapper for async execution).
 
         Args:
             agent_name: Name of the agent to invoke
             phase_name: Current phase name
+            timeout_override: Optional timeout override in seconds
 
         Returns:
             AgentOutcome with execution results
         """
         # Run async execution in event loop
-        return asyncio.run(self._invoke_agent_async(agent_name, phase_name))
+        return asyncio.run(self._invoke_agent_async(agent_name, phase_name, timeout_override))
 
     async def _invoke_agent_async(
         self, agent_name: str, phase_name: str, timeout_override: Optional[float] = None
