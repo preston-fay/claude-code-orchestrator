@@ -1,0 +1,423 @@
+name: Metrics Collection
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+  schedule:
+    - cron: '0 9 * * *'  # Daily at 9am UTC
+  workflow_dispatch:  # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  collect-dora-metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for DORA metrics
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Collect DORA metrics
+        run: |
+          python -m src.orchestrator.metrics.dora_metrics --days 90 --verbose
+        continue-on-error: true
+
+      - name: Upload DORA metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: dora-metrics
+          path: .claude/metrics/dora/
+          retention-days: 90
+        if: always()
+
+  collect-github-metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install PyGithub
+
+      - name: Collect GitHub collaboration metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m src.orchestrator.metrics.github_metrics \
+            --repo ${{ github.repository }} \
+            --days 90 \
+            --verbose
+        continue-on-error: true
+        timeout-minutes: 10
+
+      - name: Upload GitHub metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-metrics
+          path: .claude/metrics/github/
+          retention-days: 90
+        if: always()
+
+  collect-contribution-metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for contribution analysis
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Collect AI contribution metrics
+        run: |
+          python -m src.orchestrator.metrics.contribution_analyzer --days 90 --verbose
+        continue-on-error: true
+
+      - name: Upload contribution metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: contribution-metrics
+          path: .claude/metrics/contributions/
+          retention-days: 90
+        if: always()
+
+  collect-ai-review-metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install PyGithub
+
+      - name: Collect AI review impact metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m src.orchestrator.metrics.ai_review_impact \
+            --repo ${{ github.repository }} \
+            --days 90 \
+            --verbose
+        continue-on-error: true
+
+      - name: Upload AI review metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-review-metrics
+          path: .claude/metrics/ai_review/
+          retention-days: 90
+        if: always()
+
+  aggregate-metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [collect-dora-metrics, collect-contribution-metrics, collect-ai-review-metrics]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Download all metrics artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: .claude/metrics/
+        continue-on-error: true
+
+      - name: Reorganize downloaded artifacts
+        run: |
+          # Actions downloads into subdirectories by artifact name
+          # Move files to correct structure
+          if [ -d ".claude/metrics/dora-metrics" ]; then
+            mkdir -p .claude/metrics/dora
+            cp -r .claude/metrics/dora-metrics/* .claude/metrics/dora/ || true
+            rm -rf .claude/metrics/dora-metrics
+          fi
+
+          if [ -d ".claude/metrics/github-metrics" ]; then
+            mkdir -p .claude/metrics/github
+            cp -r .claude/metrics/github-metrics/* .claude/metrics/github/ || true
+            rm -rf .claude/metrics/github-metrics
+          fi
+
+          if [ -d ".claude/metrics/contribution-metrics" ]; then
+            mkdir -p .claude/metrics/contributions
+            cp -r .claude/metrics/contribution-metrics/* .claude/metrics/contributions/ || true
+            rm -rf .claude/metrics/contribution-metrics
+          fi
+
+          if [ -d ".claude/metrics/ai-review-metrics" ]; then
+            mkdir -p .claude/metrics/ai_review
+            cp -r .claude/metrics/ai-review-metrics/* .claude/metrics/ai_review/ || true
+            rm -rf .claude/metrics/ai-review-metrics
+          fi
+
+          # Show final structure
+          ls -R .claude/metrics/
+        continue-on-error: true
+
+      - name: Aggregate metrics
+        run: |
+          python -m src.orchestrator.metrics.aggregator --weeks 12 --months 6 --verbose
+        continue-on-error: true
+
+      - name: Upload aggregated metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: aggregated-metrics
+          path: .claude/metrics/aggregated/
+          retention-days: 90
+        if: always()
+
+  commit-results:
+    runs-on: ubuntu-latest
+    needs: aggregate-metrics
+    if: |
+      always() &&
+      github.event_name != 'pull_request' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all metrics artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+        continue-on-error: true
+
+      - name: Reorganize metrics for commit
+        run: |
+          # Create metrics directory structure
+          mkdir -p .claude/metrics/{dora,github,contributions,ai_review,aggregated}
+
+          # Copy from artifacts
+          if [ -d "artifacts/dora-metrics" ]; then
+            cp -r artifacts/dora-metrics/* .claude/metrics/dora/ || true
+          fi
+
+          if [ -d "artifacts/github-metrics" ]; then
+            cp -r artifacts/github-metrics/* .claude/metrics/github/ || true
+          fi
+
+          if [ -d "artifacts/contribution-metrics" ]; then
+            cp -r artifacts/contribution-metrics/* .claude/metrics/contributions/ || true
+          fi
+
+          if [ -d "artifacts/ai-review-metrics" ]; then
+            cp -r artifacts/ai-review-metrics/* .claude/metrics/ai_review/ || true
+          fi
+
+          if [ -d "artifacts/aggregated-metrics" ]; then
+            cp -r artifacts/aggregated-metrics/* .claude/metrics/aggregated/ || true
+          fi
+
+          # Show what we're committing
+          ls -R .claude/metrics/
+
+          # Count JSON files
+          json_count=$(find .claude/metrics/ -name "*.json" | wc -l)
+          echo "Found $json_count JSON files to commit"
+        continue-on-error: true
+
+      - name: Commit and push metrics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add metrics files
+          git add .claude/metrics/
+
+          # Check if there are changes
+          if git diff --cached --quiet; then
+            echo "No metrics changes to commit"
+            exit 0
+          fi
+
+          # Create commit with metadata
+          git commit -m "chore: update metrics data [skip ci]
+
+          Automated metrics collection
+
+          Trigger: ${{ github.event_name }}
+          Workflow: ${{ github.workflow }}
+          Run: ${{ github.run_number }}"
+
+          # Push with retry logic
+          max_retries=3
+          retry_count=0
+
+          while [ $retry_count -lt $max_retries ]; do
+            if git push; then
+              echo "Successfully pushed metrics"
+              exit 0
+            else
+              retry_count=$((retry_count + 1))
+              echo "Push failed, retry $retry_count of $max_retries"
+
+              if [ $retry_count -lt $max_retries ]; then
+                sleep 5
+                git pull --rebase origin main
+              fi
+            fi
+          done
+
+          echo "Failed to push metrics after $max_retries retries"
+          exit 1
+        continue-on-error: true
+
+      - name: Create summary
+        if: always()
+        run: |
+          echo "## Metrics Collection Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Trigger: \`${{ github.event_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Count metrics files
+          if [ -d ".claude/metrics" ]; then
+            dora_count=$(find .claude/metrics/dora -name "*.json" 2>/dev/null | wc -l || echo "0")
+            github_count=$(find .claude/metrics/github -name "*.json" 2>/dev/null | wc -l || echo "0")
+            contrib_count=$(find .claude/metrics/contributions -name "*.json" 2>/dev/null | wc -l || echo "0")
+            ai_review_count=$(find .claude/metrics/ai_review -name "*.json" 2>/dev/null | wc -l || echo "0")
+            agg_count=$(find .claude/metrics/aggregated -name "*.json" 2>/dev/null | wc -l || echo "0")
+
+            echo "### Collected Metrics" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- DORA: $dora_count files" >> $GITHUB_STEP_SUMMARY
+            echo "- GitHub: $github_count files" >> $GITHUB_STEP_SUMMARY
+            echo "- Contributions: $contrib_count files" >> $GITHUB_STEP_SUMMARY
+            echo "- AI Review: $ai_review_count files" >> $GITHUB_STEP_SUMMARY
+            echo "- Aggregated: $agg_count files" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No metrics directory found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View artifacts in [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    needs: [collect-dora-metrics, collect-github-metrics, collect-contribution-metrics, collect-ai-review-metrics, aggregate-metrics, commit-results]
+    if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - name: Create failure issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `Metrics Collection Failed - ${new Date().toISOString().split('T')[0]}`;
+            const body = `## Metrics Collection Failure
+
+            The automated metrics collection workflow failed.
+
+            **Workflow Run:** https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+            **Trigger:** ${context.eventName}
+            **Branch:** ${context.ref}
+
+            ### Jobs Status
+            Check the workflow run for details on which collection jobs failed.
+
+            ### Possible Causes
+            - GitHub API rate limit exceeded
+            - Collector script errors
+            - Git push conflicts
+            - Missing dependencies
+
+            ### Next Steps
+            1. Review workflow logs
+            2. Re-run failed jobs if transient failure
+            3. Update collector scripts if code issue
+            4. Check GitHub API rate limits
+            `;
+
+            // Check if issue already exists for today
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'metrics,automation'
+            });
+
+            const existingIssue = issues.data.find(i => i.title === title);
+
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['metrics', 'automation', 'bug']
+              });
+              console.log('Created failure issue');
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `Workflow failed again: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+              });
+              console.log('Updated existing failure issue');
+            }

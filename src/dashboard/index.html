@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Metrics Dashboard for Claude Code Orchestrator - DORA metrics, AI contributions, and collaboration analytics">
+    <title>Metrics Dashboard - Claude Code Orchestrator</title>
+
+    <!-- Design System Tokens -->
+    <link rel="stylesheet" href="../../design_system/web/tokens.css">
+
+    <!-- Dashboard Styles -->
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="header-content">
+            <h1>Metrics Dashboard</h1>
+            <div class="header-actions">
+                <button id="export-data" class="btn-secondary">Export Data</button>
+                <button id="theme-toggle" class="btn-primary">Light Mode</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-main">
+        <!-- Hero Metrics Section -->
+        <section class="hero-metrics">
+            <div class="metric-card hero-card">
+                <div class="card-header">
+                    <h2>DORA Rating</h2>
+                </div>
+                <div class="card-body">
+                    <div class="hero-metric" id="dora-rating">
+                        <span class="hero-value">--</span>
+                        <span class="hero-label">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card hero-card">
+                <div class="card-header">
+                    <h2>Deployment Frequency</h2>
+                </div>
+                <div class="card-body">
+                    <div class="hero-metric" id="deploy-freq">
+                        <span class="hero-value">--</span>
+                        <span class="hero-label">deploys/week</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card hero-card">
+                <div class="card-header">
+                    <h2>AI Contribution</h2>
+                </div>
+                <div class="card-body">
+                    <div class="hero-metric" id="ai-contribution">
+                        <span class="hero-value">--</span>
+                        <span class="hero-label">% collaborative</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DORA Metrics Section -->
+        <section class="metrics-section">
+            <h2 class="section-title">DORA Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Deployment Frequency</h3>
+                        <button id="download-deploy-frequency" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-deploy-frequency"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Lead Time for Changes</h3>
+                        <button id="download-lead-time" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-lead-time"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Mean Time to Recovery</h3>
+                        <button id="download-mttr" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-mttr"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Change Failure Rate</h3>
+                        <button id="download-change-failure-rate" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-change-failure-rate"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GitHub Collaboration Section -->
+        <section class="metrics-section">
+            <h2 class="section-title">GitHub Collaboration</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>PR Cycle Time</h3>
+                        <button id="download-pr-cycle-time" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-pr-cycle-time"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Merge Conflicts</h3>
+                        <button id="download-merge-conflicts" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-merge-conflicts"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Feature Velocity</h3>
+                        <button id="download-feature-velocity" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-feature-velocity"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Contribution Section -->
+        <section class="metrics-section">
+            <h2 class="section-title">AI Contribution Analysis</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Contribution Attribution</h3>
+                        <button id="download-attribution" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-attribution"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Contribution Trend</h3>
+                        <button id="download-contribution-trend" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-contribution-trend"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Commit Distribution</h3>
+                        <button id="download-commit-distribution" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-commit-distribution"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Review Impact Section -->
+        <section class="metrics-section">
+            <h2 class="section-title">AI Review Impact</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Review Coverage</h3>
+                        <button id="download-review-coverage" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-review-coverage"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Suggestions per PR</h3>
+                        <button id="download-suggestions-per-pr" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-suggestions-per-pr"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Acceptance Rate</h3>
+                        <button id="download-acceptance-rate" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-acceptance-rate"></canvas>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-header">
+                        <h3>Response Time</h3>
+                        <button id="download-response-time" class="download-chart">Download</button>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chart-response-time"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="dashboard-footer">
+        <p>Claude Code Orchestrator - Metrics Dashboard</p>
+        <p>Data updated: <span id="last-updated">--</span></p>
+    </footer>
+
+    <!-- Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+    <!-- Dashboard JavaScript Modules -->
+    <script type="module" src="js/theme-manager.js"></script>
+    <script type="module" src="js/metrics-loader.js"></script>
+    <script type="module" src="js/chart-config.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

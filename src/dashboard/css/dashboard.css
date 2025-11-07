@@ -1,0 +1,310 @@
+/**
+ * Metrics Dashboard Styles
+ *
+ * CRITICAL: Uses design_system/web/tokens.css exclusively
+ * NO hardcoded colors, spacing, or typography
+ * Default theme: DARK
+ */
+
+/* Import Design System Tokens */
+@import '../../../design_system/web/tokens.css';
+
+/* ===== ROOT & RESET ===== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family-sans);
+    background-color: var(--color-semantic-background);
+    color: var(--color-semantic-text);
+    line-height: var(--line-height-body);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== LAYOUT ===== */
+
+.dashboard-header {
+    background-color: var(--color-semantic-surface);
+    border-bottom: 1px solid var(--color-semantic-border);
+    padding: var(--spacing-4) var(--spacing-6);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-header h1 {
+    font-size: var(--font-size-5);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-semantic-text);
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--spacing-3);
+}
+
+.dashboard-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-6);
+}
+
+.dashboard-footer {
+    background-color: var(--color-semantic-surface);
+    border-top: 1px solid var(--color-semantic-border);
+    padding: var(--spacing-4) var(--spacing-6);
+    text-align: center;
+    color: var(--color-semantic-text-muted);
+    font-size: var(--font-size-1);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dashboard-footer p {
+    margin: var(--spacing-1) 0;
+}
+
+/* ===== BUTTONS ===== */
+
+button {
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-2);
+    font-weight: var(--font-weight-medium);
+    padding: var(--spacing-2) var(--spacing-4);
+    border: none;
+    border-radius: var(--radius-2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--color-purple);
+    color: var(--color-white);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--color-semantic-text);
+    border: 1px solid var(--color-semantic-border);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-semantic-surface-elevated);
+}
+
+.download-chart {
+    font-size: var(--font-size-1);
+    padding: var(--spacing-1) var(--spacing-2);
+    background-color: transparent;
+    color: var(--color-semantic-text-muted);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.metric-card:hover .download-chart {
+    opacity: 1;
+}
+
+.download-chart:hover {
+    color: var(--color-purple);
+}
+
+/* ===== SECTIONS ===== */
+
+.hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+}
+
+.metrics-section {
+    margin-bottom: var(--spacing-8);
+}
+
+.section-title {
+    font-size: var(--font-size-4);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-semantic-text);
+    margin-bottom: var(--spacing-4);
+    border-bottom: 2px solid var(--color-purple);
+    padding-bottom: var(--spacing-2);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-4);
+}
+
+/* ===== CARDS ===== */
+
+.metric-card {
+    background-color: var(--color-semantic-surface);
+    border: 1px solid var(--color-semantic-border);
+    border-radius: var(--radius-3);
+    padding: var(--spacing-4);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-3);
+}
+
+.hero-card {
+    text-align: center;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-3);
+}
+
+.card-header h2,
+.card-header h3 {
+    font-size: var(--font-size-3);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-semantic-text);
+}
+
+.card-body {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== HERO METRICS ===== */
+
+.hero-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.hero-value {
+    font-size: var(--font-size-8);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-purple);
+    line-height: 1;
+}
+
+.hero-label {
+    font-size: var(--font-size-2);
+    color: var(--color-semantic-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ===== CHARTS ===== */
+
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet (2 columns) */
+@media (max-width: 1024px) {
+    .hero-metrics,
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-main {
+        padding: var(--spacing-4);
+    }
+}
+
+/* Mobile (1 column) */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: var(--spacing-3);
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .hero-metrics,
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-main {
+        padding: var(--spacing-3);
+    }
+
+    .section-title {
+        font-size: var(--font-size-3);
+    }
+
+    .hero-value {
+        font-size: var(--font-size-6);
+    }
+
+    .card-body {
+        min-height: 150px;
+    }
+}
+
+/* ===== LOADING STATES ===== */
+
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: 'Loading...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--color-semantic-text-muted);
+}
+
+/* ===== ERROR STATES ===== */
+
+.error-message {
+    padding: var(--spacing-3);
+    background-color: var(--color-error);
+    color: var(--color-white);
+    border-radius: var(--radius-2);
+    text-align: center;
+    margin: var(--spacing-4) 0;
+}
+
+/* ===== THEME-SPECIFIC OVERRIDES ===== */
+
+/* All theme handling is done via CSS custom properties in tokens.css */
+/* No theme-specific overrides needed here */

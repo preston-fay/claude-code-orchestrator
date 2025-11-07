@@ -1,0 +1,168 @@
+name: Metrics Weekly Report
+
+on:
+  # Schedule: Every Monday at 9am UTC
+  schedule:
+    - cron: '0 9 * * 1'
+
+  # Manual trigger for testing
+  workflow_dispatch:
+
+  # After metrics collection completes
+  workflow_run:
+    workflows: ["Metrics Collection"]
+    types: [completed]
+
+env:
+  RECIPIENT_EMAIL: preston.fay@kearney.com
+  SMTP_SERVER: smtp.gmail.com
+  SMTP_PORT: 587
+
+jobs:
+  generate-weekly-report:
+    name: Generate Weekly Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install markdown2 jinja2
+
+      - name: Generate markdown report
+        run: |
+          python scripts/generate_metrics_report.py
+        continue-on-error: true
+
+      - name: Generate HTML email version
+        run: |
+          python scripts/generate_html_email.py
+        continue-on-error: true
+
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report
+          path: reports/
+          retention-days: 90
+
+  create-issue:
+    name: Create GitHub Issue
+    needs: generate-weekly-report
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Download report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: weekly-report
+          path: reports/
+
+      - name: Read report content
+        id: read-report
+        run: |
+          if [ -f reports/weekly_report.md ]; then
+            {
+              echo 'REPORT_CONTENT<<EOF'
+              cat reports/weekly_report.md
+              echo EOF
+            } >> $GITHUB_OUTPUT
+          else
+            echo 'REPORT_CONTENT=Report generation failed. Please check workflow logs.' >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get week date range
+        id: get-date
+        run: |
+          WEEK_START=$(date -u -d 'last monday' '+%Y-%m-%d' 2>/dev/null || date -u -v-monday '+%Y-%m-%d')
+          WEEK_END=$(date -u -d 'last sunday' '+%Y-%m-%d' 2>/dev/null || date -u -v-sunday '+%Y-%m-%d')
+          echo "WEEK_START=$WEEK_START" >> $GITHUB_OUTPUT
+          echo "WEEK_END=$WEEK_END" >> $GITHUB_OUTPUT
+          echo "WEEK_LABEL=Week of $WEEK_START" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const weekLabel = '${{ steps.get-date.outputs.WEEK_LABEL }}';
+            const reportContent = `${{ steps.read-report.outputs.REPORT_CONTENT }}`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Weekly Metrics Report - ${weekLabel}`,
+              body: reportContent,
+              labels: ['metrics', 'automated-report', 'weekly'],
+              assignees: [context.repo.owner]
+            });
+
+  send-email:
+    name: Send Email Notification
+    needs: generate-weekly-report
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Download report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: weekly-report
+          path: reports/
+
+      - name: Get week date range
+        id: get-date
+        run: |
+          WEEK_START=$(date -u -d 'last monday' '+%Y-%m-%d' 2>/dev/null || date -u -v-monday '+%Y-%m-%d')
+          WEEK_END=$(date -u -d 'last sunday' '+%Y-%m-%d' 2>/dev/null || date -u -v-sunday '+%Y-%m-%d')
+          echo "WEEK_LABEL=Week of $WEEK_START - $WEEK_END" >> $GITHUB_OUTPUT
+
+      - name: Send email via SMTP
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ env.SMTP_SERVER }}
+          server_port: ${{ env.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: 'Weekly Metrics Report - ${{ steps.get-date.outputs.WEEK_LABEL }}'
+          to: ${{ env.RECIPIENT_EMAIL }}
+          from: Metrics Dashboard <noreply@metrics.orchestrator>
+          html_body: file://reports/weekly_report.html
+          attachments: reports/weekly_report.md
+          ignore_cert: false
+          convert_markdown: false
+          priority: normal
+
+      - name: Log email status
+        run: |
+          echo "Email sent to: ${{ env.RECIPIENT_EMAIL }}"
+          echo "Subject: Weekly Metrics Report - ${{ steps.get-date.outputs.WEEK_LABEL }}"
+          echo "HTML body: reports/weekly_report.html"
+          echo "Attachment: reports/weekly_report.md"
+
+  notify-failure:
+    name: Notify on Failure
+    needs: [generate-weekly-report, create-issue, send-email]
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Log failure
+        run: |
+          echo "Weekly metrics report workflow failed"
+          echo "Please check the workflow logs for details"
+          echo "Repository: ${{ github.repository }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
