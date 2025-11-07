@@ -1,0 +1,296 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  ai-code-review:
+    runs-on: ubuntu-latest
+
+    # Only run if ANTHROPIC_API_KEY is available
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for diff analysis
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          echo "Getting changed files between base and head..."
+          git diff --name-only origin/${{ github.base_ref }}...HEAD > changed_files.txt
+
+          echo "Changed files:"
+          cat changed_files.txt
+
+          # Count changed files
+          FILE_COUNT=$(wc -l < changed_files.txt)
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+
+          # Check if any Python files changed
+          PYTHON_FILES=$(grep '\.py$' changed_files.txt || echo "")
+          if [ -n "$PYTHON_FILES" ]; then
+            echo "has_python_files=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_python_files=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create review scope configuration
+        if: steps.changed-files.outputs.has_python_files == 'true'
+        run: |
+          # Create review scope YAML for the orchestrator
+          cat > review_scope.yaml <<'EOF'
+          # Code Review Request
+
+          ## Code Artifacts
+          - Changed Files: $(cat changed_files.txt | tr '\n' ', ' | sed 's/,$//')
+
+          ## Review Scope
+          - [x] Code Quality
+          - [x] Security
+          - [x] Performance
+          - [x] Best Practices
+          - [x] Architecture Adherence
+
+          ## Context
+          - PR Number: ${{ github.event.pull_request.number }}
+          - PR Title: ${{ github.event.pull_request.title }}
+          - PR Author: ${{ github.event.pull_request.user.login }}
+          - Base Branch: ${{ github.base_ref }}
+          - Head Branch: ${{ github.head_ref }}
+
+          ## Review Depth
+          STANDARD
+
+          ## Changed Files
+          $(cat changed_files.txt)
+          EOF
+
+          echo "Review scope created:"
+          cat review_scope.yaml
+
+      - name: Run AI Code Review
+        if: steps.changed-files.outputs.has_python_files == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ORCHESTRATOR_EXECUTION_MODE: api  # Force API mode for automated reviews
+        run: |
+          echo "Running AI Code Review..."
+
+          # Initialize orchestrator for review phase
+          # Note: orchestrator needs the review scope as input
+          # For now, we'll directly call the reviewer via Python script
+
+          python -c "
+          import asyncio
+          import sys
+          from pathlib import Path
+          from src.orchestrator.executors.llm_exec import execute_llm
+
+          async def run_review():
+              # Read changed files
+              with open('changed_files.txt') as f:
+                  changed_files = [line.strip() for line in f if line.strip()]
+
+              # Read review scope
+              with open('review_scope.yaml') as f:
+                  review_scope = f.read()
+
+              # Read reviewer prompt template
+              with open('subagent_prompts/reviewer.md') as f:
+                  reviewer_template = f.read()
+
+              # Build full prompt with context
+              prompt = f'''
+          {reviewer_template}
+
+          ---
+
+          # REVIEW REQUEST
+
+          {review_scope}
+
+          ## Code to Review
+
+          Please review the following changed files in this pull request:
+
+          '''
+
+              # Add file contents for Python files (limit to reasonable size)
+              for file_path in changed_files:
+                  if file_path.endswith('.py') and Path(file_path).exists():
+                      try:
+                          with open(file_path) as f:
+                              content = f.read()
+
+                          # Limit file size to prevent token overflow
+                          if len(content) > 50000:  # ~12K tokens
+                              prompt += f'''
+          ### File: {file_path} (truncated - too large)
+          First 50000 characters:
+          ```python
+          {content[:50000]}
+          ```
+          '''
+                          else:
+                              prompt += f'''
+          ### File: {file_path}
+          ```python
+          {content}
+          ```
+          '''
+                      except Exception as e:
+                          print(f'Warning: Could not read {file_path}: {e}', file=sys.stderr)
+
+              prompt += '''
+
+          ---
+
+          Please provide your code review following the format specified in the reviewer prompt template above.
+          Focus on security, performance, code quality, and best practices.
+          '''
+
+              # Execute review via LLM
+              result = await execute_llm(
+                  prompt=prompt,
+                  agent_name='reviewer',
+                  phase_name='review',
+                  project_root=Path.cwd(),
+                  timeout_seconds=900,  # 15 min timeout
+              )
+
+              print(f'Review completed with exit code: {result.exit_code}')
+
+              if result.exit_code != 0:
+                  print(f'Review failed: {result.stderr}', file=sys.stderr)
+                  sys.exit(1)
+
+              # Save review output
+              review_file = Path('.claude/checkpoints/code_review.md')
+              review_file.parent.mkdir(parents=True, exist_ok=True)
+              review_file.write_text(result.stdout)
+
+              print(f'Review saved to: {review_file}')
+              return result
+
+          asyncio.run(run_review())
+          "
+
+      - name: Check review status
+        if: steps.changed-files.outputs.has_python_files == 'true'
+        run: |
+          if [ -f .claude/checkpoints/code_review.md ]; then
+            echo "✅ Review completed successfully"
+
+            # Extract review status from markdown
+            STATUS=$(grep -m 1 "^\*\*Status:\*\*" .claude/checkpoints/code_review.md || echo "Status: Unknown")
+            echo "Review status: $STATUS"
+
+            # Count issues
+            CRITICAL=$(grep -c "^\*\*Severity:\*\* Critical" .claude/checkpoints/code_review.md || echo "0")
+            MAJOR=$(grep -c "^\*\*Severity:\*\* Major" .claude/checkpoints/code_review.md || echo "0")
+
+            echo "Issues found: Critical=$CRITICAL, Major=$MAJOR"
+
+            if [ "$CRITICAL" -gt 0 ]; then
+              echo "⚠️ Critical issues found - review carefully"
+            fi
+          else
+            echo "❌ Review failed - no output generated"
+            exit 1
+          fi
+
+      - name: Post review summary to PR
+        if: steps.changed-files.outputs.has_python_files == 'true' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const reviewPath = '.claude/checkpoints/code_review.md';
+
+            if (!fs.existsSync(reviewPath)) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '❌ **AI Code Review Failed**\n\nThe automated review could not be completed. Please check the workflow logs for details.'
+              });
+              return;
+            }
+
+            const review = fs.readFileSync(reviewPath, 'utf8');
+
+            // Truncate if too long (GitHub has 65536 char limit)
+            let reviewBody = review;
+            if (review.length > 60000) {
+              reviewBody = review.substring(0, 60000) + '\n\n... (review truncated, see full report in workflow artifacts)';
+            }
+
+            // Post as PR comment
+            const comment = `## 🤖 AI Code Review
+
+${reviewBody}
+
+---
+*Generated by Claude Code Orchestrator | [View Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})*`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+            console.log('✅ Review posted to PR successfully');
+
+      - name: Upload review artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-code-review-report
+          path: |
+            .claude/checkpoints/code_review.md
+            .claude/agent_outputs/reviewer/**/*
+            review_scope.yaml
+            changed_files.txt
+          retention-days: 30
+
+      - name: Review completion summary
+        if: always()
+        run: |
+          echo "============================================"
+          echo "AI Code Review Workflow Complete"
+          echo "============================================"
+          echo "Files reviewed: ${{ steps.changed-files.outputs.file_count }}"
+          echo "Review artifact uploaded: ai-code-review-report"
+          echo ""
+
+          if [ -f .claude/checkpoints/code_review.md ]; then
+            echo "✅ Review completed and posted to PR"
+          else
+            echo "❌ Review did not complete"
+          fi

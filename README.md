@@ -64,6 +64,54 @@ Production-ready HTML/CSS/JS templates for executive presentations and one-pager
 
 **📖 Learn more:** [design_system/templates/README.md](design_system/templates/README.md)
 
+### 🤖 AI-Powered Code Review
+
+Automated code review using Claude API that analyzes pull requests for security vulnerabilities, performance issues, code quality, and best practices. Reviews are posted as PR comments with actionable recommendations.
+
+**Key Features:**
+- 🔒 **Security Analysis**: Input validation, injection prevention, authentication
+- ⚡ **Performance Review**: Algorithm efficiency, database queries, memory usage
+- 📝 **Code Quality**: Readability, maintainability, modularity, documentation
+- ✅ **Best Practices**: Error handling, logging, testing coverage
+- 🏗️ **Architecture**: Design patterns, separation of concerns, dependencies
+- 📊 **Severity Classification**: Critical, Major, Minor, Suggestions
+- 💡 **Before/After Samples**: Concrete code recommendations with examples
+
+**Quick Setup:**
+```bash
+# 1. Get Anthropic API key from https://console.anthropic.com
+# 2. Add to GitHub Secrets: ANTHROPIC_API_KEY
+# 3. Create a PR → AI review runs automatically
+```
+
+**Cost:** ~$0.10-$0.50 per PR review (depending on size)
+
+**📖 Full setup guide:** [docs/AI_CODE_REVIEW_SETUP.md](docs/AI_CODE_REVIEW_SETUP.md)
+
+**Example Review Output:**
+```markdown
+### Critical Issues (Must Fix)
+**Issue 1: SQL Injection Vulnerability**
+- File: `src/auth.py:45`
+- Category: Security
+- Code: `query = f"SELECT * FROM users WHERE id='{user_id}'"`
+- Recommendation: Use parameterized queries
+- Effort: 15 minutes
+```
+
+**How It Works:**
+1. PR opened/updated → GitHub Actions triggers
+2. Changed files analyzed via Claude API
+3. Comprehensive review posted as PR comment
+4. Full report uploaded as workflow artifact
+5. Security issues flagged for immediate attention
+
+**Customization:**
+- Customize reviewer prompt: `subagent_prompts/reviewer.md`
+- Add project-specific rules and style guidelines
+- Configure review depth (STANDARD, THOROUGH, SECURITY_FOCUSED)
+- Set file size limits and review scope
+
 ---
 
 ## Getting Started

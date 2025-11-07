@@ -57,12 +57,13 @@ subagents:
       - checkpoint_approvals.md
 
   reviewer:
-    enabled: false  # Optional agent
+    enabled: true  # AI-powered code review via Claude API
     prompt_template: subagent_prompts/reviewer.md
     checkpoint_artifacts:
       - code_review.md
       - improvements.md
       - review_checklist.md
+    timeout_minutes: 15  # Review timeout
 
   data:
     enabled: true
@@ -172,7 +173,8 @@ orchestrator:
   #   - "stub": Simulated responses for testing workflow logic
   #   - "api": Real Claude API calls (requires ANTHROPIC_API_KEY)
   # Note: Can also be set via ORCHESTRATOR_EXECUTION_MODE env var
-  execution_mode: in_session
+  # NOTE: Set to "api" when ANTHROPIC_API_KEY is available (e.g., in CI)
+  execution_mode: in_session  # Override with ORCHESTRATOR_EXECUTION_MODE=api for automated reviews
 
   # Natural language triggers
   nl_triggers:
