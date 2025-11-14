@@ -29,6 +29,9 @@ jobs:
       - name: Steward backups check
         run: bash scripts/steward/check_backups.sh
 
+      - name: Sandbox self-test
+        run: bash scripts/ops/sandbox_selftest.sh
+
       - name: Lint with ruff
         run: ruff check .
 
@@ -36,4 +39,10 @@ jobs:
         run: mypy src/ || true  # Allow failures for now
 
       - name: Run critical tests
-        run: pytest -q tests/critical
+        run: pytest -q tests/critical -o addopts=""
+
+      - name: Run MCP tests
+        run: pytest -q tests/mcp -o addopts=""
+
+      - name: Run executor tests
+        run: pytest -q tests/executors -o addopts=""

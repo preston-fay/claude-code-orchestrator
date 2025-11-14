@@ -58,6 +58,23 @@ YAML-based configuration system for client-specific quality gates, compliance re
 
 **📖 Learn more:** [clients/README.md](clients/README.md)
 
+### Code Execution Mode (MCP)
+
+Opt-in code generation mode that reduces LLM token usage by 98% (from ~150k to ~2k tokens). The orchestrator generates Python code that imports filesystem-based APIs, executes it in a sandboxed environment, and collects artifacts.
+
+**Key Features:**
+- 🚀 **98% Token Reduction**: Generate code instead of passing large contexts
+- 🔒 **Sandboxed Execution**: Import whitelist, network blocking, resource limits
+- 📦 **MCP API Registry**: Data loading, analytics, modeling, visualization modules
+- ⚙️ **Opt-In**: Use `--mode code` flag, defaults to legacy executors
+
+**Usage:**
+```bash
+orchestrator run start --mode code --intake myproject.yaml
+```
+
+**📖 Learn more:** [docs/playbooks/mcp-code-exec.md](docs/playbooks/mcp-code-exec.md) | [docs/adr/004-mcp-code-execution.md](docs/adr/004-mcp-code-execution.md)
+
 ### C-Suite Templates
 
 Production-ready HTML/CSS/JS templates for executive presentations and one-pagers. Templates enforce Kearney brand compliance (Arial font, no gridlines, purple accent) and include D3.js chart patterns optimized for C-suite audiences.

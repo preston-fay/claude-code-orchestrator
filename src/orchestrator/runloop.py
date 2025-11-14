@@ -138,7 +138,10 @@ class Orchestrator:
                 f.write(f"[{timestamp}] [{level.upper()}] {message}\n")
 
     def start_run(
-        self, intake_path: Optional[Path] = None, from_phase: Optional[str] = None
+        self,
+        intake_path: Optional[Path] = None,
+        from_phase: Optional[str] = None,
+        mode: str = "legacy",
     ) -> None:
         """
         Initialize a new orchestrator run.
@@ -146,6 +149,7 @@ class Orchestrator:
         Args:
             intake_path: Optional path to intake YAML
             from_phase: Optional phase to start from (must be enabled)
+            mode: Execution mode - "legacy" (default) or "code" (MCP code execution)
         """
         # Generate run ID
         run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -161,7 +165,7 @@ class Orchestrator:
         if not first_phase:
             raise ValueError("No enabled phases found in configuration")
 
-        # Initialize state
+        # Initialize state with mode in metadata
         self.state = RunState(
             run_id=run_id,
             status=RunStatus.RUNNING,
@@ -170,10 +174,12 @@ class Orchestrator:
             current_phase=first_phase,
             intake_path=str(intake_path) if intake_path else None,
             intake_summary=intake_summary,
+            metadata={"execution_mode": mode},
         )
 
         self._save_state()
         self._log(f"Started run {run_id}")
+        self._log(f"Execution mode: {mode}")
         self._log(f"Current phase: {first_phase}")
 
         if intake_path:

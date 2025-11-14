@@ -68,8 +68,8 @@ data/interim/
 data/processed/
 !data/external/sample/  # Allow sample data
 
-# Models (never commit model artifacts)
-models/
+# Models (never commit model artifacts at top level, but allow src/orchestrator/mcp/models source code)
+/models/
 !models/.gitkeep
 
 # MLflow

@@ -6,6 +6,7 @@ from typing import Dict, Any, Callable, Awaitable
 from .types import AgentExecResult
 from .subprocess_exec import execute_subprocess
 from .llm_exec import execute_llm
+from .code_executor import CodeExecutor, ExecutionResult
 
 
 def get_executor(
@@ -84,4 +85,6 @@ __all__ = [
     "get_executor",
     "execute_subprocess",
     "execute_llm",
+    "CodeExecutor",
+    "ExecutionResult",
 ]

@@ -436,16 +436,31 @@ def run_start(
     from_phase: Optional[str] = typer.Option(
         None, "--from", help="Start from specific phase (must be enabled)"
     ),
+    mode: str = typer.Option(
+        "legacy", "--mode", help="Execution mode: 'legacy' (default) or 'code' (MCP code execution)"
+    ),
 ):
     """
     Initialize a new orchestrator run.
 
     Starts a new workflow execution, optionally loading project configuration
     from an intake YAML file. Can start from a specific phase for testing.
+
+    Execution modes:
+    - legacy (default): Uses existing LLM and subprocess executors
+    - code: Uses MCP code execution with sandboxed Python code generation
     """
     from src.orchestrator.runloop import Orchestrator
 
+    # Validate mode
+    if mode not in ("legacy", "code"):
+        console.print(f"[red]✗ Invalid mode: {mode}[/red]")
+        console.print("  Valid modes: legacy, code")
+        return
+
     console.print("[bold]🚀 Starting Orchestrator Run[/bold]")
+    if mode == "code":
+        console.print("[cyan]  Mode: Code Execution (MCP)[/cyan]")
     console.print("━" * 60)
     console.print()
 
@@ -462,10 +477,11 @@ def run_start(
             console.print("Use [cyan]orchestrator run abort[/cyan] to stop current run")
             return
 
-        orch.start_run(intake_path=intake, from_phase=from_phase)
+        orch.start_run(intake_path=intake, from_phase=from_phase, mode=mode)
 
         console.print(f"[green]✓ Run initialized: {orch.state.run_id}[/green]")
         console.print(f"  Current phase: [yellow]{orch.state.current_phase}[/yellow]")
+        console.print(f"  Execution mode: [cyan]{mode}[/cyan]")
 
         if intake:
             console.print(f"  Intake loaded: [cyan]{intake}[/cyan]")
