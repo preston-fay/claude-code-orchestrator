@@ -100,6 +100,54 @@ requirements: ["database", "schema", "SQL"]  # OR database keywords in project t
 
 **📖 Learn more:** [docs/playbooks/specialized-agents.md](docs/playbooks/specialized-agents.md) | [docs/adr/005-specialized-agents.md](docs/adr/005-specialized-agents.md)
 
+### Parallel Execution (Swarm Mode)
+
+Dependency-aware parallel agent execution that maximizes throughput while respecting inter-agent dependencies. The Swarm Orchestrator performs topological sorting to identify independent execution groups and runs agents concurrently where safe.
+
+**Key Features:**
+- ⚡ **20-50% Speedup**: Parallel execution of independent agents
+- 🔗 **Dependency-Aware**: Topological sorting enforces execution order
+- 🎯 **Deterministic**: Results always in same order regardless of timing
+- 💾 **Context Caching**: Avoid redundant computation across agents
+- 🔒 **Concurrency Control**: Configurable max workers, semaphore-based limiting
+
+**Example Dependency Graph:**
+```yaml
+# Database architect runs first (schema design)
+# Developer runs second (implements using schema)
+# Performance + Security run in parallel (both validate developer output)
+
+dependencies:
+  developer: [database-architect]
+  performance-engineer: [developer]
+  security-auditor: [developer]
+
+# Execution groups:
+# Level 0: [database-architect]
+# Level 1: [developer]
+# Level 2: [performance-engineer, security-auditor]  # Parallel!
+```
+
+**Usage:**
+```bash
+# Enable parallel execution for current phase
+orchestrator run next --parallel --max-workers 3
+
+# Start run with parallel mode
+orchestrator run start --intake project.yaml --mode code
+
+# View swarm metrics
+orchestrator run metrics
+```
+
+**Metrics:**
+- Execution groups and parallelization factor
+- Wall time vs sequential time
+- Context cache hit rate
+- Per-agent timing and retry counts
+
+**📖 Learn more:** [docs/adr/007-swarm-foundation.md](docs/adr/007-swarm-foundation.md)
+
 ### C-Suite Templates
 
 Production-ready HTML/CSS/JS templates for executive presentations and one-pagers. Templates enforce Kearney brand compliance (Arial font, no gridlines, purple accent) and include D3.js chart patterns optimized for C-suite audiences.

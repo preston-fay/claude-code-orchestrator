@@ -52,3 +52,6 @@ jobs:
 
       - name: Run auto-detection tests
         run: pytest -q tests/runloop/test_autodetect_agents.py -o addopts=""
+
+    - name: Run swarm tests
+      run: pytest -q tests/swarm/test_dependency_groups.py tests/swarm/test_context_cache.py -o addopts=""
