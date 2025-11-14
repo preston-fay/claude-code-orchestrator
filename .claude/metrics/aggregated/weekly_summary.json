@@ -1,20 +1,20 @@
 [
   {
     "week_id": "2025-W44",
-    "week_start": "2025-11-07",
-    "week_end": "2025-11-13",
+    "week_start": "2025-11-08",
+    "week_end": "2025-11-14",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -22,20 +22,20 @@
   },
   {
     "week_id": "2025-W43",
-    "week_start": "2025-10-31",
-    "week_end": "2025-11-06",
+    "week_start": "2025-11-01",
+    "week_end": "2025-11-07",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -79,20 +79,20 @@
   },
   {
     "week_id": "2025-W42",
-    "week_start": "2025-10-24",
-    "week_end": "2025-10-30",
+    "week_start": "2025-10-25",
+    "week_end": "2025-10-31",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -136,20 +136,20 @@
   },
   {
     "week_id": "2025-W41",
-    "week_start": "2025-10-17",
-    "week_end": "2025-10-23",
+    "week_start": "2025-10-18",
+    "week_end": "2025-10-24",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -193,20 +193,20 @@
   },
   {
     "week_id": "2025-W40",
-    "week_start": "2025-10-10",
-    "week_end": "2025-10-16",
+    "week_start": "2025-10-11",
+    "week_end": "2025-10-17",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -250,20 +250,20 @@
   },
   {
     "week_id": "2025-W39",
-    "week_start": "2025-10-03",
-    "week_end": "2025-10-09",
+    "week_start": "2025-10-04",
+    "week_end": "2025-10-10",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -307,20 +307,20 @@
   },
   {
     "week_id": "2025-W38",
-    "week_start": "2025-09-26",
-    "week_end": "2025-10-02",
+    "week_start": "2025-09-27",
+    "week_end": "2025-10-03",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -364,20 +364,20 @@
   },
   {
     "week_id": "2025-W37",
-    "week_start": "2025-09-19",
-    "week_end": "2025-09-25",
+    "week_start": "2025-09-20",
+    "week_end": "2025-09-26",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -421,20 +421,20 @@
   },
   {
     "week_id": "2025-W36",
-    "week_start": "2025-09-12",
-    "week_end": "2025-09-18",
+    "week_start": "2025-09-13",
+    "week_end": "2025-09-19",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -478,20 +478,20 @@
   },
   {
     "week_id": "2025-W35",
-    "week_start": "2025-09-05",
-    "week_end": "2025-09-11",
+    "week_start": "2025-09-06",
+    "week_end": "2025-09-12",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -535,20 +535,20 @@
   },
   {
     "week_id": "2025-W34",
-    "week_start": "2025-08-29",
-    "week_end": "2025-09-04",
+    "week_start": "2025-08-30",
+    "week_end": "2025-09-05",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
@@ -592,20 +592,20 @@
   },
   {
     "week_id": "2025-W33",
-    "week_start": "2025-08-22",
-    "week_end": "2025-08-28",
+    "week_start": "2025-08-23",
+    "week_end": "2025-08-29",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.5,
+        "deployment_frequency": 0.48,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 48.0,
-        "ai_percentage": 4.0,
-        "collaborative_percentage": 48.0
+        "human_percentage": 50.0,
+        "ai_percentage": 3.85,
+        "collaborative_percentage": 46.15
       },
       "ai_review": {}
     },
