@@ -233,6 +233,23 @@ custom_rules:
     pattern: "^\\.gitignore$"
 
 # ==============================================================================
+# PERFORMANCE SLAS - Specialized Agent Triggers
+# ==============================================================================
+
+performance_slas:
+  # Performance targets that trigger automatic performance engineering review
+  # Set to 0 to disable performance SLA enforcement
+
+  latency_p95_ms: 0
+  # Default: 0 (no SLA)
+  # Override with target P95 latency in milliseconds to trigger performance-engineer agent
+  # Example: 200 for 200ms P95 latency target
+
+  throughput_rps: 0
+  # Default: 0 (no SLA)
+  # Target requests per second (if relevant for API/service workloads)
+
+# ==============================================================================
 # USAGE NOTES
 # ==============================================================================
 

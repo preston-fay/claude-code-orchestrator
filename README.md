@@ -75,6 +75,31 @@ orchestrator run start --mode code --intake myproject.yaml
 
 **📖 Learn more:** [docs/playbooks/mcp-code-exec.md](docs/playbooks/mcp-code-exec.md) | [docs/adr/004-mcp-code-execution.md](docs/adr/004-mcp-code-execution.md)
 
+### Specialized Agents (Auto-Detected)
+
+Three specialized agents automatically trigger based on project requirements and governance policies, extending lifecycle coverage without manual configuration.
+
+**Available Agents:**
+- 🔍 **Performance Engineer**: Profiles application, identifies bottlenecks, validates against SLAs
+- 🔒 **Security Auditor**: Scans for vulnerabilities (OWASP Top 10), validates compliance (GDPR/HIPAA/SOC2)
+- 🗄️ **Database Architect**: Designs schemas, generates migrations, optimizes indexes
+
+**Auto-Detection Triggers:**
+```yaml
+# Performance Engineer triggers on:
+performance_slas.latency_p95_ms > 0  # OR production environment OR performance keywords
+
+# Security Auditor triggers on:
+require_security_scan: true  # OR compliance requirements OR production environment
+
+# Database Architect triggers on:
+requirements: ["database", "schema", "SQL"]  # OR database keywords in project type
+```
+
+**Artifacts**: Performance profiles, security scan results, database schemas, compliance reports
+
+**📖 Learn more:** [docs/playbooks/specialized-agents.md](docs/playbooks/specialized-agents.md) | [docs/adr/005-specialized-agents.md](docs/adr/005-specialized-agents.md)
+
 ### C-Suite Templates
 
 Production-ready HTML/CSS/JS templates for executive presentations and one-pagers. Templates enforce Kearney brand compliance (Arial font, no gridlines, purple accent) and include D3.js chart patterns optimized for C-suite audiences.

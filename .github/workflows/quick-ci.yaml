@@ -46,3 +46,9 @@ jobs:
 
       - name: Run executor tests
         run: pytest -q tests/executors -o addopts=""
+
+      - name: Run specialized agent tests
+        run: pytest -q tests/agents -o addopts=""
+
+      - name: Run auto-detection tests
+        run: pytest -q tests/runloop/test_autodetect_agents.py -o addopts=""
