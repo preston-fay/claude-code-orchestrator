@@ -1,0 +1,15 @@
+# Smallest viable intake for a single-phase dry run
+# Used for testing orchestrator run-loop without real agents
+
+project:
+  name: "test-project"
+  description: "Minimal test intake"
+
+workflow:
+  phases:
+    - name: "test_phase"
+      agents: []  # No agents for smoke testing
+
+runtime:
+  auto_advance: false
+  max_parallel_agents: 1

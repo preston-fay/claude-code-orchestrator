@@ -1,0 +1,39 @@
+name: quick-ci
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+      - 'phase1/**'
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
+
+      - name: Steward backups check
+        run: bash scripts/steward/check_backups.sh
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Type check with mypy
+        run: mypy src/ || true  # Allow failures for now
+
+      - name: Run critical tests
+        run: pytest -q tests/critical
