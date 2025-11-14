@@ -148,6 +148,77 @@ orchestrator run metrics
 
 **📖 Learn more:** [docs/adr/007-swarm-foundation.md](docs/adr/007-swarm-foundation.md)
 
+### Skills Activation Engine v2
+
+Auto-match and inject reusable analytical patterns (skills) as concise, agent-specific code snippets. Skills activate automatically based on task keywords without manual configuration.
+
+**Key Features:**
+- 🎯 **Auto-Matching**: Keyword-based skill detection from task/intake/governance
+- 🚨 **Prerequisite Gating**: Fail-fast when MCP modules missing (with `--skills-enforce`)
+- 📝 **Concise Snippets**: Agent-specific code samples (<2k chars) vs full documentation
+- 📊 **Telemetry**: Track which skills matched, injected, skipped and why
+
+**Available Skills:**
+- **time_series_analytics**: Prophet forecasting, seasonal decomposition
+- **optimization_modeling**: Linear/nonlinear optimization (LP/NLP)
+- **survey_data_processing**: Likert scales, sentiment analysis
+- **ml_classification**: sklearn classifiers with evaluation
+- **wcag_accessibility**: WCAG 2.1 AA compliance checklist
+
+**Usage:**
+```bash
+# Skills auto-activate (no config needed)
+orchestrator run next --intake project.yaml
+
+# Enforce prerequisites (fail if MCP modules missing)
+orchestrator run next --skills-enforce
+
+# Skills match on keywords:
+# "forecast seasonal trends" → time_series_analytics
+# "optimize costs minimize" → optimization_modeling
+```
+
+**📖 Learn more:** [docs/playbooks/skills.md](docs/playbooks/skills.md) | [docs/adr/008-skills-engine-v2.md](docs/adr/008-skills-engine-v2.md)
+
+### Product Trinity Workflow
+
+Structured PM → UX → Dev → QA workflow for product development projects. Provides opinionated phases with clear artifact handoffs and testable acceptance criteria.
+
+**Workflow Phases:**
+```
+1. Product Requirements (PM) → PRD, user stories, acceptance criteria
+2. UX Design (UX) → Wireframes, design system, WCAG checklist
+3. Development (Dev) → Implementation
+4. Quality Assurance (QA) → Validation report with pass/fail metrics
+```
+
+**Key Features:**
+- 📋 **Structured Phases**: Clear inputs/outputs per phase
+- ✅ **Testable**: Acceptance criteria (Given/When/Then) → QA validation mapping
+- ♿ **Accessibility First**: WCAG 2.1 AA checklist in UX phase
+- 📊 **Pass Rate Metrics**: QA tracks pass/fail per criterion with severity
+
+**Usage:**
+```bash
+# Initialize product project
+orchestrator init --workflow product_trinity
+
+# Run product workflow
+orchestrator run --workflow product_trinity --intake intake/starter.product.yaml
+
+# Artifacts produced:
+# reports/PRD.md, user_stories.md, acceptance_criteria.md
+# wireframes/*.md, design_system.md
+# reports/qa_validation_report.md (with pass rate %)
+```
+
+**QA Report Format:**
+- Summary table: Total criteria | Passed | Failed | Pass Rate %
+- Per-criterion: Status (PASS/FAIL), Evidence, Severity, Recommendations
+- Automated test coverage metrics
+
+**📖 Learn more:** [docs/playbooks/product_trinity.md](docs/playbooks/product_trinity.md) | [docs/adr/009-product-trinity.md](docs/adr/009-product-trinity.md)
+
 ### C-Suite Templates
 
 Production-ready HTML/CSS/JS templates for executive presentations and one-pagers. Templates enforce Kearney brand compliance (Arial font, no gridlines, purple accent) and include D3.js chart patterns optimized for C-suite audiences.

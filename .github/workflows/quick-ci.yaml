@@ -55,3 +55,9 @@ jobs:
 
     - name: Run swarm tests
       run: pytest -q tests/swarm/test_dependency_groups.py tests/swarm/test_context_cache.py -o addopts=""
+
+    - name: Run skills tests
+      run: pytest -q tests/skills -o addopts=""
+
+    - name: Run product tests
+      run: pytest -q tests/product -o addopts=""

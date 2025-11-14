@@ -1,0 +1,51 @@
+# Product Trinity Starter Intake Template
+
+project:
+  name: "MyProduct"
+  type: "product"
+  description: "Product development project using PM → UX → Dev → QA workflow"
+  
+personas:
+  - name: "End User"
+    role: "Primary user"
+    goals:
+      - "Complete tasks efficiently"
+      - "Intuitive interface"
+    pain_points:
+      - "Complex workflows"
+      - "Poor mobile experience"
+      
+  - name: "Administrator"
+    role: "System admin"
+    goals:
+      - "Easy configuration"
+      - "Monitor usage"
+    pain_points:
+      - "Lack of visibility"
+
+requirements:
+  functional:
+    - "User authentication and authorization"
+    - "Dashboard with key metrics"
+    - "Mobile-responsive design"
+    - "Export data functionality"
+    
+  technical:
+    - "RESTful API"
+    - "PostgreSQL database"
+    - "React frontend"
+    - "WCAG 2.1 AA accessibility compliance"
+    
+success_metrics:
+  - "User task completion rate > 90%"
+  - "Page load time < 2 seconds"
+  - "Accessibility score ≥ 95"
+  - "Zero critical security vulnerabilities"
+  
+constraints:
+  timeline: "8 weeks"
+  budget: "N/A"
+  technical:
+    - "Must work on modern browsers (Chrome, Firefox, Safari)"
+    - "Mobile-first design approach"
+    - "Follow company design system"

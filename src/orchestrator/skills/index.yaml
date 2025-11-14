@@ -1,0 +1,205 @@
+# Skills Index - Catalog of reusable analytical patterns
+# Each skill defines keywords for auto-matching, MCP prerequisites, and agent-specific snippets
+
+skills:
+  time_series_analytics:
+    description: "Time-series forecasting with seasonal decomposition and Prophet/ARIMA models"
+    category: "analytics"
+    keywords:
+      - "forecast"
+      - "seasonal"
+      - "prophet"
+      - "time series"
+      - "arima"
+      - "trend"
+      - "decomposition"
+    requires:
+      - "orchestrator.mcp.data.load_csv"
+      - "orchestrator.mcp.analytics.describe_data"
+      - "orchestrator.mcp.models.train_prophet"
+    snippets:
+      data: |
+        # Time-series data loading and decomposition
+        from orchestrator.mcp.data import load_csv
+        from orchestrator.mcp.analytics import describe_data, seasonal_decompose
+
+        # Load time-series data
+        df = load_csv("data/timeseries.csv", parse_dates=["date"])
+        df = df.set_index("date")
+
+        # Describe and decompose
+        stats = describe_data(df)
+        decomposition = seasonal_decompose(df["value"], period=12)
+      developer: |
+        # Prophet forecasting model
+        from orchestrator.mcp.models import train_prophet, forecast_prophet
+
+        # Train Prophet model
+        model = train_prophet(df, target="value", seasonality="yearly")
+
+        # Generate forecast
+        future = forecast_prophet(model, periods=12)
+
+        # Evaluate
+        metrics = evaluate_model(model, df_test)
+
+  optimization_modeling:
+    description: "Linear/nonlinear optimization modeling with constraints"
+    category: "optimization"
+    keywords:
+      - "optimize"
+      - "maximize"
+      - "minimize"
+      - "constraint"
+      - "linear programming"
+      - "operations research"
+      - "pulp"
+      - "scipy.optimize"
+    requires:
+      - "orchestrator.mcp.analytics.describe_data"
+    snippets:
+      developer: |
+        # Optimization problem setup
+        from orchestrator.mcp.optimization import create_lp_problem, solve_lp
+
+        # Define decision variables and constraints
+        prob = create_lp_problem("maximize", objective_coeffs)
+        prob.add_constraints(A, b, sense="<=")
+
+        # Solve
+        solution = solve_lp(prob)
+        print(f"Optimal value: {solution.objective_value}")
+      qa: |
+        # Validate optimization results
+        assert solution.status == "optimal"
+        assert all(x >= 0 for x in solution.variables)
+        assert solution.objective_value >= baseline
+
+  survey_data_processing:
+    description: "Survey data cleaning, coding, and analysis"
+    category: "analytics"
+    keywords:
+      - "survey"
+      - "questionnaire"
+      - "likert"
+      - "response"
+      - "sentiment"
+      - "qualitative"
+    requires:
+      - "orchestrator.mcp.data.load_csv"
+      - "orchestrator.mcp.analytics.describe_data"
+    snippets:
+      data: |
+        # Survey data loading and cleaning
+        from orchestrator.mcp.data import load_csv
+        from orchestrator.mcp.analytics import recode_categorical, compute_frequencies
+
+        # Load survey responses
+        df = load_csv("data/survey_responses.csv")
+
+        # Recode Likert scales
+        df["satisfaction"] = recode_categorical(
+            df["satisfaction_raw"],
+            mapping={"Very Dissatisfied": 1, "Dissatisfied": 2, "Neutral": 3, "Satisfied": 4, "Very Satisfied": 5}
+        )
+
+        # Compute frequencies
+        freqs = compute_frequencies(df["satisfaction"])
+      developer: |
+        # Survey analysis and visualization
+        from orchestrator.mcp.analytics import cross_tabulate, chi_square_test
+        from orchestrator.mcp.viz import plot_stacked_bar
+
+        # Cross-tabulation by demographic
+        crosstab = cross_tabulate(df, "satisfaction", "age_group")
+
+        # Statistical test
+        chi2_result = chi_square_test(crosstab)
+
+        # Visualize
+        plot_stacked_bar(crosstab, title="Satisfaction by Age Group")
+
+  ml_classification:
+    description: "Machine learning classification with sklearn"
+    category: "ml"
+    keywords:
+      - "classification"
+      - "logistic regression"
+      - "random forest"
+      - "predict"
+      - "accuracy"
+      - "precision"
+      - "recall"
+    requires:
+      - "orchestrator.mcp.data.load_csv"
+      - "orchestrator.mcp.models.train_classifier"
+    snippets:
+      data: |
+        # Load and split classification data
+        from orchestrator.mcp.data import load_csv, train_test_split
+
+        df = load_csv("data/classification.csv")
+        X_train, X_test, y_train, y_test = train_test_split(
+            df.drop("target", axis=1), df["target"], test_size=0.2
+        )
+      developer: |
+        # Train classifier
+        from orchestrator.mcp.models import train_classifier, evaluate_classifier
+
+        model = train_classifier(X_train, y_train, algorithm="random_forest")
+        metrics = evaluate_classifier(model, X_test, y_test)
+
+        print(f"Accuracy: {metrics['accuracy']:.3f}")
+        print(f"F1 Score: {metrics['f1_score']:.3f}")
+
+  wcag_accessibility:
+    description: "WCAG 2.1 accessibility compliance checklist"
+    category: "ux"
+    keywords:
+      - "accessibility"
+      - "wcag"
+      - "a11y"
+      - "aria"
+      - "screen reader"
+      - "keyboard navigation"
+    requires: []
+    snippets:
+      ux-designer: |
+        # WCAG 2.1 AA Compliance Checklist
+
+        **Perceivable:**
+        - [ ] Alt text for all images (descriptive, not "image of...")
+        - [ ] Color contrast ratio ≥ 4.5:1 for normal text, 3:1 for large text
+        - [ ] Captions for all video/audio content
+
+        **Operable:**
+        - [ ] All functionality accessible via keyboard (no mouse-only actions)
+        - [ ] Visible focus indicators on interactive elements
+        - [ ] No time limits (or user can extend/disable)
+
+        **Understandable:**
+        - [ ] Page language declared (<html lang="en">)
+        - [ ] Labels for all form inputs
+        - [ ] Error messages are clear and actionable
+
+        **Robust:**
+        - [ ] Valid HTML (passes W3C validator)
+        - [ ] ARIA labels where semantic HTML insufficient
+      qa: |
+        # Accessibility testing checklist
+
+        **Automated Tools:**
+        - Run axe DevTools (covers ~30% of WCAG issues)
+        - Run WAVE browser extension
+        - Check color contrast with Colour Contrast Analyser
+
+        **Manual Testing:**
+        - Navigate entire flow using only keyboard (Tab, Enter, Esc)
+        - Test with screen reader (NVDA on Windows, VoiceOver on Mac)
+        - Zoom to 200% and verify no content loss
+
+        **Report Format:**
+        - Issue severity: Critical, Major, Minor
+        - WCAG success criterion violated (e.g., 1.4.3 Contrast)
+        - Steps to reproduce
+        - Suggested fix

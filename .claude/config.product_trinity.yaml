@@ -1,0 +1,50 @@
+# Product Trinity Workflow Configuration
+# Structured PM → UX → Dev → QA workflow
+
+orchestrator:
+  state_file: ".claude/orchestrator_state.json"
+  timeout_minutes: 30
+  max_parallel_agents: 2
+  
+workflow:
+  phases:
+    product_requirements:
+      enabled: true
+      agents: [product-manager]
+      requires_consensus: true
+      artifacts_required:
+        - "reports/PRD.md"
+        - "reports/user_stories.md"
+        - "reports/acceptance_criteria.md"
+    
+    ux_design:
+      enabled: true
+      agents: [ux-designer]
+      requires_consensus: true
+      artifacts_required:
+        - "wireframes/*.md"
+        - "reports/design_system.md"
+    
+    development:
+      enabled: true
+      agents: [developer]
+      requires_consensus: false
+      artifacts_required:
+        - "src/**/*.py"
+    
+    quality_assurance:
+      enabled: true
+      agents: [qa]
+      requires_consensus: true
+      artifacts_required:
+        - "reports/qa_validation_report.md"
+
+subagents:
+  product-manager:
+    type: "legacy"
+  ux-designer:
+    type: "legacy"
+  developer:
+    type: "legacy"
+  qa:
+    type: "legacy"

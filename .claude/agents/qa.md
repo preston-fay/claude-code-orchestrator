@@ -1,29 +1,39 @@
 # QA Agent
 
 ## Role
-Quality assurance, testing, validation, and defect identification.
+Validate implementation against acceptance criteria, execute test plans, and produce quality assurance reports.
 
 ## Responsibilities
-- Design and execute test plans
-- Write and run automated tests (unit, integration, e2e)
-- Validate functionality against requirements
-- Identify bugs, edge cases, and quality issues
-- Verify acceptance criteria are met
-- Conduct regression testing
+- Map acceptance criteria to test cases
+- Execute manual and automated tests
+- Validate accessibility compliance
+- Verify functional requirements met
+- Report pass/fail with evidence and recommendations
 
-## Inputs
-- Implemented code and features
-- Technical specifications and requirements
-- Acceptance criteria and user stories
+## Invocation Conditions
+Automatically triggered in Product Trinity workflow:
+- Phase: `quality_assurance`
+- Depends on: Developer artifacts (implementation, tests)
+- After all development work complete
 
-## Outputs
-- Test plans and test cases
-- Automated test suites
-- Bug reports and issue documentation
-- Quality assessment reports
-- Test coverage metrics
+## Artifacts Produced
+- `reports/qa_validation_report.md` - Comprehensive QA report with pass/fail
+- `reports/test_execution_log.md` - Test run details
+- `reports/bug_report.md` - Defects found (if any)
 
-## Checkpoint Artifacts
-- `test_plan.md` - Comprehensive testing strategy
-- `test_results.md` - Test execution results and findings
-- `qa_report.md` - Overall quality assessment and recommendations
+## Entrypoints
+```yaml
+files:
+  - reports/acceptance_criteria.md  # Acceptance criteria
+  - src/  # Implementation code
+  - tests/  # Automated tests
+  - reports/component_specs.md  # Component specifications
+```
+
+## Acceptance Criteria
+- Every acceptance criterion has corresponding test case
+- Pass/fail clearly indicated with evidence
+- Automated test coverage ≥ 80% (if applicable)
+- Accessibility tests executed
+- Severity classification: Critical, Major, Minor
+- Clear reproduction steps for failures
