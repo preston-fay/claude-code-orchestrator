@@ -1,0 +1,37 @@
+# Default Configuration for Claude Code Orchestrator
+# This file defines the baseline settings for all environments.
+# Override via:
+#   1. Environment variables (ORCH_LOGGING__LEVEL=DEBUG)
+#   2. Custom config file (ORCH_CONFIG=/path/to/config.yaml)
+#   3. CLI overrides (passed programmatically)
+
+app:
+  name: orchestrator
+  environment: "dev"            # dev | staging | prod
+
+paths:
+  workspace: ".work"
+  reports: "reports"
+  data_processed: "data/processed"
+
+logging:
+  level: "INFO"                 # DEBUG | INFO | WARNING | ERROR
+  json: false                   # Output as JSON format
+  file: null                    # e.g., "logs/orchestrator.log"
+
+governance:
+  require_security_scan: false
+  performance_slas:
+    latency_p95_ms: 0           # 0 means disabled
+
+runtime:
+  max_parallel_agents: 2
+  auto_advance: false
+
+secrets:
+  provider: "env"               # env | none | (future: vault)
+  env_prefix: "ORCH_"
+
+cli:
+  color: true
+  progress_bars: true
