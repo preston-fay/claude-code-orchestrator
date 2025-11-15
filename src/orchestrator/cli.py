@@ -208,6 +208,9 @@ def quickstart(
         console.print("[bold]Step 2:[/bold] Starting orchestrator run")
 
         orch = Orchestrator()
+        # Set default design system for quickstart
+        if "design_system" not in orch.config:
+            orch.config["design_system"] = "kearney"
         orch.start_run(intake_path=intake_path, from_phase=None)
 
         console.print(f"  ✓ Run started: {orch.state.run_id}")
@@ -436,6 +439,9 @@ def run_start(
     from_phase: Optional[str] = typer.Option(
         None, "--from", help="Start from specific phase (must be enabled)"
     ),
+    design_system: Optional[str] = typer.Option(
+        None, "--design-system", help="Design system to use ('kearney' or 'client:<slug>')"
+    ),
 ):
     """
     Initialize a new orchestrator run.
@@ -461,6 +467,10 @@ def run_start(
             console.print()
             console.print("Use [cyan]orchestrator run abort[/cyan] to stop current run")
             return
+
+        # Set design system in config if provided via CLI
+        if design_system:
+            orch.config["design_system"] = design_system
 
         orch.start_run(intake_path=intake, from_phase=from_phase)
 

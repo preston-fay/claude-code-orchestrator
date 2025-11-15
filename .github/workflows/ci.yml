@@ -46,6 +46,14 @@ jobs:
           mypy src/ --ignore-missing-imports
         continue-on-error: true
 
+      - name: Enforce KDS guardrails (no inline CSS/colors)
+        run: |
+          echo "Checking for inline styles in orchestrator HTML producers..."
+          ! grep -RIn --include="*.py" 'style\s*=' src/orchestrator || (echo "::error::Inline style attribute found in orchestrator code" && exit 1)
+          echo "Checking for hardcoded hex colors in orchestrator HTML producers..."
+          ! grep -RIn --include="*.py" '#[0-9a-fA-F]\{3,6\}' src/orchestrator || (echo "::error::Hardcoded hex color found in orchestrator code" && exit 1)
+          echo "✅ KDS guardrails passed"
+
       - name: Run tests with pytest
         run: |
           pytest -v --cov=src --cov-report=xml --cov-report=term-missing

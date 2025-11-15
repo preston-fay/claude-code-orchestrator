@@ -64,6 +64,76 @@ Production-ready HTML/CSS/JS templates for executive presentations and one-pager
 
 **📖 Learn more:** [design_system/templates/README.md](design_system/templates/README.md)
 
+### 🎨 Design System Enforcement
+
+The orchestrator enforces mandatory design system selection via a preflight gate. All deliverables must use either the Kearney Design System (KDS) or an approved client override theme. This ensures brand consistency, accessibility compliance, and eliminates inline styles.
+
+**Key Features:**
+- ✅ **Mandatory Preflight**: Orchestrator will not run without a design system selection
+- 🎨 **KDS Baseline**: Professional Slate/Inter palette with WCAG AA accessibility
+- 🏢 **Client Overrides**: Support for client-specific colors, fonts, and logos
+- 🚫 **HTML Guardrails**: Rejects inline CSS and hardcoded hex colors
+- 🔍 **CI Enforcement**: Automated linting prevents KDS violations
+
+**Default (Kearney) Design System:**
+```bash
+# Via config (.claude/config.yaml)
+design_system: "kearney"
+
+# Via CLI
+orchestrator run start --design-system kearney
+
+# Via environment
+export DESIGN_SYSTEM=kearney
+```
+
+**Client Override Example:**
+```yaml
+# .claude/config.yaml
+design_system: "client:acme"
+design_overrides:
+  client_name: "ACME Corp"
+  logo_url: "https://acme.com/logo.png"
+  colors:
+    accent: "#FF6600"
+    primary: "#003366"
+  fonts:
+    headline: "Roboto"
+  wcag_target: "AAA"
+```
+
+**Using KDS in Code:**
+```python
+from src.orchestrator.design import get_design, html_shell, kds_classes, enforce_kds_html
+
+# Get design tokens
+design = get_design("kearney")
+classes = kds_classes(design)
+
+# Generate HTML (use classes, not inline styles!)
+body = f"<div class='{classes['card']}'><h1 class='{classes['h1']}'>Report Title</h1></div>"
+html = html_shell("My Report", body, design)
+
+# Enforce guardrails (raises ValueError if inline styles/colors detected)
+safe_html = enforce_kds_html(body)
+```
+
+**Accessibility:**
+- All KDS color pairings meet WCAG AA contrast ratios (4.5:1 minimum)
+- Client overrides with `wcag_target: "AAA"` require 7:1 contrast
+- Font sizes follow relative scaling for better accessibility
+
+**CI Protection:**
+- CI fails if orchestrator code contains `style="..."` attributes
+- CI fails if hardcoded hex colors (`#RRGGBB`) found in orchestrator code
+- Exceptions whitelisted via code comments (e.g., brand color constants)
+
+**Why This Matters:**
+- **Consistency**: Every deliverable looks professionally branded
+- **Accessibility**: Prevents low-contrast color combinations
+- **Maintainability**: Design changes update centrally, not scattered across files
+- **Client Trust**: Demonstrates attention to brand compliance
+
 ### 🤖 AI-Powered Code Review
 
 Automated code review using Claude API that analyzes pull requests for security vulnerabilities, performance issues, code quality, and best practices. Reviews are posted as PR comments with actionable recommendations.

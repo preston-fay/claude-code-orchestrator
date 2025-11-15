@@ -22,6 +22,8 @@ from .checkpoints import validate_artifacts
 from .prompt_loader import build_agent_context, load_and_interpolate
 from .executors import get_executor, AgentExecResult
 from .reliability import with_timeout, retry_async, RetryConfig
+from .preflight import ensure_design_selection
+from .design import get_design
 
 
 def _is_agent_error_retryable(exception: Exception, retry_cfg: RetryConfig) -> bool:
@@ -150,6 +152,11 @@ class Orchestrator:
         # Generate run ID
         run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+        # PREFLIGHT: Enforce design system selection (mandatory gate)
+        design_selection = ensure_design_selection(self.config)
+        design = get_design(design_selection.system, design_selection.overrides)
+        self._log(f"Design system selected: {design_selection.system}")
+
         # Load intake if provided
         intake_summary = None
         if intake_path:
@@ -171,6 +178,14 @@ class Orchestrator:
             intake_path=str(intake_path) if intake_path else None,
             intake_summary=intake_summary,
         )
+
+        # Store design system in state for access by agents
+        self.state.metadata = self.state.metadata or {}
+        self.state.metadata["design_selection"] = {
+            "system": design_selection.system,
+            "overrides": design_selection.overrides,
+        }
+        self.state.metadata["design"] = design
 
         self._save_state()
         self._log(f"Started run {run_id}")
