@@ -86,6 +86,8 @@ all = [
 
 [project.scripts]
 orchestrator = "src.orchestrator.__main__:app"
+kds-print = "src.orchestrator.cli_kds:main"
+kds-version = "src.orchestrator.cli_kds:version"
 
 [project.urls]
 Homepage = "https://github.com/claude-code-orchestrator/claude-code-orchestrator"

@@ -2,6 +2,13 @@
 
 from typing import Dict, Any, Optional
 import re
+import json
+from .tokens import load_kearney_tokens, BrandTokensError
+
+
+def json_deepcopy(obj: Any) -> Any:
+    """Deep copy an object via JSON serialization."""
+    return json.loads(json.dumps(obj))
 
 
 # ---- Kearney baseline tokens ----
@@ -9,51 +16,16 @@ def _kearney_tokens() -> Dict[str, Any]:
     """
     Return Kearney Design System (KDS) baseline tokens.
 
-    These tokens define the default Kearney branding:
-    - Colors: Professional blue/slate palette with high contrast
-    - Fonts: Inter for consistency and accessibility
-    - Margins: Standard spacing for PDF/PPTX (72pt = 1 inch)
-    - Classes: Reusable CSS classes for HTML deliverables
-    - CSS: Embedded stylesheet for consistent rendering
+    Loads tokens from canonical kearney_brand.yml file.
+    This is the ONLY source of truth for Kearney design tokens.
+
+    Returns:
+        Dictionary of Kearney brand tokens
+
+    Raises:
+        BrandTokensError: If tokens cannot be loaded
     """
-    return {
-        "colors": {
-            "fg": "#0F172A",  # Slate 900 - primary text
-            "muted": "#475569",  # Slate 600 - secondary text
-            "bg": "#FFFFFF",  # White background
-            "card": "#F8FAFC",  # Slate 50 - card backgrounds
-            "accent": "#0EA5E9",  # Sky 500 - Kearney blue accent
-        },
-        "fonts": {
-            "headline": "Inter",
-            "body": "Inter",
-        },
-        "margins": {
-            "x": 72,  # 1 inch horizontal margin (PDF)
-            "y": 72,  # 1 inch vertical margin (PDF)
-        },
-        "classes": {
-            "card": "kds-card",
-            "btn": "kds-btn",
-            "badge": "kds-badge",
-            "row": "kds-row",
-            "input": "kds-input",
-            "section": "kds-section",
-            "h1": "kds-h1",
-            "h2": "kds-h2",
-        },
-        "css": (
-            ".kds{font-family:Inter,system-ui,Arial,sans-serif;color:#0F172A;background:#fff;margin:24px}"
-            ".kds .kds-card{background:#F8FAFC;border-radius:14px;padding:16px;margin:12px 0;border:1px solid #E2E8F0}"
-            ".kds .kds-btn{padding:8px 12px;border-radius:10px;border:1px solid #E2E8F0;background:#fff;cursor:pointer}"
-            ".kds .kds-badge{display:inline-block;background:#0EA5E9;color:#fff;padding:2px 8px;border-radius:999px;font-size:12px}"
-            ".kds .kds-row{display:flex;gap:12px;flex-wrap:wrap}"
-            ".kds .kds-input{padding:8px 10px;border:1px solid #CBD5E1;border-radius:10px;width:100%}"
-            ".kds .kds-section{margin:16px 0}"
-            ".kds .kds-h1{font-size:28px;margin:0 0 8px}"
-            ".kds .kds-h2{font-size:18px;margin:16px 0 8px}"
-        ),
-    }
+    return load_kearney_tokens()
 
 
 def get_design(system: str, overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -84,7 +56,7 @@ def get_design(system: str, overrides: Optional[Dict[str, Any]] = None) -> Dict[
 
     if system.startswith("client:"):
         # Start with Kearney base and merge client overrides
-        d = base.copy()
+        d = json_deepcopy(base)
         ov = overrides or {}
 
         # Merge colors (client colors take precedence)
@@ -95,10 +67,14 @@ def get_design(system: str, overrides: Optional[Dict[str, Any]] = None) -> Dict[
         if "fonts" in ov:
             d["fonts"] = {**d["fonts"], **ov["fonts"]}
 
+        # Merge classes (rare, but allowed)
+        if "classes" in ov:
+            d["classes"] = {**d["classes"], **ov["classes"]}
+
         # Add client-specific metadata
         d["client"] = system
         d["logo_url"] = ov.get("logo_url")
-        d["wcag_target"] = ov.get("wcag_target", "AA")
+        d["wcag_target"] = ov.get("wcag_target", base.get("meta", {}).get("wcag_target", "AA"))
 
         return d
 
@@ -115,7 +91,9 @@ def get_css(design: Optional[Dict[str, Any]] = None) -> str:
     Returns:
         CSS string for embedding in HTML
     """
-    return (design or _kearney_tokens())["css"]
+    d = design or _kearney_tokens()
+    # Support both "css_bundle" (new) and "css" (legacy) keys
+    return d.get("css_bundle") or d.get("css", "")
 
 
 def kds_classes(design: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
@@ -154,7 +132,7 @@ def html_shell(title: str, body_html: str, design: Optional[Dict[str, Any]] = No
         True
     """
     d = design or _kearney_tokens()
-    css = d["css"]
+    css = get_css(d)
 
     return (
         f"<!doctype html>"
@@ -182,7 +160,17 @@ def pdf_theme(design: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     Returns:
         Dictionary with PDF theme settings
     """
-    return design or _kearney_tokens()
+    d = design or _kearney_tokens()
+
+    # Build standardized PDF theme structure
+    return {
+        "colors": d["colors"],
+        "fonts": d["fonts"],
+        "margins": {
+            "x": d.get("spacing", {}).get("page_margin_x", 72),
+            "y": d.get("spacing", {}).get("page_margin_y", 72),
+        },
+    }
 
 
 def pptx_theme(prs: Any, design: Optional[Dict[str, Any]] = None) -> None:

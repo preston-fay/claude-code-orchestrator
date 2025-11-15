@@ -98,22 +98,23 @@ class TestDesignRegistry:
 
         assert "colors" in design
         assert "fonts" in design
-        assert "margins" in design
+        assert "spacing" in design  # New: spacing instead of margins
         assert "classes" in design
-        assert "css" in design
+        assert "css_bundle" in design  # New: css_bundle instead of css
 
-        # Verify color palette
-        assert design["colors"]["fg"] == "#0F172A"
-        assert design["colors"]["accent"] == "#0EA5E9"
+        # Verify color palette (official Kearney colors)
+        assert design["colors"]["fg"] == "#1E1E1E"  # Official Kearney dark gray
+        assert design["colors"]["primary"] == "#7823DC"  # Official Kearney purple
+        assert design["colors"]["accent"] == "#7823DC"  # Same as primary
         assert design["colors"]["bg"] == "#FFFFFF"
 
         # Verify fonts
         assert design["fonts"]["headline"] == "Inter"
         assert design["fonts"]["body"] == "Inter"
 
-        # Verify margins
-        assert design["margins"]["x"] == 72
-        assert design["margins"]["y"] == 72
+        # Verify spacing (replaces margins)
+        assert design["spacing"]["page_margin_x"] == 72
+        assert design["spacing"]["page_margin_y"] == 72
 
     def test_client_override_colors(self):
         """Test client color overrides."""
@@ -126,8 +127,8 @@ class TestDesignRegistry:
         assert design["colors"]["accent"] == "#FF6600"
         assert design["colors"]["primary"] == "#003366"
 
-        # Base colors should remain
-        assert design["colors"]["fg"] == "#0F172A"
+        # Base colors should remain (official Kearney colors)
+        assert design["colors"]["fg"] == "#1E1E1E"  # Official Kearney dark gray
         assert design["colors"]["bg"] == "#FFFFFF"
 
     def test_client_override_fonts(self):
@@ -302,7 +303,7 @@ class TestIntegration:
         # Step 2: Get design tokens
         design = get_design(selection.system, selection.overrides)
 
-        assert design["colors"]["accent"] == "#0EA5E9"
+        assert design["colors"]["accent"] == "#7823DC"  # Official Kearney purple
         assert design["fonts"]["headline"] == "Inter"
 
         # Step 3: Generate HTML with KDS
@@ -338,8 +339,8 @@ class TestIntegration:
         # Client accent should override
         assert design["colors"]["accent"] == "#FF6600"
 
-        # Kearney base should remain
-        assert design["colors"]["fg"] == "#0F172A"
+        # Kearney base should remain (official Kearney colors)
+        assert design["colors"]["fg"] == "#1E1E1E"  # Official Kearney dark gray
 
         # Client metadata
         assert design["client"] == "client:acme"

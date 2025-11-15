@@ -9,6 +9,13 @@ from .registry import (
     kds_classes,
     enforce_kds_html,
 )
+from .tokens import (
+    load_kearney_tokens,
+    BrandTokensError,
+    validate_tokens,
+    get_token_version,
+    get_chart_colors,
+)
 
 __all__ = [
     "get_design",
@@ -18,4 +25,9 @@ __all__ = [
     "pptx_theme",
     "kds_classes",
     "enforce_kds_html",
+    "load_kearney_tokens",
+    "BrandTokensError",
+    "validate_tokens",
+    "get_token_version",
+    "get_chart_colors",
 ]

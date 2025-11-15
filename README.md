@@ -134,6 +134,90 @@ safe_html = enforce_kds_html(body)
 - **Maintainability**: Design changes update centrally, not scattered across files
 - **Client Trust**: Demonstrates attention to brand compliance
 
+---
+
+### 📐 Kearney Design Tokens (Single Source of Truth)
+
+All Kearney brand tokens (colors, fonts, spacing, CSS) are defined in a single canonical YAML file inside the orchestrator. This ensures you never "lose the colors" and prevents token drift across projects.
+
+**Canonical Token File:**
+```
+src/orchestrator/design/kearney_brand.yml
+```
+
+This file contains:
+- **Official Kearney Purple**: `#7823DC` (RGB 120, 35, 220)
+- **Grayscale Palette**: `#1E1E1E` to `#FFFFFF` (10 shades)
+- **Chart Colors**: Ordered palette for data visualization (6 colors)
+- **Typography**: Inter font family with fallbacks
+- **Spacing**: PDF/PPTX margins (72pt = 1 inch)
+- **CSS Bundle**: Embedded stylesheet for HTML outputs
+- **Utility Classes**: `kds-card`, `kds-btn`, `kds-badge`, etc.
+
+**Verifying Current Tokens:**
+```bash
+# Print all active tokens as JSON
+kds-print
+
+# Check token version
+kds-version
+
+# Inspect specific values
+kds-print | jq '.colors.primary'
+# Output: "#7823DC"
+
+kds-print | jq '.fonts.headline'
+# Output: "Inter"
+```
+
+**Emergency Override (Hotfix):**
+```bash
+# Override tokens via environment variable (temporary)
+export KDS_TOKENS_JSON='{"colors":{"primary":"#FF0000"},...}'
+orchestrator run start
+```
+
+**Updating Tokens:**
+1. Edit `src/orchestrator/design/kearney_brand.yml`
+2. Increment `meta.version` (e.g., `1.0.0` → `1.0.1`)
+3. Run `kds-print` to verify changes
+4. Create PR with version bump and description
+5. After merge, all projects automatically use new tokens
+
+**Why This Solves "Lost Colors" Problem:**
+- ✅ Tokens live **inside the orchestrator package** (not in app repos)
+- ✅ Every output (HTML/PDF/PPTX) flows through orchestrator helpers
+- ✅ CI fails if anyone tries to bypass KDS (inline styles/colors)
+- ✅ CLI command (`kds-print`) confirms exact active values anytime
+- ✅ Version tracking in tokens metadata (`meta.version`)
+
+**Integration Example:**
+```python
+from src.orchestrator.design import load_kearney_tokens, get_chart_colors
+
+# Load official tokens
+tokens = load_kearney_tokens()
+
+# Use Kearney purple
+primary = tokens["colors"]["primary"]  # "#7823DC"
+
+# Get chart palette (ordered)
+chart_colors = get_chart_colors()
+# ["#D2D2D2", "#A5A5A5", "#787878", "#E6D2FA", "#C8A5F0", "#AF7DEB"]
+
+# Create visualization with official colors
+import plotly.graph_objects as go
+fig = go.Figure(data=[go.Bar(marker_color=chart_colors[0])])
+```
+
+**Token Validation:**
+- Runtime validation ensures all required keys present
+- CI checks that `#7823DC` appears in CSS bundle (catches divergence)
+- Fail-fast on missing or malformed tokens
+- WCAG compliance metadata (`wcag_target: "AA"`)
+
+---
+
 ### 🤖 AI-Powered Code Review
 
 Automated code review using Claude API that analyzes pull requests for security vulnerabilities, performance issues, code quality, and best practices. Reviews are posted as PR comments with actionable recommendations.

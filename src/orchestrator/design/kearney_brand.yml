@@ -1,0 +1,109 @@
+# Kearney Design System (KDS) - Single Source of Truth
+# This file is the canonical definition of Kearney brand tokens.
+# DO NOT hardcode colors, fonts, or spacing elsewhere.
+# All outputs (HTML/PDF/PPTX) MUST use these tokens via orchestrator helpers.
+
+meta:
+  name: "Kearney"
+  version: "1.0.0"
+  updated_by: "Brand/Platform"
+  updated_at: "2025-11-15"
+  wcag_target: "AA"
+  description: "Official Kearney brand tokens for C-suite deliverables"
+
+# Official Kearney color palette
+colors:
+  # Primary brand color
+  primary: "#7823DC"            # Kearney Purple (RGB 120, 35, 220)
+  accent: "#7823DC"             # Primary accent (same as primary)
+
+  # Text colors
+  fg: "#1E1E1E"                 # Primary text - Dark gray (RGB 30, 30, 30)
+  muted: "#A5A5A5"              # Secondary text - Medium gray (RGB 165, 165, 165)
+
+  # Background colors
+  bg: "#FFFFFF"                 # White background (RGB 255, 255, 255)
+  card: "#F5F5F5"               # Card backgrounds - Light gray (RGB 245, 245, 245)
+  border: "#E6E6E6"             # Borders - Very light gray (RGB 230, 230, 230)
+
+  # Chart colors (ordered palette for data visualization)
+  chart_1: "#D2D2D2"            # Light gray (RGB 210, 210, 210)
+  chart_2: "#A5A5A5"            # Medium gray (RGB 165, 165, 165)
+  chart_3: "#787878"            # Dark gray (RGB 120, 120, 120)
+  chart_4: "#E6D2FA"            # Light purple (RGB 230, 210, 250)
+  chart_5: "#C8A5F0"            # Medium-light purple (RGB 200, 165, 240)
+  chart_6: "#AF7DEB"            # Medium purple (RGB 175, 125, 235)
+
+  # Extended palette (for gradients and advanced visualizations)
+  purple_light: "#D7BEF5"       # RGB 215, 190, 245
+  purple_medium_light: "#B991EB" # RGB 185, 145, 235
+  purple_medium: "#A064E6"      # RGB 160, 100, 230
+  purple_medium_dark: "#9150E1" # RGB 145, 80, 225
+  purple_dark: "#8737E1"        # RGB 135, 55, 225
+
+  # Grayscale palette (additional shades)
+  gray_50: "#F5F5F5"            # RGB 245, 245, 245
+  gray_100: "#E6E6E6"           # RGB 230, 230, 230
+  gray_200: "#D2D2D2"           # RGB 210, 210, 210
+  gray_300: "#B9B9B9"           # RGB 185, 185, 185
+  gray_400: "#A5A5A5"           # RGB 165, 165, 165
+  gray_500: "#8C8C8C"           # RGB 140, 140, 140
+  gray_600: "#787878"           # RGB 120, 120, 120
+  gray_700: "#5F5F5F"           # RGB 95, 95, 95
+  gray_800: "#4B4B4B"           # RGB 75, 75, 75
+  gray_900: "#323232"           # RGB 50, 50, 50
+  gray_950: "#1E1E1E"           # RGB 30, 30, 30
+
+# Typography
+fonts:
+  headline: "Inter"             # Headlines and titles
+  body: "Inter"                 # Body text
+  monospace: "Monaco, Consolas, 'Courier New', monospace"
+  fallback: "system-ui, Arial, sans-serif"
+
+# Spacing (PDF/PPTX)
+spacing:
+  page_margin_x: 72             # 1 inch horizontal margin (72 points)
+  page_margin_y: 72             # 1 inch vertical margin (72 points)
+  card_padding: 16              # Card padding (pixels)
+  section_margin: 16            # Section spacing (pixels)
+
+# CSS utility classes (canonical names used by apps)
+classes:
+  card: "kds-card"
+  btn: "kds-btn"
+  badge: "kds-badge"
+  row: "kds-row"
+  input: "kds-input"
+  section: "kds-section"
+  h1: "kds-h1"
+  h2: "kds-h2"
+  h3: "kds-h3"
+  text-muted: "kds-text-muted"
+  chart: "kds-chart"
+
+# Embedded CSS bundle (minified)
+# Apps should NEVER write custom CSS - use this bundle
+css_bundle: |
+  .kds{font-family:Inter,system-ui,Arial,sans-serif;color:#1E1E1E;background:#fff;margin:24px}
+  .kds .kds-card{background:#F5F5F5;border-radius:14px;padding:16px;margin:12px 0;border:1px solid #E6E6E6}
+  .kds .kds-btn{padding:8px 12px;border-radius:10px;border:1px solid #E6E6E6;background:#fff;cursor:pointer;color:#1E1E1E}
+  .kds .kds-btn:hover{background:#F5F5F5}
+  .kds .kds-badge{display:inline-block;background:#7823DC;color:#fff;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600}
+  .kds .kds-row{display:flex;gap:12px;flex-wrap:wrap}
+  .kds .kds-input{padding:8px 10px;border:1px solid #D2D2D2;border-radius:10px;width:100%;font-family:Inter,sans-serif}
+  .kds .kds-section{margin:16px 0}
+  .kds .kds-h1{font-size:28px;margin:0 0 8px;color:#1E1E1E;font-weight:700}
+  .kds .kds-h2{font-size:18px;margin:16px 0 8px;color:#1E1E1E;font-weight:600}
+  .kds .kds-h3{font-size:16px;margin:12px 0 6px;color:#1E1E1E;font-weight:600}
+  .kds .kds-text-muted{color:#A5A5A5}
+  .kds .kds-chart{font-family:Inter,sans-serif}
+
+# Chart theming for D3/Plotly/etc
+chart_theme:
+  colors: ["#D2D2D2", "#A5A5A5", "#787878", "#E6D2FA", "#C8A5F0", "#AF7DEB"]
+  font_family: "Inter, system-ui, Arial, sans-serif"
+  font_size: 12
+  grid_color: "#E6E6E6"
+  axis_color: "#1E1E1E"
+  background: "#FFFFFF"
