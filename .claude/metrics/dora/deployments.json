@@ -1,7 +1,7 @@
 {
   "metric": "deployment_frequency",
-  "period": "2025-08-18/2025-11-16",
-  "collection_timestamp": "2025-11-16T09:17:04.528152",
+  "period": "2025-08-19/2025-11-17",
+  "collection_timestamp": "2025-11-17T09:22:48.164970",
   "deployments": [
     {
       "version": "v1.0.0",
@@ -19,7 +19,7 @@
   "summary": {
     "total_deployments": 2,
     "deploys_per_day": 0.06,
-    "deploys_per_week": 0.45,
+    "deploys_per_week": 0.44,
     "rating": "medium"
   }
 }
