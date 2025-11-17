@@ -29,6 +29,13 @@ console = Console()
 # Add intake command group
 app.add_typer(intake_app, name="intake")
 
+# Add constitution command group
+try:
+    from src.orchestrator.cli_constitution import app as constitution_app
+    app.add_typer(constitution_app, name="constitution")
+except ImportError as e:
+    console.print(f"[yellow]Warning: Could not import constitution CLI: {e}[/yellow]")
+
 # Add style command group
 try:
     from src.orchestrator.style import app as style_app

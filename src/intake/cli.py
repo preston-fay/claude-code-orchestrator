@@ -161,6 +161,111 @@ def validate(
 
 
 @app.command()
+def clarify(
+    intake_file: Path = typer.Argument(..., help="Path to intake YAML file"),
+    severity: Optional[str] = typer.Option(
+        None,
+        "--severity",
+        "-s",
+        help="Filter by severity (critical, high, medium, low)",
+    ),
+    category: Optional[str] = typer.Option(
+        None,
+        "--category",
+        "-c",
+        help="Filter by category (requirements, data, technical, security, etc.)",
+    ),
+):
+    """Analyze intake and generate clarifying questions.
+
+    This command identifies underspecified or ambiguous areas in your intake
+    configuration and generates clarifying questions to improve specification quality.
+
+    Run this BEFORE starting the orchestrator workflow to catch issues early.
+
+    Example:
+        orchestrator intake clarify intake/my-project.yaml
+        orchestrator intake clarify intake/my-project.yaml --severity critical
+    """
+    console.print(f"[bold blue]🔍 Analyzing intake file:[/bold blue] {intake_file}\n")
+
+    if not intake_file.exists():
+        console.print(f"[red]Error: File not found: {intake_file}[/red]")
+        raise typer.Exit(1)
+
+    # Load intake
+    try:
+        import yaml
+        with open(intake_file) as f:
+            intake_data = yaml.safe_load(f)
+    except Exception as e:
+        console.print(f"[red]Error loading intake: {e}[/red]")
+        raise typer.Exit(1)
+
+    # Import clarifier
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from src.orchestrator.intake.clarifier import clarify_intake
+
+    # Analyze and get questions
+    questions = clarify_intake(intake_data)
+
+    # Filter by severity if requested
+    if severity:
+        questions = [q for q in questions if q.severity == severity.lower()]
+
+    # Filter by category if requested
+    if category:
+        questions = [q for q in questions if q.category == category.lower()]
+
+    if not questions:
+        console.print("[green]✅ No clarifications needed![/green]")
+        console.print("\nYour intake is well-specified and ready for orchestration.")
+        console.print("\n💡 Next step: orchestrator run start --intake", intake_file)
+        return
+
+    # Display questions
+    console.print(f"[yellow]Found {len(questions)} clarification{'s' if len(questions) != 1 else ''}:[/yellow]\n")
+
+    for i, q in enumerate(questions, 1):
+        severity_colors = {
+            "critical": "red",
+            "high": "yellow",
+            "medium": "blue",
+            "low": "cyan",
+        }
+        color = severity_colors.get(q.severity, "white")
+
+        console.print(f"[bold {color}]#{i} [{q.severity.upper()}] {q.category}[/bold {color}]")
+        console.print(f"[bold]❓ {q.question}[/bold]")
+        console.print(f"   Field: [cyan]{q.field}[/cyan]")
+        console.print(f"   Reason: {q.reason}")
+
+        if q.examples:
+            console.print("   Examples:")
+            for ex in q.examples[:3]:  # Show max 3 examples
+                console.print(f"     • {ex}")
+
+        console.print()  # Blank line between questions
+
+    # Summary
+    console.print("[bold]Summary:[/bold]")
+    by_severity = {}
+    for q in questions:
+        by_severity[q.severity] = by_severity.get(q.severity, 0) + 1
+
+    for sev in ["critical", "high", "medium", "low"]:
+        if sev in by_severity:
+            color = severity_colors.get(sev, "white")
+            console.print(f"  [{color}]{sev.capitalize()}: {by_severity[sev]}[/{color}]")
+
+    console.print("\n💡 Tips:")
+    console.print("  - Address critical/high severity questions before starting orchestrator")
+    console.print("  - Update your intake file with clarified information")
+    console.print("  - Run 'orchestrator intake validate' after updates")
+    console.print("  - Run this command again to check for remaining issues")
+
+
+@app.command()
 def render(
     intake_file: Path = typer.Argument(..., help="Path to intake YAML file"),
     overwrite: bool = typer.Option(

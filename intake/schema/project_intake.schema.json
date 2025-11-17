@@ -278,6 +278,74 @@
           "description": {"type": "string"}
         }
       }
+    },
+    "constitution": {
+      "type": "object",
+      "description": "Project constitution - fundamental principles and guardrails",
+      "properties": {
+        "code_quality": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Code quality standards and requirements"
+        },
+        "ux_principles": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "User experience and design principles"
+        },
+        "security": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Security requirements and standards"
+        },
+        "data_quality": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Data quality standards"
+        },
+        "forbidden": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Forbidden practices, patterns, or technologies"
+        },
+        "required": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Required practices or technologies"
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "description": "Technology-agnostic requirements (what, not how)",
+      "properties": {
+        "functional": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Functional requirements describing system behavior"
+        },
+        "non_functional": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Non-functional requirements (performance, security, scalability)"
+        },
+        "user_stories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "as_a": {"type": "string"},
+              "i_want": {"type": "string"},
+              "so_that": {"type": "string"},
+              "acceptance_criteria": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          },
+          "description": "User stories in standard format"
+        }
+      }
     }
   }
 }
