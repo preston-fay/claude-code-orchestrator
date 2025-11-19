@@ -35,11 +35,11 @@ const defaultTheme: ClientTheme = {
   colors: {
     light: {
       primary: '#7823DC',
-      emphasis: '#E63946',
+      emphasis: '#9150E1',  // Approved Kearney purple
     },
     dark: {
-      primary: '#A855F7',
-      emphasis: '#EF476F',
+      primary: '#AF7DEB',   // Approved dark theme purple
+      emphasis: '#C8A5F0',  // Approved lighter purple for dark mode
     },
   },
   typography: {

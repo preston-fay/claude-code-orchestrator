@@ -89,9 +89,10 @@ export default function Governance() {
   };
 
   const getScoreColor = (score: number): string => {
-    if (score >= 90) return theme === 'dark' ? '#66BB6A' : '#2E7D32';
-    if (score >= 75) return theme === 'dark' ? '#FFA726' : '#ED6C02';
-    return theme === 'dark' ? '#EF5350' : '#D32F2F';
+    // Kearney brand: NO green/red/orange, use purple/grey gradient
+    if (score >= 90) return theme === 'dark' ? '#AF7DEB' : '#7823DC';  // Purple for high scores
+    if (score >= 75) return theme === 'dark' ? '#A5A5A5' : '#787878';  // Mid grey for medium scores
+    return theme === 'dark' ? '#787878' : '#4B4B4B';  // Dark grey for low scores
   };
 
   const renderMiniChart = (data: TrendPoint[], label: string) => {
@@ -163,7 +164,7 @@ export default function Governance() {
     return (
       <div className="governance-page" style={{
         padding: '2rem',
-        color: theme === 'dark' ? '#EF5350' : '#D32F2F',
+        color: theme === 'dark' ? '#A5A5A5' : '#4B4B4B',  // Neutral grey for errors (NO red)
         backgroundColor: theme === 'dark' ? '#000000' : '#FFFFFF',
       }}>
         <div>Error: {error}</div>
@@ -396,7 +397,7 @@ export default function Governance() {
                   backgroundColor: theme === 'dark' ? '#1E1E1E' : '#F5F5F5',
                   borderRadius: '0.25rem',
                   border: `1px solid ${theme === 'dark' ? '#4B4B4B' : '#D2D2D2'}`,
-                  borderLeft: `4px solid ${theme === 'dark' ? '#FFA726' : '#ED6C02'}`,
+                  borderLeft: `4px solid ${theme === 'dark' ? '#AF7DEB' : '#7823DC'}`,  // Purple accent (NO orange)
                 }}
               >
                 <div style={{

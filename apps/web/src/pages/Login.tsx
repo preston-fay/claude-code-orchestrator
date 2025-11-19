@@ -180,7 +180,7 @@ export function Login() {
             }}
             onMouseEnter={(e) => {
               if (!loading) {
-                e.currentTarget.style.backgroundColor = '#6a1fc9';
+                e.currentTarget.style.backgroundColor = '#8737E1';  // Darker purple for hover
               }
             }}
             onMouseLeave={(e) => {
