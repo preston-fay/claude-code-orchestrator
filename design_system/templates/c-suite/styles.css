@@ -34,13 +34,13 @@
   --color-surface: #F5F5F5;      /* Light grey for cards/sections */
   --color-border: #D2D2D2;       /* Border grey */
 
-  /* Chart colors (NO GREEN per Kearney brand) */
+  /* Chart colors (Kearney brand: purple + grey only) */
   --color-chart-primary: #7823DC;
   --color-chart-secondary: #AF7DEB;
   --color-chart-tertiary: #C8A5F0;
   --color-chart-muted: #A5A5A5;
-  --color-chart-negative: #D32F2F; /* Red for declining metrics */
-  --color-chart-warning: #ED6C02;  /* Orange for warnings */
+  --color-chart-negative: #4B4B4B;  /* Dark grey (NO red - use text indicators) */
+  --color-chart-neutral: #787878;   /* Mid grey for neutral state */
 
   /* Spacing scale */
   --space-xs: 0.5rem;    /* 8px */
@@ -301,21 +301,21 @@ strong, .font-bold {
   border-left-color: var(--color-primary);
 }
 
-.callout-warning {
-  border-left-color: var(--color-chart-warning);
-  background-color: #FFF3E0;
+.callout-attention {
+  border-left-color: var(--color-chart-neutral);
+  background-color: #F5F5F5;  /* Neutral grey background */
 }
 
-.callout-error {
+.callout-negative {
   border-left-color: var(--color-chart-negative);
-  background-color: #FFEBEE;
+  background-color: #F5F5F5;  /* Neutral grey background */
 }
 
-/* Insight callout (key findings) */
+/* Insight callout (key findings) - NO gradient per Kearney brand */
 .insight {
   padding: var(--space-lg);
   margin: var(--space-xl) 0;
-  background: linear-gradient(to right, #E6D2FA 0%, transparent 100%);
+  background: #F4EDFF;  /* Light purple tint (flat, no gradient) */
   border-left: 6px solid var(--color-primary);
   border-radius: 4px;
 }
