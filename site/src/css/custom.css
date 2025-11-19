@@ -26,7 +26,7 @@
   --kearney-black: #000000;
   --kearney-grey100: #F5F5F5;
   --kearney-grey300: #B9B9B9;
-  --kearney-grey600: #5A5A5A;
+  --kearney-grey600: #787878;
   --kearney-grey800: #2D2D2D;
   --kearney-grey900: #1A1A1A;
 
@@ -56,9 +56,9 @@
 
   /* Map Kearney tokens to Docusaurus/Infima variables */
   --ifm-color-primary: var(--kearney-emphasis);
-  --ifm-color-primary-dark: #6b1fc8;
-  --ifm-color-primary-darker: #641dbf;
-  --ifm-color-primary-darkest: #53189e;
+  --ifm-color-primary-dark: #8737E1;
+  --ifm-color-primary-darker: #A064E6;
+  --ifm-color-primary-darkest: #B991EB;
   --ifm-color-primary-light: var(--kearney-violet4);
   --ifm-color-primary-lighter: var(--kearney-violet3);
   --ifm-color-primary-lightest: var(--kearney-violet2);
@@ -106,10 +106,10 @@
   /* Map to Docusaurus variables */
   --ifm-color-primary: var(--kearney-emphasis);
   --ifm-color-primary-dark: var(--kearney-violet3);
-  --ifm-color-primary-darker: #9e6ed8;
-  --ifm-color-primary-darkest: #8050c4;
+  --ifm-color-primary-darker: #B991EB;
+  --ifm-color-primary-darkest: #D7BEF5;
   --ifm-color-primary-light: var(--kearney-violet2);
-  --ifm-color-primary-lighter: #d4b4f5;
+  --ifm-color-primary-lighter: #E6D2FA;
   --ifm-color-primary-lightest: var(--kearney-violet1);
 
   --ifm-background-color: var(--kearney-background);

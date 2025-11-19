@@ -1,8 +1,9 @@
 /**
  * Kearney Design System - CSS Custom Properties
  *
- * Auto-generated from design_system/tokens.json
- * Use with theme switching via data-theme="light|dark" on root element
+ * Generated from design_system/tokens.json (v1.1.0)
+ * Brand principle: White + slate + purple accent
+ * NO green, red, orange, or blue
  */
 
 :root {
@@ -10,20 +11,39 @@
   --color-charcoal: #1E1E1E;
   --color-silver: #A5A5A5;
   --color-purple: #7823DC;
+
+  /* Complete Grey Scale */
   --color-grey-100: #F5F5F5;
+  --color-grey-150: #E6E6E6;
   --color-grey-200: #D2D2D2;
-  --color-grey-300: #BEBEBE;
-  --color-grey-500: #787878;
-  --color-grey-600: #5A5A5A;
+  --color-grey-250: #C8C8C8;
+  --color-grey-350: #B9B9B9;
+  --color-grey-500: #A5A5A5;
+  --color-grey-550: #8C8C8C;
+  --color-grey-600: #787878;
+  --color-grey-650: #5F5F5F;
   --color-grey-700: #4B4B4B;
+  --color-grey-850: #323232;
   --color-grey-800: #2D2D2D;
   --color-grey-900: #1A1A1A;
+
+  /* Primary Violet Scale */
   --color-violet-1: #E6D2FA;
   --color-violet-2: #C8A5F0;
   --color-violet-3: #AF7DEB;
   --color-violet-4: #9150E1;
+  --color-violet-5: #7823DC;
+
+  /* Secondary Violet Scale */
+  --color-violet-1-alt: #D7BEF5;
+  --color-violet-2-alt: #B991EB;
+  --color-violet-3-alt: #A064E6;
+  --color-violet-4-alt: #8737E1;
+
+  /* Extended */
   --color-white: #FFFFFF;
   --color-black: #000000;
+  --color-faint: #FAFAFA;
 
   /* Typography */
   --font-family-primary: Inter, Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
@@ -55,49 +75,11 @@
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.01em;
   --letter-spacing-wider: 0.02em;
-
-  /* Spacing */
-  --spacing-0: 0;
-  --spacing-1: 0.25rem;
-  --spacing-2: 0.5rem;
-  --spacing-3: 0.75rem;
-  --spacing-4: 1rem;
-  --spacing-5: 1.25rem;
-  --spacing-6: 1.5rem;
-  --spacing-8: 2rem;
-  --spacing-10: 2.5rem;
-  --spacing-12: 3rem;
-  --spacing-16: 4rem;
-  --spacing-20: 5rem;
-  --spacing-24: 6rem;
-
-  /* Border Radius */
-  --radius-none: 0;
-  --radius-sm: 0.125rem;
-  --radius-base: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius-full: 9999px;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
-  /* Status Colors - Kearney Brand Compliant */
-  --color-success: #7823DC;  /* Purple - NO GREEN per brand guidelines */
-  --color-warning: #ED6C02;
-  --color-error: #D32F2F;
-  --color-info: #7823DC;
 }
 
-/* Light Theme (Default) */
+/* Light Theme */
 :root,
-[data-theme="light"] {
+[data-theme='light'] {
   --background: #FFFFFF;
   --surface: #F5F5F5;
   --surface-elevated: #FFFFFF;
@@ -105,21 +87,24 @@
   --text-muted: #787878;
   --text-inverse: #FFFFFF;
   --border: #D2D2D2;
+  --border-subtle: #E6E6E6;
+  --border-medium: #C8C8C8;
   --emphasis: #7823DC;
   --emphasis-hover: #9150E1;
-  --success: #7823DC;  /* Purple - NO GREEN per Kearney brand */
-  --success-tint: #E6D2FA;  /* Light purple - NO GREEN */
-  --warning: #ED6C02;
-  --warning-tint: #FFF3E0;
-  --error: #D32F2F;
-  --error-tint: #FFEBEE;
+  --emphasis-light: #E6D2FA;
+  --positive: #7823DC;
+  --positive-tint: #E6D2FA;
+  --negative: #4B4B4B;
+  --negative-tint: #F5F5F5;
+  --neutral: #787878;
+  --neutral-tint: #F5F5F5;
   --spot-color: #7823DC;
   --chart-muted: #A5A5A5;
   --chart-highlight: #7823DC;
 }
 
 /* Dark Theme */
-[data-theme="dark"] {
+[data-theme='dark'] {
   --background: #000000;
   --surface: #1E1E1E;
   --surface-elevated: #2D2D2D;
@@ -127,66 +112,25 @@
   --text-muted: #A5A5A5;
   --text-inverse: #1E1E1E;
   --border: #4B4B4B;
+  --border-subtle: #323232;
+  --border-medium: #5F5F5F;
   --emphasis: #AF7DEB;
   --emphasis-hover: #C8A5F0;
-  --success: #AF7DEB;  /* Purple - NO GREEN per Kearney brand */
-  --success-tint: #9150E1;  /* Darker purple - NO GREEN */
-  --warning: #FFA726;
-  --warning-tint: #E65100;
-  --error: #EF5350;
-  --error-tint: #B71C1C;
+  --emphasis-light: #8737E1;
+  --positive: #AF7DEB;
+  --positive-tint: #323232;
+  --negative: #787878;
+  --negative-tint: #1E1E1E;
+  --neutral: #A5A5A5;
+  --neutral-tint: #1E1E1E;
   --spot-color: #AF7DEB;
   --chart-muted: #787878;
   --chart-highlight: #C8A5F0;
 }
 
-/* Dark Mode via class (alternative to data-theme) */
-.dark {
-  --background: #000000;
-  --surface: #1E1E1E;
-  --surface-elevated: #2D2D2D;
-  --text: #FFFFFF;
-  --text-muted: #A5A5A5;
-  --text-inverse: #1E1E1E;
-  --border: #4B4B4B;
-  --emphasis: #AF7DEB;
-  --emphasis-hover: #C8A5F0;
-  --success: #AF7DEB;  /* Purple - NO GREEN per Kearney brand */
-  --success-tint: #9150E1;  /* Darker purple - NO GREEN */
-  --warning: #FFA726;
-  --warning-tint: #E65100;
-  --error: #EF5350;
-  --error-tint: #B71C1C;
-  --spot-color: #AF7DEB;
-  --chart-muted: #787878;
-  --chart-highlight: #C8A5F0;
+/* Brand Metadata */
+:root {
+  --kds-version: '1.1.0';
+  --kds-principle: 'White + slate + purple accent';
+  --kds-forbidden: 'NO green, red, orange, or blue';
 }
-
-/* Global Styles */
-body {
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-  color: var(--text);
-  background-color: var(--background);
-  margin: 0;
-  padding: 0;
-}
-
-/* Utility Classes */
-.bg-background { background-color: var(--background); }
-.bg-surface { background-color: var(--surface); }
-.bg-surface-elevated { background-color: var(--surface-elevated); }
-
-.text-primary { color: var(--text); }
-.text-muted { color: var(--text-muted); }
-.text-inverse { color: var(--text-inverse); }
-.text-emphasis { color: var(--emphasis); }
-
-.border-base { border-color: var(--border); }
-
-.font-light { font-weight: var(--font-weight-light); }
-.font-regular { font-weight: var(--font-weight-regular); }
-.font-medium { font-weight: var(--font-weight-medium); }
-.font-semibold { font-weight: var(--font-weight-semibold); }
-.font-bold { font-weight: var(--font-weight-bold); }
