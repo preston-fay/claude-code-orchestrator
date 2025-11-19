@@ -19,7 +19,7 @@ for building brand-compliant interfaces.
 
 ### Typography
 
-Modular scale 1.25 ratio used as kearney.com CSS was not accessible. Inter font with Arial fallback.
+Modular scale 1.25 ratio. Inter font with Arial fallback. NO ALL CAPS headings.
 
 ## Token Categories
 
@@ -75,7 +75,7 @@ const theme = getThemeColors('light');
 
 ## Version
 
-Design system version: **1.0.0**
+Design system version: **1.1.0**
 
-Source: Kearney brand guidelines
+Source: Kearney brand guidelines - white + slate + purple accent
 

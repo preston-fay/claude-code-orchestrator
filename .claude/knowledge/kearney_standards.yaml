@@ -122,11 +122,12 @@ presentation_standards:
       exceptions: "Client-specific brand guidelines may override"
 
     color_palette:
-      primary: "Kearney blue (#003A70)"
-      secondary: "Kearney light blue (#00A3E0)"
-      accent_colors: "Use sparingly for emphasis (red for negative, green for positive)"
-      neutral: "Grays for supporting information"
-      avoid: "Default PowerPoint colors (garish, unprofessional)"
+      primary: "Kearney Purple (#7823DC)"
+      visual_principle: "White + slate + purple accent"
+      accent_purples: "Light purples (#9150E1, #AF7DEB, #C8A5F0, #E6D2FA) for emphasis"
+      neutral: "Greys (#F5F5F5 to #1E1E1E) for supporting information and foundation"
+      semantic_approach: "NO green, red, orange, or blue. Use purple for emphasis, greys with text labels for state."
+      avoid: "Default PowerPoint colors, green/red/orange semantic colors, old Kearney blue"
 
     layout:
       title_placement: "Top-left or centered, depending on template"

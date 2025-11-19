@@ -1,27 +1,26 @@
 {
   "sequential": {
     "purple": {
-      "description": "Sequential scale from light to dark purple, derived from violet tokens",
+      "description": "Sequential scale from light to dark purple, using only approved Kearney purples",
       "colors": [
         "#E6D2FA",
         "#C8A5F0",
         "#AF7DEB",
         "#9150E1",
         "#7823DC",
-        "#601FB5",
-        "#4A188E",
-        "#341167"
+        "#323232",
+        "#1E1E1E"
       ],
-      "accessibility": "WCAG AA compliant on white background from index 4 onwards"
+      "accessibility": "WCAG AA compliant on white background from index 4 onwards. Dark end uses greys (not old purples)."
     },
     "neutral": {
       "description": "Sequential scale from light to dark grey",
       "colors": [
         "#F5F5F5",
+        "#E6E6E6",
         "#D2D2D2",
         "#A5A5A5",
         "#787878",
-        "#5A5A5A",
         "#4B4B4B",
         "#2D2D2D",
         "#1E1E1E"
@@ -37,10 +36,9 @@
         "#AF7DEB",
         "#C8A5F0",
         "#E6D2FA",
-        "#D2D2D2",
-        "#A5A5A5",
         "#787878",
-        "#4B4B4B"
+        "#A5A5A5",
+        "#D2D2D2"
       ],
       "center": "#E6D2FA"
     }
@@ -73,16 +71,19 @@
     }
   },
   "semantic": {
-    "status": {
-      "success": "#2E7D32",
-      "warning": "#ED6C02",
-      "error": "#D32F2F",
-      "info": "#7823DC"
+    "emphasis": {
+      "primary": "#7823DC",
+      "positive": "#7823DC",
+      "neutral": "#787878",
+      "negative": "#4B4B4B",
+      "muted": "#A5A5A5",
+      "description": "NO green/red/orange. Use purple for emphasis, greys for semantic states with text labels."
     },
     "trend": {
-      "positive": "#2E7D32",
-      "negative": "#D32F2F",
-      "neutral": "#787878"
+      "up": "#787878",
+      "down": "#787878",
+      "neutral": "#A5A5A5",
+      "description": "Use neutral greys with symbols (▲ ▼ ─) for direction. NO green/red color-coding."
     }
   },
   "visualization": {
@@ -101,12 +102,14 @@
       "label_first": "Prefer mark labels over axis labels",
       "spot_color": "Use spot color to emphasize key data points or insights",
       "no_pie_gauge": "Never use pie charts or gauge charts",
-      "collision_avoidance": "Ensure labels never overlap with data marks"
+      "collision_avoidance": "Ensure labels never overlap with data marks",
+      "color_semantics": "NO green/red/orange. Use purple + grey only with text indicators for state."
     }
   },
   "meta": {
-    "generation_method": "Computed from core Kearney tokens using mathematical interpolation",
-    "color_space": "RGB with perceptual adjustments",
-    "version": "1.0.0"
+    "generation_method": "Approved Kearney brand palette - white + slate + purple accent",
+    "color_space": "RGB",
+    "version": "1.1.0",
+    "brand_note": "All colors strictly from Kearney approved palette. Old dark purples (#601FB5, #4A188E, #341167) removed."
   }
 }
