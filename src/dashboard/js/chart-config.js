@@ -11,8 +11,8 @@
 // Kearney Purple Color Palette (from design system) - Approved colors only
 export const COLORS = {
     purple: '#7823DC',
-    purpleLight: '#9150E1',  // Changed from #9B51E0 (non-approved)
-    purpleDark: '#4B4B4B',   // Changed from #5A1AA8 (use grey instead of old purple)
+    purpleLight: '#9150E1',
+    purpleDark: '#4B4B4B',  // Dark grey (brand uses purple + grey, not darker purples)
     charcoal: '#1E1E1E',
     silver: '#A5A5A5',
     white: '#FFFFFF',
@@ -31,9 +31,9 @@ export function getThemeColors(isDark = true) {
     return {
         text: isDark ? COLORS.white : COLORS.charcoal,
         textMuted: COLORS.silver,
-        background: isDark ? '#000000' : '#FFFFFF',  // Changed from #121212 (non-approved)
+        background: isDark ? '#000000' : '#FFFFFF',
         surface: isDark ? '#1E1E1E' : '#F5F5F5',
-        border: isDark ? '#323232' : '#D2D2D2'  // Changed from #333333 and #E0E0E0 (non-approved)
+        border: isDark ? '#323232' : '#D2D2D2'
     };
 }
 
