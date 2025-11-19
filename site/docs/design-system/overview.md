@@ -1,9 +1,15 @@
 # Kearney Design System
 
-**Version:** 1.0.0
-**Last Updated:** 2025-10-15
+**Version:** 1.1.0
+**Last Updated:** 2025-11-19
 
 Complete brand-locked design system for Kearney Analytics Platform with D3/Leaflet overlay support.
+
+## Brand Principle
+
+**"White + slate + purple accent"**
+
+The Kearney Design System follows a strict visual principle of clean white or dark backgrounds, a comprehensive grey foundation palette, and purple used sparingly for emphasis. **NO green, red, orange, or blue** are permitted anywhere in the design system.
 
 ---
 
@@ -27,12 +33,17 @@ Complete brand-locked design system for Kearney Analytics Platform with D3/Leafl
 
 The Kearney Design System enforces strict brand compliance across all visualizations and interfaces:
 
-- **No emojis** in any outputs
+### Visual Constraints
+
+- **Approved colors only** - 27 colors from KDS palette (white, black, greys, purples)
+- **Forbidden colors** - NO green, red, orange, or blue anywhere
+- **No emojis** in any outputs (use text symbols: ▲ ▼ ─)
 - **No gridlines** on charts or maps
+- **No ALL CAPS** headings (use sentence case or title case)
 - **Label-first** approach - prefer direct mark labels over axis labels
-- **Spot color emphasis** for key insights
+- **Spot color emphasis** - purple for key insights only
+- **Generous whitespace** - breathing room between elements
 - **Inter font** with Arial fallback
-- **Kearney colors only** - no colors outside defined palette
 
 ### Technology Stack
 
@@ -60,15 +71,31 @@ All design values are centralized in `design_system/tokens.json`:
     },
     "grey": {
       "100": "#F5F5F5",
+      "150": "#E6E6E6",
       "200": "#D2D2D2",
-      "500": "#787878",
-      "800": "#2D2D2D"
+      "250": "#C8C8C8",
+      "350": "#B9B9B9",
+      "500": "#A5A5A5",
+      "550": "#8C8C8C",
+      "600": "#787878",
+      "650": "#5F5F5F",
+      "700": "#4B4B4B",
+      "850": "#323232",
+      "800": "#2D2D2D",
+      "900": "#1A1A1A"
     },
     "violet": {
       "1": "#E6D2FA",
       "2": "#C8A5F0",
       "3": "#AF7DEB",
-      "4": "#9150E1"
+      "4": "#9150E1",
+      "5": "#7823DC"
+    },
+    "violetAlt": {
+      "1": "#D7BEF5",
+      "2": "#B991EB",
+      "3": "#A064E6",
+      "4": "#8737E1"
     }
   }
 }
@@ -148,12 +175,24 @@ Modular 1.25 ratio scale:
 
 **Sequential (Purple):**
 ```typescript
-["#E6D2FA", "#C8A5F0", "#AF7DEB", "#9150E1", "#7823DC", "#601FB5", "#4A188E", "#341167"]
+// Use only approved purples - NO deprecated colors
+["#E6D2FA", "#C8A5F0", "#AF7DEB", "#9150E1", "#7823DC"]
 ```
 
 **Categorical (Primary):**
 ```typescript
+// Alternate purples and greys for visual separation
 ["#7823DC", "#A5A5A5", "#9150E1", "#787878", "#AF7DEB", "#D2D2D2"]
+```
+
+**Semantic States:**
+```typescript
+// NO green/red/orange - use purple/grey with text labels
+{
+  positive: "#7823DC",  // With ▲ or "Improved" label
+  negative: "#4B4B4B",  // With ▼ or "Declined" label
+  neutral: "#787878"    // With ─ or "No change" label
+}
 ```
 
 ---
@@ -439,9 +478,19 @@ import { CategoricalBarChart } from './components/CategoricalBarChart';
    - Semibold (600) for emphasis
 
 6. **Colors**
-   - Only Kearney palette
-   - No arbitrary colors
-   - Derive ramps from core palette
+   - Only 27 approved colors from KDS palette
+   - NO green, red, orange, or blue
+   - Validated in CI with `scripts/validate_kds_colors.py`
+
+7. **Typography**
+   - NO ALL CAPS headings
+   - Use sentence case or title case
+   - Semibold (600) for emphasis, not bold (700)
+
+8. **Spacing**
+   - Generous whitespace
+   - Breathing room between elements
+   - Don't crowd interfaces
 
 ### Testing Compliance
 
@@ -457,6 +506,10 @@ expect(gridElements.empty()).toBe(true);
 // Verify spot color used
 const spotElements = svg.selectAll('[stroke="#7823DC"], [stroke="#AF7DEB"]');
 expect(spotElements.empty()).toBe(false);
+
+// Verify color compliance
+// Run: python scripts/validate_kds_colors.py
+// All hex colors must be from approved 27-color palette
 ```
 
 ---
@@ -741,5 +794,5 @@ python scripts/merge_theme.py --client acme-corp
 
 Internal use only - Kearney Analytics Platform
 
-**Generated:** 2025-10-15
-**Version:** 1.0.0
+**Generated:** 2025-11-19
+**Version:** 1.1.0
