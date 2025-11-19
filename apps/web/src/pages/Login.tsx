@@ -228,7 +228,7 @@ export function Login() {
                 transition: 'background-color 0.2s'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f9f9f9';
+                e.currentTarget.style.backgroundColor = '#FAFAFA';  // Approved KDS faint grey
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'white';
