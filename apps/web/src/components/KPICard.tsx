@@ -33,13 +33,15 @@ export function KPICard({
   const colors = getThemeColors(theme);
 
   const getTrendColor = (direction: TrendDirection): string => {
+    // Use neutral greys only - NO green/red (Kearney brand compliance)
+    // Direction is conveyed by symbol (▲/▼/─), not color
     switch (direction) {
       case 'up':
-        return colors.success;
+        return colors.textMuted;  // Neutral grey (#787878)
       case 'down':
-        return colors.error;
+        return colors.textMuted;  // Neutral grey (#787878)
       case 'neutral':
-        return colors.textMuted;
+        return colors.textMuted;  // Neutral grey (#787878)
     }
   };
 
