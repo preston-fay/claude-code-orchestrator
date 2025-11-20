@@ -534,9 +534,91 @@
       color: var(--color-primary);
       border: 1px solid var(--color-primary);
     }
+    /* ============================================================================
+       COVER PAGE - Clean white with purple accents
+       ============================================================================ */
+    .cover-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      text-align: center;
+      padding: var(--space-xl);
+      page-break-after: always;
+    }
+
+    .cover-title {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: var(--space-md);
+      letter-spacing: -0.02em;
+    }
+
+    .cover-subtitle {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-xl);
+    }
+
+    .cover-divider {
+      width: 120px;
+      height: 4px;
+      background-color: var(--color-primary);
+      margin: var(--space-lg) auto;
+    }
+
+    .cover-meta {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-xl);
+      line-height: 1.8;
+    }
+
+    .cover-meta strong {
+      color: var(--color-text-primary);
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background-color: var(--color-surface);
+      color: var(--color-primary);
+      padding: 8px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 2px solid var(--color-primary);
+      margin-top: var(--space-lg);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    @media print {
+      .cover-page {
+        min-height: 100%;
+      }
+    }
   </style>
 </head>
 <body>
+
+  <!-- =========================================================================
+       COVER PAGE
+       ========================================================================= -->
+  <div class="cover-page">
+    <h1 class="cover-title">Claude Code Orchestrator</h1>
+    <p class="cover-subtitle">A Meta-Framework for AI-Driven Software Delivery</p>
+    <div class="cover-divider"></div>
+    <div class="cover-badge">Executive Overview</div>
+    <p class="cover-meta">
+      <strong>Prepared by:</strong> Kearney<br>
+      <strong>Version:</strong> 1.0<br>
+      <strong>Date:</strong> November 2025
+    </p>
+  </div>
 
   <!-- =========================================================================
        CONTENT
