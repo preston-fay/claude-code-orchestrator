@@ -89,6 +89,12 @@ const ProjectListPage: React.FC = () => {
         <div className="empty-state">
           <p>No projects found.</p>
           <p>Create your first project to get started with Ready/Set/Go.</p>
+          <div className="golden-path-hint">
+            <h4>Try the Golden Path Demo</h4>
+            <p>Run the canonical example project to see Ready-Set-Code in action:</p>
+            <code>python scripts/dev/run_golden_path_demo.py</code>
+            <p className="hint-text">Then refresh this page to see the project.</p>
+          </div>
         </div>
       ) : (
         <table className="project-table">
@@ -108,7 +114,12 @@ const ProjectListPage: React.FC = () => {
                 onClick={() => navigate(`/projects/${project.project_id}`)}
                 className="clickable-row"
               >
-                <td className="project-name">{project.project_name}</td>
+                <td className="project-name">
+                  {project.project_name}
+                  {project.project_name.startsWith('Golden Path') && (
+                    <span className="badge badge-demo">Demo</span>
+                  )}
+                </td>
                 <td>{project.client}</td>
                 <td>
                   <span className="phase-badge">{project.current_phase}</span>
