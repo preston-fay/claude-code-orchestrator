@@ -329,6 +329,8 @@ class WorkflowEngine:
         self,
         agent_id: str,
         phase: PhaseType,
+        user: UserProfile | None = None,
+        model_config: Any | None = None,
     ) -> AgentState:
         """Execute an agent through its lifecycle.
 
@@ -342,6 +344,8 @@ class WorkflowEngine:
         Args:
             agent_id: Agent to execute.
             phase: Current phase.
+            user: User profile for BYOK and entitlements.
+            model_config: Selected model configuration.
 
         Returns:
             Agent execution state.
@@ -396,6 +400,17 @@ class WorkflowEngine:
                 context.artifacts_path = str(self._workspace.artifacts_path)
                 context.logs_path = str(self._workspace.logs_path)
                 context.tmp_path = str(self._workspace.tmp_path)
+
+            # Set LLM provider info from user and model config
+            if user:
+                context.user_id = user.user_id
+                context.llm_api_key = user.anthropic_api_key
+                context.llm_provider = user.default_provider
+                context.model_preferences = user.entitlements.model_access
+
+            if model_config:
+                context.provider = model_config.provider
+                context.model = model_config.model
 
             for step in plan.steps:
                 output = agent.act(step, context)
@@ -524,8 +539,8 @@ class WorkflowEngine:
                 logger.error(f"Budget exceeded for {agent_id}: {e}")
                 raise BudgetExceededError(str(e))
 
-        # Execute the agent
-        agent_state = await self._execute_agent(agent_id, phase)
+        # Execute the agent with user and model config
+        agent_state = await self._execute_agent(agent_id, phase, user, model_config)
 
         # Update state with model info
         agent_state.model_used = model_config.model

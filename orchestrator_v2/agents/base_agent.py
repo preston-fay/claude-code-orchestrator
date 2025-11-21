@@ -14,6 +14,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 from orchestrator_v2.core.state_models import (
+    AgentContext,
     AgentOutput,
     AgentPlan,
     AgentPlanStep,
@@ -26,6 +27,7 @@ from orchestrator_v2.core.state_models import (
     TaskDefinition,
     TokenUsage,
 )
+from orchestrator_v2.llm import get_provider_registry, LlmResult
 
 
 class BaseAgentConfig(BaseModel):
@@ -132,6 +134,43 @@ class BaseAgent:
         self._token_usage.input_tokens += input_tokens
         self._token_usage.output_tokens += output_tokens
         self._token_usage.total_tokens += input_tokens + output_tokens
+
+    async def _call_llm(
+        self,
+        prompt: str,
+        context: AgentContext,
+    ) -> LlmResult:
+        """Call the LLM using the configured provider.
+
+        This method uses the provider registry to route the call
+        to the appropriate LLM provider based on context settings.
+
+        Args:
+            prompt: The formatted prompt to send.
+            context: Agent context with provider and model settings.
+
+        Returns:
+            LlmResult with generated text and token usage.
+
+        Raises:
+            LlmProviderError: If the LLM call fails.
+        """
+        registry = get_provider_registry()
+
+        # Get model from context or use default
+        model = context.model or "claude-3-sonnet-20240229"
+
+        # Call the provider
+        result = await registry.generate(
+            prompt=prompt,
+            model=model,
+            context=context,
+        )
+
+        # Record token usage
+        self._record_tokens(result.input_tokens, result.output_tokens)
+
+        return result
 
     def _create_artifact(
         self,
