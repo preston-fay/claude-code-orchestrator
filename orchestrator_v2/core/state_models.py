@@ -333,6 +333,12 @@ class AgentContext(BaseModel):
     available_skills: list[str] = Field(default_factory=list)
     governance_constraints: dict[str, Any] = Field(default_factory=dict)
     budget_remaining: TokenUsage = Field(default_factory=TokenUsage)
+    # Workspace paths for file operations
+    workspace_root: str | None = None
+    repo_path: str | None = None
+    artifacts_path: str | None = None
+    logs_path: str | None = None
+    tmp_path: str | None = None
 
 
 # -----------------------------------------------------------------------------

@@ -41,7 +41,9 @@ from orchestrator_v2.core.state_models import (
     TokenUsage,
 )
 from orchestrator_v2.governance.governance_engine import GovernanceEngine
+from orchestrator_v2.repo.adapter import RepoAdapter
 from orchestrator_v2.telemetry.token_tracking import TokenTracker
+from orchestrator_v2.workspace.models import WorkspaceConfig
 
 
 class WorkflowEngine:
@@ -65,6 +67,7 @@ class WorkflowEngine:
         governance_engine: GovernanceEngine | None = None,
         token_tracker: TokenTracker | None = None,
         agents: Mapping[str, BaseAgent] | None = None,
+        workspace: WorkspaceConfig | None = None,
     ):
         """Initialize the WorkflowEngine.
 
@@ -74,6 +77,7 @@ class WorkflowEngine:
             governance_engine: Governance engine instance.
             token_tracker: Token tracker instance.
             agents: Mapping of agent_id to agent instances.
+            workspace: Workspace configuration for file isolation.
         """
         self._phase_manager = phase_manager or PhaseManager()
         self._checkpoint_manager = checkpoint_manager or CheckpointManager()
@@ -81,6 +85,37 @@ class WorkflowEngine:
         self._token_tracker = token_tracker or TokenTracker()
         self._agents = agents or {}
         self._state: ProjectState | None = None
+        self._workspace: WorkspaceConfig | None = workspace
+        self._repo_adapter: RepoAdapter | None = None
+
+        # Initialize repo adapter if workspace provided
+        if workspace:
+            self._repo_adapter = RepoAdapter(workspace)
+
+    @property
+    def workspace(self) -> WorkspaceConfig | None:
+        """Get the workspace configuration."""
+        return self._workspace
+
+    @property
+    def repo_adapter(self) -> RepoAdapter | None:
+        """Get the repository adapter."""
+        return self._repo_adapter
+
+    def set_workspace(self, workspace: WorkspaceConfig) -> None:
+        """Set the workspace configuration.
+
+        Args:
+            workspace: Workspace configuration.
+        """
+        self._workspace = workspace
+        self._repo_adapter = RepoAdapter(workspace)
+
+        # Update checkpoint manager to use workspace paths
+        if workspace:
+            self._checkpoint_manager = CheckpointManager(
+                checkpoint_dir=workspace.state_path / "checkpoints"
+            )
 
     @property
     def state(self) -> ProjectState:
@@ -315,6 +350,14 @@ class WorkflowEngine:
                 project_state=self.state,
                 task=task,
             )
+            # Add workspace paths if available
+            if self._workspace:
+                context.workspace_root = str(self._workspace.workspace_root)
+                context.repo_path = str(self._workspace.repo_path)
+                context.artifacts_path = str(self._workspace.artifacts_path)
+                context.logs_path = str(self._workspace.logs_path)
+                context.tmp_path = str(self._workspace.tmp_path)
+
             for step in plan.steps:
                 output = agent.act(step, context)
                 context.previous_outputs.append(output)
