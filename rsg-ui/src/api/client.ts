@@ -8,6 +8,10 @@ import {
   SetStatus,
   GoStatus,
   ProjectStatus,
+  UserPublicProfile,
+  UpdateProviderSettingsPayload,
+  ProviderTestResult,
+  Checkpoint,
 } from './types';
 
 // Default configuration
@@ -141,4 +145,42 @@ export async function getGoStatus(id: string): Promise<GoStatus> {
 export async function healthCheck(): Promise<{ status: string }> {
   const response = await axiosInstance.get<{ status: string }>('/health');
   return response.data;
+}
+
+// User Profile & Provider Settings
+
+export async function getCurrentUser(): Promise<UserPublicProfile> {
+  const response = await axiosInstance.get<UserPublicProfile>('/users/me');
+  return response.data;
+}
+
+export async function updateProviderSettings(
+  payload: UpdateProviderSettingsPayload
+): Promise<UserPublicProfile> {
+  const response = await axiosInstance.post<UserPublicProfile>(
+    '/users/me/provider-settings',
+    payload
+  );
+  return response.data;
+}
+
+export async function testProviderConnection(
+  payload?: UpdateProviderSettingsPayload
+): Promise<ProviderTestResult> {
+  const response = await axiosInstance.post<ProviderTestResult>(
+    '/users/me/provider-test',
+    payload ?? {}
+  );
+  return response.data;
+}
+
+// Checkpoints
+export async function getProjectCheckpoints(projectId: string): Promise<Checkpoint[]> {
+  const response = await axiosInstance.get<Checkpoint[]>(`/projects/${projectId}/checkpoints`);
+  return response.data;
+}
+
+// Phase execution
+export async function runPhase(projectId: string, phase?: string): Promise<void> {
+  await axiosInstance.post(`/projects/${projectId}/advance`);
 }

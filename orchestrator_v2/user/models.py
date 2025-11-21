@@ -120,3 +120,47 @@ class ApiKeyUpdate(BaseModel):
     """Schema for updating BYOK API key."""
     api_key: str
     provider: str = "anthropic"
+
+
+class UserPublicProfile(BaseModel):
+    """
+    Sanitized user profile for API responses.
+
+    Never exposes the full API key - only indicates if set and shows last 4 chars.
+    """
+    user_id: str
+    email: str
+    name: Optional[str] = None
+    role: UserRole
+    llm_provider: str
+    llm_key_set: bool
+    llm_key_suffix: Optional[str] = None
+    default_model: str
+    model_entitlements: dict[str, list[str]] = Field(default_factory=dict)
+    token_usage: TokenUsage = Field(default_factory=TokenUsage)
+    projects: list[str] = Field(default_factory=list)
+
+
+def to_public_profile(user: UserProfile) -> UserPublicProfile:
+    """
+    Convert a UserProfile to a sanitized UserPublicProfile.
+
+    This ensures API keys are never returned in full.
+    """
+    suffix = None
+    if user.llm_api_key and len(user.llm_api_key) >= 4:
+        suffix = user.llm_api_key[-4:]
+
+    return UserPublicProfile(
+        user_id=user.user_id,
+        email=user.email,
+        name=user.name,
+        role=user.role,
+        llm_provider=user.llm_provider,
+        llm_key_set=bool(user.llm_api_key),
+        llm_key_suffix=suffix,
+        default_model=user.default_model,
+        model_entitlements=user.model_entitlements,
+        token_usage=user.token_usage,
+        projects=user.projects,
+    )

@@ -74,6 +74,25 @@ class GovernanceResultDTO(BaseModel):
 
 
 # -----------------------------------------------------------------------------
+# User Provider Settings DTOs
+# -----------------------------------------------------------------------------
+
+class UpdateProviderSettingsDTO(BaseModel):
+    """Request to update LLM provider settings."""
+    llm_provider: str  # "anthropic" or "bedrock"
+    api_key: str | None = None
+    default_model: str | None = None
+
+
+class ProviderTestResultDTO(BaseModel):
+    """Result of a provider connectivity test."""
+    success: bool
+    provider: str
+    model: str | None = None
+    message: str
+
+
+# -----------------------------------------------------------------------------
 # Ready/Set/Go DTOs
 # -----------------------------------------------------------------------------
 

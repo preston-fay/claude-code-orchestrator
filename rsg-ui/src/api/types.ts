@@ -93,3 +93,47 @@ export interface ApiConfig {
   userId: string;
   userEmail: string;
 }
+
+// User Profile Types
+export interface UserTokenUsage {
+  total_input_tokens: number;
+  total_output_tokens: number;
+  total_requests: number;
+  last_reset: string;
+}
+
+export interface UserPublicProfile {
+  user_id: string;
+  email: string;
+  name?: string | null;
+  role: 'admin' | 'developer' | 'viewer';
+  llm_provider: string;
+  llm_key_set: boolean;
+  llm_key_suffix?: string | null;
+  default_model: string;
+  model_entitlements: Record<string, string[]>;
+  token_usage: UserTokenUsage;
+  projects: string[];
+}
+
+export interface UpdateProviderSettingsPayload {
+  llm_provider: string;
+  api_key?: string;
+  default_model?: string;
+}
+
+export interface ProviderTestResult {
+  success: boolean;
+  provider: string;
+  model?: string | null;
+  message: string;
+}
+
+export interface Checkpoint {
+  checkpoint_id: string;
+  phase: string;
+  status: string;
+  agent_id: string;
+  created_at: string;
+  artifacts?: string[];
+}

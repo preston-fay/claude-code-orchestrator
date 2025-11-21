@@ -19,10 +19,12 @@ from orchestrator_v2.api.dto import (
     GoStatusDTO,
     PhaseDTO,
     ProjectDTO,
+    ProviderTestResultDTO,
     ReadyStatusDTO,
     RsgOverviewDTO,
     SetStatusDTO,
     StatusDTO,
+    UpdateProviderSettingsDTO,
     go_status_to_dto,
     ready_status_to_dto,
     rsg_overview_to_dto,
@@ -51,9 +53,11 @@ from orchestrator_v2.auth.dependencies import (
 )
 from orchestrator_v2.user.models import (
     UserProfile,
+    UserPublicProfile,
     UserRole,
     ApiKeyUpdate,
     UserProfileUpdate,
+    to_public_profile,
 )
 
 
@@ -126,14 +130,105 @@ async def health_check():
 # User Management Endpoints
 # -----------------------------------------------------------------------------
 
-@app.get("/me")
+@app.get("/users/me", response_model=UserPublicProfile)
 async def get_current_user_profile(user: UserProfile = Depends(get_current_user)):
-    """Get current user's profile."""
-    # Don't expose the API key in the response
-    user_dict = user.model_dump()
-    if user_dict.get("llm_api_key"):
-        user_dict["llm_api_key"] = "***" + user_dict["llm_api_key"][-4:] if len(user_dict["llm_api_key"]) > 4 else "***"
-    return user_dict
+    """Get current user's profile with sanitized API key."""
+    return to_public_profile(user)
+
+
+# Keep /me as alias for backward compatibility
+@app.get("/me")
+async def get_me_legacy(user: UserProfile = Depends(get_current_user)):
+    """Get current user's profile (legacy endpoint)."""
+    return to_public_profile(user)
+
+
+@app.post("/users/me/provider-settings", response_model=UserPublicProfile)
+async def update_provider_settings(
+    payload: UpdateProviderSettingsDTO,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Update LLM provider settings for current user."""
+    # Validate provider
+    if payload.llm_provider not in ("anthropic", "bedrock"):
+        raise HTTPException(status_code=400, detail="Unsupported provider. Use 'anthropic' or 'bedrock'.")
+
+    user.llm_provider = payload.llm_provider
+
+    # Only store api_key if provider == anthropic
+    if payload.llm_provider == "anthropic" and payload.api_key:
+        user.llm_api_key = payload.api_key
+
+    if payload.default_model:
+        user.default_model = payload.default_model
+
+    user.updated_at = datetime.utcnow()
+
+    # Save user
+    user_repo = get_user_repository()
+    await user_repo.save(user)
+
+    return to_public_profile(user)
+
+
+@app.post("/users/me/provider-test", response_model=ProviderTestResultDTO)
+async def test_provider(
+    payload: UpdateProviderSettingsDTO | None = None,
+    user: UserProfile = Depends(get_current_user),
+):
+    """
+    Test if current (or proposed) provider settings work.
+
+    If payload provided, test against those values without persisting them.
+    """
+    from orchestrator_v2.llm import get_provider_registry
+    from orchestrator_v2.core.state_models import AgentContext, TaskDefinition, ProjectState
+
+    provider_name = payload.llm_provider if payload and payload.llm_provider else user.llm_provider
+    temp_api_key = payload.api_key if (payload and payload.api_key) else user.llm_api_key
+    model = payload.default_model if (payload and payload.default_model) else user.default_model
+
+    registry = get_provider_registry()
+
+    # Create a minimal context for testing
+    context = AgentContext(
+        project_state=ProjectState(
+            project_id="test",
+            run_id="test",
+            project_name="Test",
+        ),
+        task=TaskDefinition(
+            task_id="test",
+            description="Provider test",
+        ),
+        user_id=user.user_id,
+        llm_api_key=temp_api_key,
+        llm_provider=provider_name,
+        model=model,
+    )
+
+    test_prompt = "You are a health check. Reply with exactly: READY-SET-CODE-OK"
+
+    try:
+        result = await registry.generate(
+            prompt=test_prompt,
+            model=model,
+            context=context,
+        )
+        ok = "READY-SET-CODE-OK" in result.text
+        return ProviderTestResultDTO(
+            success=ok,
+            provider=provider_name,
+            model=model,
+            message="LLM provider responded successfully" if ok else "Provider responded but did not echo sentinel text",
+        )
+    except Exception as e:
+        return ProviderTestResultDTO(
+            success=False,
+            provider=provider_name,
+            model=model,
+            message=f"Error testing provider: {str(e)}",
+        )
 
 
 @app.get("/users")
