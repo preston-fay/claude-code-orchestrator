@@ -563,12 +563,10 @@
        COVER PAGE
        ========================================================================= -->
   <div class="cover-page">
-    <h1 class="cover-title">Claude Code Orchestrator</h1>
+    <h1 class="cover-title">Kearney AI Code Orchestrator</h1>
     <p class="cover-subtitle">A Meta-Framework for AI-Driven Software Delivery</p>
     <div class="cover-divider"></div>
-    <div class="cover-badge">Executive Overview</div>
     <p class="cover-meta">
-      <strong>Prepared by:</strong> Kearney<br>
       <strong>Version:</strong> 1.0<br>
       <strong>Date:</strong> November 2025
     </p>
@@ -884,8 +882,6 @@
       <li>Consequences and trade-offs</li>
     </ul>
 
-    <div class="page-break"></div>
-
     <!-- TECHNOLOGY STACK -->
     <h1>Technology Stack</h1>
 
@@ -1023,13 +1019,16 @@ cd site && npm install && cd ..</code></pre>
 
     <h3>Step 1: Bootstrap a New Project</h3>
     <pre><code># Analytics project
-orchestrator bootstrap analytics --output ~/projects/customer-analytics
+orchestrator bootstrap analytics \
+  --output ~/projects/customer-analytics
 
 # ML project
-orchestrator bootstrap ml-model --output ~/projects/demand-forecast
+orchestrator bootstrap ml-model \
+  --output ~/projects/demand-forecast
 
 # Web application
-orchestrator bootstrap webapp --output ~/projects/admin-dashboard</code></pre>
+orchestrator bootstrap webapp \
+  --output ~/projects/admin-dashboard</code></pre>
 
     <h3>Step 2: Configure Project Intake</h3>
     <p>Edit the generated <code>intake.yaml</code>:</p>
@@ -1037,13 +1036,23 @@ orchestrator bootstrap webapp --output ~/projects/admin-dashboard</code></pre>
   name: "Customer Analytics"
   type: "analytics"
 goals:
-  primary: ["Segment customers by value", "Identify churn risk"]
+  primary:
+    - "Segment customers by value"
+    - "Identify churn risk"
 data:
-  sources: ["Production database", "CRM API"]
-  privacy_requirements: ["Anonymize PII"]
+  sources:
+    - "Production database"
+    - "CRM API"
 orchestration:
-  enabled_agents: ["architect", "data", "developer", "qa", "documentarian"]
-  consensus_required: ["planning", "data_engineering"]</code></pre>
+  enabled_agents:
+    - "architect"
+    - "data"
+    - "developer"
+    - "qa"
+    - "documentarian"
+  consensus_required:
+    - "planning"
+    - "data_engineering"</code></pre>
 
     <h3>Step 3: Start the Workflow</h3>
     <pre><code># Start orchestration
