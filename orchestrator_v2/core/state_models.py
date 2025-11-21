@@ -368,6 +368,11 @@ class AgentContext(BaseModel):
     artifacts_path: str | None = None
     logs_path: str | None = None
     tmp_path: str | None = None
+    # User context for BYOK and entitlements
+    user_id: str | None = None
+    llm_api_key: str | None = None
+    llm_provider: str = "anthropic"
+    model_preferences: list[str] = Field(default_factory=list)
 
 
 # -----------------------------------------------------------------------------

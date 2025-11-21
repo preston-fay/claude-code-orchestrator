@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, Field
 
 from orchestrator_v2.api.dto import (
@@ -42,6 +42,18 @@ from orchestrator_v2.persistence.fs_repository import (
     FileSystemCheckpointRepository,
     FileSystemGovernanceLogRepository,
     FileSystemProjectRepository,
+)
+from orchestrator_v2.auth.dependencies import (
+    get_current_user,
+    get_user_repository,
+    require_role,
+    require_admin,
+)
+from orchestrator_v2.user.models import (
+    UserProfile,
+    UserRole,
+    ApiKeyUpdate,
+    UserProfileUpdate,
 )
 
 
@@ -109,6 +121,135 @@ async def health_check():
         timestamp=datetime.utcnow().isoformat(),
     )
 
+
+# -----------------------------------------------------------------------------
+# User Management Endpoints
+# -----------------------------------------------------------------------------
+
+@app.get("/me")
+async def get_current_user_profile(user: UserProfile = Depends(get_current_user)):
+    """Get current user's profile."""
+    # Don't expose the API key in the response
+    user_dict = user.model_dump()
+    if user_dict.get("llm_api_key"):
+        user_dict["llm_api_key"] = "***" + user_dict["llm_api_key"][-4:] if len(user_dict["llm_api_key"]) > 4 else "***"
+    return user_dict
+
+
+@app.get("/users")
+async def list_users(user: UserProfile = Depends(require_role(UserRole.ADMIN))):
+    """List all users (admin only)."""
+    user_repo = get_user_repository()
+    users = await user_repo.list_users()
+
+    # Mask API keys
+    result = []
+    for u in users:
+        u_dict = u.model_dump()
+        if u_dict.get("llm_api_key"):
+            u_dict["llm_api_key"] = "***" + u_dict["llm_api_key"][-4:] if len(u_dict["llm_api_key"]) > 4 else "***"
+        result.append(u_dict)
+
+    return result
+
+
+@app.get("/users/{user_id}")
+async def get_user(
+    user_id: str,
+    current_user: UserProfile = Depends(get_current_user)
+):
+    """Get user profile by ID."""
+    # Users can only view their own profile unless admin
+    if current_user.user_id != user_id and current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Not authorized to view other users")
+
+    user_repo = get_user_repository()
+    user = await user_repo.get_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail=f"User not found: {user_id}")
+
+    # Mask API key
+    user_dict = user.model_dump()
+    if user_dict.get("llm_api_key"):
+        user_dict["llm_api_key"] = "***" + user_dict["llm_api_key"][-4:] if len(user_dict["llm_api_key"]) > 4 else "***"
+
+    return user_dict
+
+
+@app.post("/users/{user_id}/key")
+async def set_user_api_key(
+    user_id: str,
+    key_update: ApiKeyUpdate,
+    current_user: UserProfile = Depends(get_current_user)
+):
+    """Set BYOK LLM API key for a user."""
+    # Users can only set their own key unless admin
+    if current_user.user_id != user_id and current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Not authorized to modify other users")
+
+    user_repo = get_user_repository()
+    user = await user_repo.get_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail=f"User not found: {user_id}")
+
+    user.llm_api_key = key_update.api_key
+    user.llm_provider = key_update.provider
+    await user_repo.save(user)
+
+    return {"status": "updated", "user_id": user_id, "provider": key_update.provider}
+
+
+@app.post("/users/{user_id}/entitlements")
+async def set_user_entitlements(
+    user_id: str,
+    entitlements: dict[str, list[str]],
+    current_user: UserProfile = Depends(require_role(UserRole.ADMIN))
+):
+    """Set model entitlements for a user (admin only)."""
+    user_repo = get_user_repository()
+    user = await user_repo.get_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail=f"User not found: {user_id}")
+
+    user.model_entitlements = entitlements
+    await user_repo.save(user)
+
+    return {"status": "updated", "user_id": user_id, "entitlements": entitlements}
+
+
+@app.post("/users/{user_id}/projects/{project_id}/grant")
+async def grant_project_access(
+    user_id: str,
+    project_id: str,
+    current_user: UserProfile = Depends(require_role(UserRole.ADMIN))
+):
+    """Grant user access to a project (admin only)."""
+    user_repo = get_user_repository()
+    success = await user_repo.grant_project_access(user_id, project_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"User not found: {user_id}")
+
+    return {"status": "granted", "user_id": user_id, "project_id": project_id}
+
+
+@app.delete("/users/{user_id}/projects/{project_id}/revoke")
+async def revoke_project_access(
+    user_id: str,
+    project_id: str,
+    current_user: UserProfile = Depends(require_role(UserRole.ADMIN))
+):
+    """Revoke user access to a project (admin only)."""
+    user_repo = get_user_repository()
+    success = await user_repo.revoke_project_access(user_id, project_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"User not found: {user_id}")
+
+    return {"status": "revoked", "user_id": user_id, "project_id": project_id}
+
+
+# -----------------------------------------------------------------------------
+# Project Endpoints
+# -----------------------------------------------------------------------------
 
 @app.get("/projects", response_model=list[ProjectDTO])
 async def list_projects():
