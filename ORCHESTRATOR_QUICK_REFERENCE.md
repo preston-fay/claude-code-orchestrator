@@ -413,3 +413,50 @@ python scripts/print_ecr_uri.py
 
 This URI will be used in App Runner deployment.
 
+---
+
+## Quick Validation After Deployment
+
+### 1. Get the App Runner URL
+
+From AWS Console → App Runner → Your Service → Default domain
+
+### 2. Run the Verification Script
+
+```bash
+python scripts/verify_deployment.py --url https://xxxxx.awsapprunner.com
+```
+
+Expected output:
+```
+Orchestrator Deployment Verification
+=====================================
+Target: https://xxxxx.awsapprunner.com
+
+[1/4] Health Check................ OK
+[2/4] Create Project.............. OK
+      Project ID: abc12345...
+[3/4] Start Ready Stage........... OK
+[4/4] Get RSG Overview............ OK
+
+=====================================
+VERIFICATION PASSED
+All endpoints responding correctly
+=====================================
+```
+
+### 3. Or Use Raw curl
+
+```bash
+# Health check
+curl https://<url>/health
+
+# List projects
+curl https://<url>/projects
+
+# RSG overview
+curl https://<url>/rsg/<project_id>/overview
+```
+
+See [DEPLOYMENT_VALIDATION.md](DEPLOYMENT_VALIDATION.md) for complete validation guide.
+
