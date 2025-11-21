@@ -58,6 +58,31 @@ class GateStatus(str, Enum):
     BLOCKED = "blocked"
 
 
+class RsgStage(str, Enum):
+    """Ready/Set/Go macro stage.
+
+    Maps to engine phases:
+    - READY = PLANNING + ARCHITECTURE
+    - SET = DATA + early DEVELOPMENT
+    - GO = full DEVELOPMENT + QA + DOCUMENTATION
+    """
+    NOT_STARTED = "not_started"
+    READY = "ready"
+    SET = "set"
+    GO = "go"
+    COMPLETE = "complete"
+
+
+class RsgProgress(BaseModel):
+    """Progress tracking for Ready/Set/Go stages."""
+    ready_completed: bool = False
+    set_completed: bool = False
+    go_completed: bool = False
+    last_ready_phase: PhaseType | None = None
+    last_set_phase: PhaseType | None = None
+    last_go_phase: PhaseType | None = None
+
+
 # -----------------------------------------------------------------------------
 # Token and Cost Tracking (ADR-005)
 # -----------------------------------------------------------------------------
@@ -243,6 +268,10 @@ class ProjectState(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    # Ready/Set/Go stage tracking
+    rsg_stage: RsgStage = RsgStage.NOT_STARTED
+    rsg_progress: RsgProgress = Field(default_factory=RsgProgress)
 
 
 # -----------------------------------------------------------------------------

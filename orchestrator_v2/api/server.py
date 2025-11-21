@@ -16,10 +16,20 @@ from pydantic import BaseModel, Field
 from orchestrator_v2.api.dto import (
     CheckpointDTO,
     GovernanceResultDTO,
+    GoStatusDTO,
     PhaseDTO,
     ProjectDTO,
+    ReadyStatusDTO,
+    RsgOverviewDTO,
+    SetStatusDTO,
     StatusDTO,
+    go_status_to_dto,
+    ready_status_to_dto,
+    rsg_overview_to_dto,
+    set_status_to_dto,
 )
+from orchestrator_v2.rsg.service import RsgService, RsgServiceError
+from orchestrator_v2.workspace.manager import WorkspaceManager
 from orchestrator_v2.core.engine import WorkflowEngine
 from orchestrator_v2.core.state_models import (
     CheckpointType,
@@ -62,6 +72,15 @@ project_repo = FileSystemProjectRepository()
 checkpoint_repo = FileSystemCheckpointRepository()
 artifact_repo = FileSystemArtifactRepository()
 governance_repo = FileSystemGovernanceLogRepository()
+
+# Initialize workspace manager and RSG service
+workspace_manager = WorkspaceManager()
+rsg_service = RsgService(
+    project_repository=project_repo,
+    checkpoint_repository=checkpoint_repo,
+    artifact_repository=artifact_repo,
+    workspace_manager=workspace_manager,
+)
 
 # Track active engines per project
 _engines: dict[str, WorkflowEngine] = {}
@@ -374,6 +393,103 @@ async def delete_project(project_id: str):
         del _engines[project_id]
 
     return {"status": "deleted", "project_id": project_id}
+
+
+# -----------------------------------------------------------------------------
+# Ready/Set/Go Endpoints
+# -----------------------------------------------------------------------------
+
+@app.post("/rsg/{project_id}/ready/start", response_model=ReadyStatusDTO)
+async def start_ready(project_id: str):
+    """Start the Ready stage (PLANNING + ARCHITECTURE)."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    try:
+        status = await rsg_service.start_ready(project_id)
+        return ready_status_to_dto(status)
+    except RsgServiceError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/rsg/{project_id}/ready/status", response_model=ReadyStatusDTO)
+async def get_ready_status(project_id: str):
+    """Get Ready stage status."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    status = await rsg_service.get_ready_status(project_id)
+    return ready_status_to_dto(status)
+
+
+@app.post("/rsg/{project_id}/set/start", response_model=SetStatusDTO)
+async def start_set(project_id: str):
+    """Start the Set stage (DATA + early DEVELOPMENT)."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    try:
+        status = await rsg_service.start_set(project_id)
+        return set_status_to_dto(status)
+    except RsgServiceError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/rsg/{project_id}/set/status", response_model=SetStatusDTO)
+async def get_set_status(project_id: str):
+    """Get Set stage status."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    status = await rsg_service.get_set_status(project_id)
+    return set_status_to_dto(status)
+
+
+@app.post("/rsg/{project_id}/go/start", response_model=GoStatusDTO)
+async def start_go(project_id: str):
+    """Start the Go stage (DEVELOPMENT + QA + DOCUMENTATION)."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    try:
+        status = await rsg_service.start_go(project_id)
+        return go_status_to_dto(status)
+    except RsgServiceError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/rsg/{project_id}/go/status", response_model=GoStatusDTO)
+async def get_go_status(project_id: str):
+    """Get Go stage status."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    status = await rsg_service.get_go_status(project_id)
+    return go_status_to_dto(status)
+
+
+@app.get("/rsg/{project_id}/overview", response_model=RsgOverviewDTO)
+async def get_rsg_overview(project_id: str):
+    """Get combined RSG overview."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    overview = await rsg_service.get_overview(project_id)
+    return rsg_overview_to_dto(overview)
 
 
 # Factory function for creating configured app
