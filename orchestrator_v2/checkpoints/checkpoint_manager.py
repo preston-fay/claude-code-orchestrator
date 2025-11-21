@@ -15,7 +15,7 @@ from orchestrator_v2.checkpoints.models import (
     CheckpointDiff,
     CheckpointSummary,
 )
-from orchestrator_v2.core.state_models import (
+from orchestrator_v2.engine.state_models import (
     AgentState,
     ArtifactInfo,
     CheckpointType,

@@ -34,8 +34,8 @@ from orchestrator_v2.api.dto import (
 from orchestrator_v2.telemetry.events_repository import get_event_repository
 from orchestrator_v2.rsg.service import RsgService, RsgServiceError
 from orchestrator_v2.workspace.manager import WorkspaceManager
-from orchestrator_v2.core.engine import WorkflowEngine
-from orchestrator_v2.core.state_models import (
+from orchestrator_v2.engine.engine import WorkflowEngine
+from orchestrator_v2.engine.state_models import (
     CheckpointType,
     GateStatus,
     PhaseType,
@@ -184,7 +184,7 @@ async def test_provider(
     If payload provided, test against those values without persisting them.
     """
     from orchestrator_v2.llm import get_provider_registry
-    from orchestrator_v2.core.state_models import AgentContext, TaskDefinition, ProjectState
+    from orchestrator_v2.engine.state_models import AgentContext, TaskDefinition, ProjectState
 
     provider_name = payload.llm_provider if payload and payload.llm_provider else user.llm_provider
     temp_api_key = payload.api_key if (payload and payload.api_key) else user.llm_api_key

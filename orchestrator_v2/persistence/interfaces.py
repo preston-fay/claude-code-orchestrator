@@ -9,7 +9,7 @@ See ADR-002 for persistence architecture.
 
 from typing import Protocol
 
-from orchestrator_v2.core.state_models import (
+from orchestrator_v2.engine.state_models import (
     ArtifactInfo,
     CheckpointState,
     GovernanceResults,

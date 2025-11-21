@@ -9,8 +9,8 @@ See ADR-004 for governance architecture.
 from datetime import datetime
 from typing import Any
 
-from orchestrator_v2.core.exceptions import GovernanceError
-from orchestrator_v2.core.state_models import (
+from orchestrator_v2.engine.exceptions import GovernanceError
+from orchestrator_v2.engine.state_models import (
     GateResult,
     GateStatus,
     GovernanceResults,

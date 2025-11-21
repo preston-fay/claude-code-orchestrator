@@ -6,7 +6,7 @@ Defines status and overview models for the RSG abstraction layer.
 
 from pydantic import BaseModel, Field
 
-from orchestrator_v2.core.state_models import PhaseType, RsgStage
+from orchestrator_v2.engine.state_models import PhaseType, RsgStage
 
 
 class ReadyStatus(BaseModel):

@@ -9,8 +9,8 @@ RSG Phase Mapping:
 - GO = full DEVELOPMENT + QA + DOCUMENTATION
 """
 
-from orchestrator_v2.core.engine import WorkflowEngine
-from orchestrator_v2.core.state_models import PhaseType, RsgStage
+from orchestrator_v2.engine.engine import WorkflowEngine
+from orchestrator_v2.engine.state_models import PhaseType, RsgStage
 from orchestrator_v2.persistence.interfaces import (
     ArtifactRepository,
     CheckpointRepository,

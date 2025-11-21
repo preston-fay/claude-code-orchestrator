@@ -8,7 +8,7 @@ See docs/LLM_PROVIDERS.md for usage details.
 
 import logging
 
-from orchestrator_v2.core.state_models import AgentContext
+from orchestrator_v2.engine.state_models import AgentContext
 from orchestrator_v2.llm.providers.base import (
     LlmAuthenticationError,
     LlmProviderError,

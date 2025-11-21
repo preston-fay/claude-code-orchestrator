@@ -11,7 +11,7 @@ import json
 import logging
 import os
 
-from orchestrator_v2.core.state_models import AgentContext
+from orchestrator_v2.engine.state_models import AgentContext
 from orchestrator_v2.llm.providers.base import (
     LlmAuthenticationError,
     LlmModelNotFoundError,

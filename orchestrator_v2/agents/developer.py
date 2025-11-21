@@ -12,7 +12,7 @@ See ADR-001 for agent responsibilities.
 """
 
 from orchestrator_v2.agents.base_agent import BaseAgent, BaseAgentConfig
-from orchestrator_v2.core.state_models import (
+from orchestrator_v2.engine.state_models import (
     AgentOutput,
     AgentPlan,
     AgentPlanStep,

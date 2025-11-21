@@ -10,9 +10,9 @@ See docs/orchestrator-v2-architecture.md for full architecture documentation.
 __version__ = "2.0.0-alpha"
 __author__ = "Kearney Platform Team"
 
-from orchestrator_v2.core.engine import WorkflowEngine
-from orchestrator_v2.core.phase_manager import PhaseManager
-from orchestrator_v2.core.state_models import (
+from orchestrator_v2.engine.engine import WorkflowEngine
+from orchestrator_v2.engine.phase_manager import PhaseManager
+from orchestrator_v2.engine.state_models import (
     ProjectState,
     PhaseState,
     AgentState,

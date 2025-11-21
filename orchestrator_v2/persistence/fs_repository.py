@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from orchestrator_v2.core.state_models import (
+from orchestrator_v2.engine.state_models import (
     ArtifactInfo,
     CheckpointState,
     GovernanceResults,

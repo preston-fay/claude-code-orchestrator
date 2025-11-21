@@ -26,7 +26,7 @@ async def start_command(intake_path: Path, **kwargs: Any) -> dict[str, Any]:
     TODO: Create project
     TODO: Print status
     """
-    from orchestrator_v2.core.engine import WorkflowEngine
+    from orchestrator_v2.engine.engine import WorkflowEngine
 
     engine = WorkflowEngine()
     state = await engine.start_project(intake_path)

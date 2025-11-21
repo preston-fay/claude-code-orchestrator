@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
-    from orchestrator_v2.core.state_models import AgentContext
+    from orchestrator_v2.engine.state_models import AgentContext
 
 
 class LlmResult(BaseModel):
