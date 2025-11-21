@@ -311,3 +311,56 @@ Phase N+1 starts
 - **3 Validation Statuses** (PASS, PARTIAL, FAIL)
 - **~2,500 Lines** Core orchestrator code
 
+---
+
+## Running the Orchestrator API in Docker
+
+### Build locally
+```bash
+docker build -t orchestrator-api:local .
+```
+
+### Run locally
+```bash
+docker run -p 8000:8000 orchestrator-api:local
+```
+
+### Test health endpoint
+```bash
+curl http://localhost:8000/health
+```
+
+### Production Entrypoint
+
+The production ASGI entrypoint is:
+```
+orchestrator_v2.main:app
+```
+
+**Usage with uvicorn:**
+```bash
+uvicorn orchestrator_v2.main:app --host 0.0.0.0 --port 8000
+```
+
+**Usage with gunicorn (multiple workers):**
+```bash
+gunicorn orchestrator_v2.main:app -w 4 -k uvicorn.workers.UvicornWorker
+```
+
+### Docker Image Details
+
+| Property | Value |
+|----------|-------|
+| Base Image | python:3.11-slim |
+| Exposed Port | 8000 |
+| Entrypoint | uvicorn orchestrator_v2.main:app |
+| Build Type | Multi-stage (builder + runtime) |
+
+### CI/CD
+
+GitHub Actions workflow: `.github/workflows/build-and-publish-image.yml`
+
+- Triggers on push to main branch
+- Builds and tests container image
+- Prepared for AWS ECR integration (future)
+
