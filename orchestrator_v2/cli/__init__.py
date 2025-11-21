@@ -11,6 +11,7 @@ from orchestrator_v2.cli.commands import (
     approve_command,
     rollback_command,
 )
+from orchestrator_v2.cli.rsg_cli import app as rsg_app
 
 __all__ = [
     "start_command",
@@ -18,4 +19,5 @@ __all__ = [
     "status_command",
     "approve_command",
     "rollback_command",
+    "rsg_app",
 ]
