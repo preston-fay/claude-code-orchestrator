@@ -10,6 +10,13 @@ from typing import Any, Protocol
 
 from pydantic import BaseModel, Field
 
+from orchestrator_v2.core.state_models import (
+    ArtifactInfo,
+    PhaseType,
+    ProjectState,
+    TokenUsage,
+)
+
 
 class MethodologyStep(BaseModel):
     """A step in a skill's methodology."""
@@ -49,6 +56,16 @@ class SkillMetadata(BaseModel):
     validation_criteria: str = ""
 
 
+class SkillResult(BaseModel):
+    """Result from skill execution."""
+    skill_id: str
+    success: bool = True
+    messages: list[str] = Field(default_factory=list)
+    artifacts: list[ArtifactInfo] = Field(default_factory=list)
+    token_usage: TokenUsage = Field(default_factory=TokenUsage)
+    error_message: str | None = None
+
+
 class SkillInput(BaseModel):
     """Input to a skill execution."""
     skill_id: str
@@ -74,72 +91,68 @@ class BaseSkill(Protocol):
     See ADR-003 for skill architecture.
     """
 
+    id: str
+    name: str
+    triggers: list[str]
     metadata: SkillMetadata
 
-    def detect_trigger(self, task_description: str) -> float:
-        """Calculate relevance score for a task description.
+    def matches(self, text: str) -> bool:
+        """Check if skill matches given text based on triggers.
 
         Args:
-            task_description: Description of the task.
+            text: Text to check against triggers.
 
         Returns:
-            Relevance score from 0.0 to 1.0.
-
-        TODO: Implement trigger detection
-        TODO: Match against trigger keywords
-        TODO: Consider semantic similarity
-        """
-        ...
-
-    def validate_inputs(self, inputs: SkillInput) -> list[str]:
-        """Validate inputs against the skill's input schema.
-
-        Args:
-            inputs: Skill inputs to validate.
-
-        Returns:
-            List of validation errors (empty if valid).
-
-        TODO: Implement schema validation
-        TODO: Check required fields
-        TODO: Validate field types
+            True if any trigger matches.
         """
         ...
 
     async def execute(
         self,
-        inputs: SkillInput,
-        tools: dict[str, Any],
-    ) -> SkillOutput:
+        agent_id: str,
+        phase: PhaseType,
+        project_state: ProjectState,
+        context: dict[str, Any],
+    ) -> SkillResult:
         """Execute the skill methodology.
 
-        This runs through the skill's methodology steps
-        using the provided tools.
-
         Args:
-            inputs: Validated skill inputs.
-            tools: Available tools for execution.
+            agent_id: ID of the executing agent.
+            phase: Current workflow phase.
+            project_state: Current project state.
+            context: Additional context for execution.
 
         Returns:
-            Skill execution output.
-
-        TODO: Implement methodology execution
-        TODO: Track step progress
-        TODO: Collect artifacts
+            Skill execution result with artifacts and messages.
         """
         ...
 
-    def validate_outputs(self, outputs: SkillOutput) -> list[str]:
-        """Validate outputs against the skill's output schema.
 
-        Args:
-            outputs: Skill outputs to validate.
+class BaseSkillImpl:
+    """Base implementation for skills."""
 
-        Returns:
-            List of validation errors (empty if valid).
+    def __init__(self, metadata: SkillMetadata):
+        self.metadata = metadata
+        self.id = metadata.id
+        self.name = metadata.id
+        self.triggers = metadata.triggers
 
-        TODO: Implement output validation
-        TODO: Check required fields
-        TODO: Validate result structure
-        """
-        ...
+    def matches(self, text: str) -> bool:
+        """Check if skill matches given text."""
+        text_lower = text.lower()
+        return any(trigger.lower() in text_lower for trigger in self.triggers)
+
+    async def execute(
+        self,
+        agent_id: str,
+        phase: PhaseType,
+        project_state: ProjectState,
+        context: dict[str, Any],
+    ) -> SkillResult:
+        """Execute the skill - to be overridden by subclasses."""
+        return SkillResult(
+            skill_id=self.id,
+            success=True,
+            messages=[f"Skill {self.id} executed by {agent_id}"],
+            token_usage=TokenUsage(input_tokens=50, output_tokens=25, total_tokens=75),
+        )
