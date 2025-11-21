@@ -92,6 +92,18 @@ class ProviderTestResultDTO(BaseModel):
     message: str
 
 
+class EventDTO(BaseModel):
+    """Event data transfer object."""
+    id: str
+    event_type: str
+    timestamp: datetime
+    project_id: str
+    phase: str | None = None
+    agent_id: str | None = None
+    message: str
+    data: dict[str, Any] = Field(default_factory=dict)
+
+
 # -----------------------------------------------------------------------------
 # Ready/Set/Go DTOs
 # -----------------------------------------------------------------------------

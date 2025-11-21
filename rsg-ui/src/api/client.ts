@@ -12,6 +12,7 @@ import {
   UpdateProviderSettingsPayload,
   ProviderTestResult,
   Checkpoint,
+  OrchestratorEvent,
 } from './types';
 
 // Default configuration
@@ -183,4 +184,22 @@ export async function getProjectCheckpoints(projectId: string): Promise<Checkpoi
 // Phase execution
 export async function runPhase(projectId: string, phase?: string): Promise<void> {
   await axiosInstance.post(`/projects/${projectId}/advance`);
+}
+
+// Events
+export async function getProjectEvents(
+  projectId: string,
+  limit: number = 50,
+  eventType?: string
+): Promise<OrchestratorEvent[]> {
+  const params = new URLSearchParams();
+  params.append('limit', limit.toString());
+  if (eventType) {
+    params.append('event_type', eventType);
+  }
+
+  const response = await axiosInstance.get<OrchestratorEvent[]>(
+    `/projects/${projectId}/events?${params.toString()}`
+  );
+  return response.data;
 }

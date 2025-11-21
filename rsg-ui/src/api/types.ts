@@ -137,3 +137,15 @@ export interface Checkpoint {
   created_at: string;
   artifacts?: string[];
 }
+
+// Event types
+export interface OrchestratorEvent {
+  id: string;
+  event_type: string;
+  timestamp: string;
+  project_id: string;
+  phase: string | null;
+  agent_id: string | null;
+  message: string;
+  data: Record<string, unknown>;
+}

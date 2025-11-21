@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from orchestrator_v2.api.dto import (
     CheckpointDTO,
+    EventDTO,
     GovernanceResultDTO,
     GoStatusDTO,
     PhaseDTO,
@@ -30,6 +31,7 @@ from orchestrator_v2.api.dto import (
     rsg_overview_to_dto,
     set_status_to_dto,
 )
+from orchestrator_v2.telemetry.events_repository import get_event_repository
 from orchestrator_v2.rsg.service import RsgService, RsgServiceError
 from orchestrator_v2.workspace.manager import WorkspaceManager
 from orchestrator_v2.core.engine import WorkflowEngine
@@ -549,6 +551,57 @@ async def get_checkpoints(project_id: str):
             continue
 
     return checkpoints
+
+
+@app.get("/projects/{project_id}/events", response_model=list[EventDTO])
+async def get_project_events(
+    project_id: str,
+    limit: int = 50,
+    event_type: str | None = None,
+):
+    """Get events for a project.
+
+    Args:
+        project_id: Project identifier.
+        limit: Maximum number of events to return (default 50).
+        event_type: Optional filter by event type.
+    """
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    event_repo = get_event_repository()
+
+    # Get events from repository
+    from orchestrator_v2.telemetry.events import EventType as ET
+
+    type_filter = None
+    if event_type:
+        try:
+            type_filter = ET(event_type)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid event type: {event_type}")
+
+    events = event_repo.get_events(
+        project_id=project_id,
+        event_type=type_filter,
+        limit=limit,
+    )
+
+    return [
+        EventDTO(
+            id=e.id,
+            event_type=e.event_type.value,
+            timestamp=e.timestamp,
+            project_id=e.project_id,
+            phase=e.phase,
+            agent_id=e.agent_id,
+            message=e.message,
+            data=e.data,
+        )
+        for e in events
+    ]
 
 
 @app.post("/projects/{project_id}/rollback/{checkpoint_id}")

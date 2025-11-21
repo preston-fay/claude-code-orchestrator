@@ -7,13 +7,65 @@ See ADR-005 for observability.
 """
 
 from datetime import datetime
+from enum import Enum
 from typing import Any
+import uuid
 
 from pydantic import BaseModel, Field
 
 
+class EventType(str, Enum):
+    """Types of orchestrator events."""
+    # Phase lifecycle
+    PHASE_STARTED = "phase_started"
+    PHASE_COMPLETED = "phase_completed"
+    PHASE_FAILED = "phase_failed"
+
+    # Agent lifecycle
+    AGENT_STARTED = "agent_started"
+    AGENT_COMPLETED = "agent_completed"
+    AGENT_FAILED = "agent_failed"
+
+    # Checkpoint events
+    CHECKPOINT_CREATED = "checkpoint_created"
+    CHECKPOINT_PASSED = "checkpoint_passed"
+    CHECKPOINT_FAILED = "checkpoint_failed"
+
+    # Governance events
+    GOVERNANCE_CHECK_STARTED = "governance_check_started"
+    GOVERNANCE_CHECK_PASSED = "governance_check_passed"
+    GOVERNANCE_CHECK_FAILED = "governance_check_failed"
+
+    # LLM events
+    LLM_REQUEST_STARTED = "llm_request_started"
+    LLM_REQUEST_COMPLETED = "llm_request_completed"
+    LLM_REQUEST_FAILED = "llm_request_failed"
+
+    # Workflow events
+    WORKFLOW_STARTED = "workflow_started"
+    WORKFLOW_COMPLETED = "workflow_completed"
+    WORKFLOW_FAILED = "workflow_failed"
+
+    # Generic info
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+
+
+class OrchestratorEvent(BaseModel):
+    """Event emitted during orchestrator execution."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    event_type: EventType
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    project_id: str
+    phase: str | None = None
+    agent_id: str | None = None
+    message: str
+    data: dict[str, Any] = Field(default_factory=dict)
+
+
 class Event(BaseModel):
-    """Structured event."""
+    """Structured event (legacy compatibility)."""
     event_type: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     workflow_id: str

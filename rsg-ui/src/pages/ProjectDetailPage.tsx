@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
 import { Project, Checkpoint } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
+import RunActivityPanel from '../components/RunActivityPanel';
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -205,6 +206,16 @@ const ProjectDetailPage: React.FC = () => {
           })}
         </div>
       </section>
+
+      {/* Run Activity */}
+      {projectId && (
+        <section className="section">
+          <RunActivityPanel
+            projectId={projectId}
+            isRunning={runningPhase !== null}
+          />
+        </section>
+      )}
 
       {/* Checkpoints */}
       <section className="section">

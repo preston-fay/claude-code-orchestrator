@@ -816,6 +816,188 @@ p {
   color: var(--emphasis);
 }
 
+/* Activity Panel */
+.activity-panel {
+  background-color: var(--color-grey-800);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  font-family: var(--font-family-mono);
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--color-charcoal);
+  border-bottom: 1px solid var(--color-grey-700);
+}
+
+.activity-header h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.activity-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-size: 0.75rem;
+}
+
+.activity-running {
+  color: var(--color-violet-2);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.activity-count {
+  color: var(--color-silver);
+}
+
+.activity-body {
+  height: 300px;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.activity-loading,
+.activity-error,
+.activity-empty {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-silver);
+}
+
+.activity-error {
+  color: var(--error);
+}
+
+/* Event List */
+.event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.event-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  color: var(--color-silver);
+  border-radius: var(--radius-sm);
+}
+
+.event-item:hover {
+  background-color: var(--color-grey-700);
+}
+
+.event-icon {
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
+
+.event-time {
+  flex-shrink: 0;
+  color: var(--color-grey-500);
+  width: 60px;
+}
+
+.event-message {
+  flex: 1;
+  word-break: break-word;
+}
+
+.event-phase-tag,
+.event-agent-tag {
+  flex-shrink: 0;
+  padding: 0 var(--spacing-xs);
+  background-color: var(--color-grey-700);
+  border-radius: var(--radius-sm);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+}
+
+.event-agent-tag {
+  background-color: var(--color-grey-600);
+}
+
+/* Event Type Colors */
+.event-workflow .event-icon,
+.event-workflow .event-message {
+  color: var(--color-violet-2);
+}
+
+.event-phase .event-icon,
+.event-phase .event-message {
+  color: var(--color-violet-3);
+}
+
+.event-agent .event-icon {
+  color: var(--color-grey-300);
+}
+
+.event-governance .event-icon {
+  color: var(--color-violet-4);
+}
+
+.event-checkpoint .event-icon {
+  color: var(--color-silver);
+}
+
+.event-llm .event-icon {
+  color: var(--color-grey-500);
+}
+
+.event-success .event-icon,
+.event-success .event-message {
+  color: var(--color-violet-2);
+}
+
+.event-error .event-icon,
+.event-error .event-message {
+  color: var(--error);
+}
+
+.event-warning .event-icon,
+.event-warning .event-message {
+  color: var(--warning);
+}
+
+.event-info .event-icon {
+  color: var(--color-silver);
+}
+
+/* Scroll to bottom button */
+.scroll-to-bottom {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-sm);
+  background-color: var(--color-grey-700);
+  color: var(--color-silver);
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: var(--font-family-mono);
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.scroll-to-bottom:hover {
+  background-color: var(--color-grey-600);
+  color: var(--color-white);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .main-content {

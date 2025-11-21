@@ -24,6 +24,8 @@ from orchestrator_v2.telemetry.budget_enforcer import (
     BudgetEnforcer,
     BudgetExceededError as BudgetError,
 )
+from orchestrator_v2.telemetry.events import EventType
+from orchestrator_v2.telemetry.events_repository import emit_event
 from orchestrator_v2.user.models import UserProfile
 from orchestrator_v2.user.repository import FileSystemUserRepository
 
@@ -109,6 +111,35 @@ class WorkflowEngine:
         # Initialize repo adapter if workspace provided
         if workspace:
             self._repo_adapter = RepoAdapter(workspace)
+
+    def _emit_event(
+        self,
+        event_type: EventType,
+        message: str,
+        phase: str | None = None,
+        agent_id: str | None = None,
+        **data,
+    ) -> None:
+        """Emit an event for the current project.
+
+        Args:
+            event_type: Type of event.
+            message: Human-readable message.
+            phase: Current phase (optional).
+            agent_id: Agent identifier (optional).
+            **data: Additional event data.
+        """
+        if self._state is None:
+            return
+
+        emit_event(
+            event_type=event_type,
+            project_id=self._state.project_id,
+            message=message,
+            phase=phase,
+            agent_id=agent_id,
+            **data,
+        )
 
     @property
     def workspace(self) -> WorkspaceConfig | None:
@@ -201,6 +232,14 @@ class WorkflowEngine:
         # Create initial PRE checkpoint
         await self.save_checkpoint(PhaseType.PLANNING, CheckpointType.PRE)
 
+        # Emit workflow started event
+        self._emit_event(
+            EventType.WORKFLOW_STARTED,
+            f"Project '{project_name}' workflow started",
+            phase=PhaseType.PLANNING.value,
+            client=client,
+        )
+
         return self._state
 
     async def run_phase(
@@ -249,6 +288,14 @@ class WorkflowEngine:
         # Store phase state
         self.state.phase_states[phase.value] = phase_state
 
+        # Emit phase started event
+        self._emit_event(
+            EventType.PHASE_STARTED,
+            f"Phase {phase.value} started with {len(phase_def.responsible_agents)} agents",
+            phase=phase.value,
+            agents=phase_def.responsible_agents,
+        )
+
         try:
             # Execute agents in parallel
             logger.info(
@@ -294,6 +341,15 @@ class WorkflowEngine:
                 ]
                 phase_state.status = "failed"
                 phase_state.error_message = f"Blocked by gates: {blocked_gates}"
+
+                # Emit phase failed event
+                self._emit_event(
+                    EventType.PHASE_FAILED,
+                    f"Phase {phase.value} blocked by governance gates",
+                    phase=phase.value,
+                    blocked_gates=blocked_gates,
+                )
+
                 raise GovernanceError(
                     f"Phase {phase.value} blocked by governance gates: {blocked_gates}"
                 )
@@ -318,9 +374,25 @@ class WorkflowEngine:
 
             self.state.updated_at = datetime.utcnow()
 
+            # Emit phase completed event
+            self._emit_event(
+                EventType.PHASE_COMPLETED,
+                f"Phase {phase.value} completed successfully",
+                phase=phase.value,
+            )
+
         except Exception as e:
             phase_state.status = "failed"
             phase_state.error_message = str(e)
+
+            # Emit phase failed event (if not already emitted)
+            if not isinstance(e, GovernanceError):
+                self._emit_event(
+                    EventType.PHASE_FAILED,
+                    f"Phase {phase.value} failed: {str(e)}",
+                    phase=phase.value,
+                    error=str(e),
+                )
             raise
 
         return phase_state
@@ -360,6 +432,14 @@ class WorkflowEngine:
         # Get agent instance (or use stub)
         agent = self._agents.get(agent_id)
 
+        # Emit agent started event
+        self._emit_event(
+            EventType.AGENT_STARTED,
+            f"Agent {agent_id} started",
+            phase=phase.value,
+            agent_id=agent_id,
+        )
+
         if agent is None:
             # Stub execution for agents not yet implemented
             agent_state.status = AgentStatus.COMPLETE
@@ -371,6 +451,16 @@ class WorkflowEngine:
                 output_tokens=200,
                 total_tokens=700,
             )
+
+            # Emit agent completed event
+            self._emit_event(
+                EventType.AGENT_COMPLETED,
+                f"Agent {agent_id} completed (stub)",
+                phase=phase.value,
+                agent_id=agent_id,
+                tokens_used=700,
+            )
+
             return agent_state
 
         try:
@@ -427,10 +517,28 @@ class WorkflowEngine:
             agent_state.summary = summary.summary
             agent_state.token_usage = summary.total_token_usage
 
+            # Emit agent completed event
+            self._emit_event(
+                EventType.AGENT_COMPLETED,
+                f"Agent {agent_id} completed successfully",
+                phase=phase.value,
+                agent_id=agent_id,
+                tokens_used=summary.total_token_usage.total_tokens if summary.total_token_usage else 0,
+            )
+
         except Exception as e:
             agent_state.status = AgentStatus.FAILED
             agent_state.error_message = str(e)
             agent_state.completed_at = datetime.utcnow()
+
+            # Emit agent failed event
+            self._emit_event(
+                EventType.AGENT_FAILED,
+                f"Agent {agent_id} failed: {str(e)}",
+                phase=phase.value,
+                agent_id=agent_id,
+                error=str(e),
+            )
 
         return agent_state
 
@@ -634,11 +742,32 @@ class WorkflowEngine:
         Returns:
             GovernanceResults with gate outcomes.
         """
+        # Emit governance check started event
+        self._emit_event(
+            EventType.GOVERNANCE_CHECK_STARTED,
+            f"Evaluating governance gates for phase {phase.value}",
+            phase=phase.value,
+        )
+
         results = await self._governance_engine.evaluate_phase_transition(
             from_phase=phase,
             to_phase=self._get_next_phase_type(phase),
             state=self.state,
         )
+
+        # Emit governance check result event
+        if results.passed:
+            self._emit_event(
+                EventType.GOVERNANCE_CHECK_PASSED,
+                f"Governance gates passed for phase {phase.value}",
+                phase=phase.value,
+            )
+        else:
+            self._emit_event(
+                EventType.GOVERNANCE_CHECK_FAILED,
+                f"Governance gates failed for phase {phase.value}",
+                phase=phase.value,
+            )
 
         # Log governance evaluation
         self._governance_engine.audit_log(
@@ -693,4 +822,12 @@ class WorkflowEngine:
         self.state.current_phase = PhaseType.COMPLETE
         self.state.updated_at = datetime.utcnow()
         await self.save_checkpoint(PhaseType.COMPLETE, CheckpointType.POST)
+
+        # Emit workflow completed event
+        self._emit_event(
+            EventType.WORKFLOW_COMPLETED,
+            f"Project '{self.state.project_name}' workflow completed",
+            completed_phases=[p.value for p in self.state.completed_phases],
+        )
+
         return self.state
