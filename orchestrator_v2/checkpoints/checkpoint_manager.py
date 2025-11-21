@@ -95,8 +95,16 @@ class CheckpointManager:
             governance_results=governance,
         )
 
-        # TODO: Write checkpoint to storage
-        # TODO: Update index
+        # Update index
+        self._index[checkpoint_id] = CheckpointSummary(
+            id=checkpoint_id,
+            phase=phase,
+            checkpoint_type=checkpoint_type,
+            version=1,
+            created_at=checkpoint.created_at,
+            passed=governance.passed,
+            artifact_count=len(artifacts),
+        )
 
         return checkpoint
 

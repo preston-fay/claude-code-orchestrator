@@ -1,8 +1,8 @@
 """
 Phase Manager for Orchestrator v2.
 
-The PhaseManager handles the execution of individual workflow phases,
-coordinating agents, skills, tools, and artifact collection.
+The PhaseManager handles workflow phase definitions, transitions,
+and phase execution coordination.
 
 See ADR-002 for phase model details.
 """
@@ -18,343 +18,246 @@ from orchestrator_v2.core.state_models import (
     AgentStatus,
     AgentSummary,
     ArtifactInfo,
+    PhaseDefinition,
     PhaseState,
     PhaseType,
     ProjectState,
     TaskDefinition,
     TokenUsage,
+    WorkflowDefinition,
 )
 
 
+def get_default_workflow() -> WorkflowDefinition:
+    """Get the default analytics workflow definition.
+
+    This defines the canonical phase sequence for analytics projects.
+    See ADR-002 for phase graph details.
+
+    Returns:
+        Default WorkflowDefinition.
+    """
+    return WorkflowDefinition(
+        name="analytics_workflow",
+        description="Standard analytics project workflow",
+        project_type="analytics",
+        phases=[
+            PhaseDefinition(
+                name=PhaseType.PLANNING,
+                order=0,
+                responsible_agents=["architect"],
+                inputs=["intake.yaml"],
+                outputs=["project_plan.md", "requirements.md"],
+                quality_gates=["plan_completeness"],
+                description="Analyze requirements and plan project approach",
+            ),
+            PhaseDefinition(
+                name=PhaseType.ARCHITECTURE,
+                order=1,
+                responsible_agents=["architect"],
+                inputs=["project_plan.md", "requirements.md"],
+                outputs=["architecture.md", "data_model.md"],
+                quality_gates=["architecture_review"],
+                description="Design system architecture and data models",
+            ),
+            PhaseDefinition(
+                name=PhaseType.DATA,
+                order=2,
+                responsible_agents=["data"],
+                inputs=["architecture.md", "data_model.md"],
+                outputs=["data/processed/", "models/", "metrics.json"],
+                quality_gates=["data_quality", "model_performance"],
+                description="Build data pipelines and train models",
+                optional=True,
+            ),
+            PhaseDefinition(
+                name=PhaseType.DEVELOPMENT,
+                order=3,
+                responsible_agents=["developer"],
+                inputs=["architecture.md"],
+                outputs=["src/", "tests/"],
+                quality_gates=["test_coverage", "code_quality"],
+                description="Implement features and write tests",
+            ),
+            PhaseDefinition(
+                name=PhaseType.QA,
+                order=4,
+                responsible_agents=["qa"],
+                inputs=["src/", "tests/"],
+                outputs=["test_report.md", "coverage.json"],
+                quality_gates=["test_pass_rate", "security_scan"],
+                description="Execute tests and validate quality",
+            ),
+            PhaseDefinition(
+                name=PhaseType.DOCUMENTATION,
+                order=5,
+                responsible_agents=["documentarian"],
+                inputs=["src/", "architecture.md"],
+                outputs=["docs/", "README.md"],
+                quality_gates=["doc_completeness"],
+                description="Create technical and user documentation",
+            ),
+        ],
+    )
+
+
 class PhaseManager:
-    """Manages execution of workflow phases.
+    """Manages workflow phases and transitions.
 
-    The PhaseManager coordinates:
-    - Agent selection for phases
-    - Task creation and assignment
-    - Parallel agent execution
-    - Artifact collection and validation
-    - Phase state management
+    The PhaseManager:
+    - Holds the workflow definition
+    - Determines current and next phases
+    - Validates phase transitions
+    - Provides phase metadata
 
-    See ADR-001 for agent coordination.
-    See ADR-002 for phase execution model.
+    See ADR-002 for phase model details.
     """
 
-    def __init__(self):
-        """Initialize the PhaseManager."""
-        # TODO: Initialize agent registry
-        # TODO: Initialize skill registry
-        # TODO: Initialize tool registry
-        pass
-
-    async def execute_phase(
-        self,
-        phase: PhaseType,
-        state: ProjectState,
-    ) -> PhaseState:
-        """Execute a complete workflow phase.
-
-        This orchestrates:
-        1. Agent selection based on phase requirements
-        2. Task creation for each agent
-        3. Agent initialization with context
-        4. Plan generation by agents
-        5. Plan execution with tool/skill usage
-        6. Output collection and artifact validation
-
-        See ADR-001 for agent lifecycle.
+    def __init__(self, workflow_definition: WorkflowDefinition | None = None):
+        """Initialize the PhaseManager.
 
         Args:
-            phase: Phase to execute.
-            state: Current project state.
+            workflow_definition: Workflow definition to use.
+                Defaults to the standard analytics workflow.
+        """
+        self._workflow_definition = workflow_definition or get_default_workflow()
+
+    @property
+    def workflow_definition(self) -> WorkflowDefinition:
+        """Get the workflow definition."""
+        return self._workflow_definition
+
+    def get_current_phase(self, project_state: ProjectState) -> PhaseDefinition:
+        """Get the current phase definition.
+
+        Args:
+            project_state: Current project state.
 
         Returns:
-            Completed PhaseState with artifacts.
+            Current phase definition.
 
         Raises:
-            PhaseError: If phase execution fails.
-
-        TODO: Implement full phase orchestration
-        TODO: Select agents for phase
-        TODO: Create and assign tasks
-        TODO: Execute agents (possibly in parallel)
-        TODO: Collect and validate outputs
+            ValueError: If current phase not found in workflow.
         """
-        # Get agents for this phase
-        agent_ids = self._get_agents_for_phase(phase)
-
-        # Create phase state
-        phase_state = PhaseState(
-            phase=phase,
-            status="running",
-            agent_ids=agent_ids,
+        phase_def = self._workflow_definition.get_phase_by_type(
+            project_state.current_phase
         )
+        if phase_def is None:
+            raise ValueError(
+                f"Phase {project_state.current_phase} not found in workflow"
+            )
+        return phase_def
 
-        # Execute each agent
-        for agent_id in agent_ids:
-            try:
-                # Create task for agent
-                task = self._create_task_for_agent(agent_id, phase, state)
-
-                # Execute agent
-                summary = await self._execute_agent(
-                    agent_id=agent_id,
-                    task=task,
-                    state=state,
-                )
-
-                # Collect artifacts
-                for artifact in summary.artifacts:
-                    phase_state.artifacts[artifact.path] = artifact
-
-            except AgentError as e:
-                phase_state.status = "failed"
-                phase_state.error_message = str(e)
-                raise PhaseError(f"Phase {phase.value} failed: {e}")
-
-        phase_state.status = "complete"
-        return phase_state
-
-    def _get_agents_for_phase(self, phase: PhaseType) -> list[str]:
-        """Get agent IDs for a phase.
-
-        See ADR-001 for agent-phase mapping.
+    def get_next_phase(self, project_state: ProjectState) -> PhaseDefinition | None:
+        """Get the next phase definition.
 
         Args:
-            phase: Phase to get agents for.
+            project_state: Current project state.
+
+        Returns:
+            Next phase definition, or None if workflow is complete.
+        """
+        current_order = self._workflow_definition.get_phase_order(
+            project_state.current_phase
+        )
+
+        for phase in sorted(self._workflow_definition.phases, key=lambda p: p.order):
+            if phase.order > current_order:
+                return phase
+
+        return None
+
+    def get_phase_definition(self, phase_type: PhaseType) -> PhaseDefinition:
+        """Get phase definition by type.
+
+        Args:
+            phase_type: Phase type to look up.
+
+        Returns:
+            Phase definition.
+
+        Raises:
+            ValueError: If phase not found.
+        """
+        phase_def = self._workflow_definition.get_phase_by_type(phase_type)
+        if phase_def is None:
+            raise ValueError(f"Phase {phase_type} not found in workflow")
+        return phase_def
+
+    def is_last_phase(self, phase: PhaseDefinition) -> bool:
+        """Check if this is the last phase in the workflow.
+
+        Args:
+            phase: Phase to check.
+
+        Returns:
+            True if this is the last phase.
+        """
+        max_order = max(p.order for p in self._workflow_definition.phases)
+        return phase.order >= max_order
+
+    def get_agents_for_phase(self, phase_type: PhaseType) -> list[str]:
+        """Get responsible agent IDs for a phase.
+
+        Args:
+            phase_type: Phase to get agents for.
 
         Returns:
             List of agent IDs.
-
-        TODO: Implement agent selection
-        TODO: Consider subagent delegation
         """
-        # Default agent mapping
-        phase_agents: dict[PhaseType, list[str]] = {
-            PhaseType.PLANNING: ["architect"],
-            PhaseType.ARCHITECTURE: ["architect"],
-            PhaseType.DATA: ["data"],
-            PhaseType.CONSENSUS: ["consensus"],
-            PhaseType.DEVELOPMENT: ["developer"],
-            PhaseType.QA: ["qa"],
-            PhaseType.DOCUMENTATION: ["documentarian"],
-            PhaseType.REVIEW: ["reviewer"],
-            PhaseType.HYGIENE: ["steward"],
+        phase_def = self.get_phase_definition(phase_type)
+        return phase_def.responsible_agents
+
+    def validate_phase_transition(
+        self,
+        from_phase: PhaseType,
+        to_phase: PhaseType,
+        completed_phases: list[PhaseType],
+    ) -> tuple[bool, str]:
+        """Validate a phase transition.
+
+        Args:
+            from_phase: Current phase.
+            to_phase: Target phase.
+            completed_phases: List of completed phases.
+
+        Returns:
+            Tuple of (is_valid, error_message).
+        """
+        from_order = self._workflow_definition.get_phase_order(from_phase)
+        to_order = self._workflow_definition.get_phase_order(to_phase)
+
+        if to_order <= from_order:
+            return False, f"Cannot transition backward from {from_phase} to {to_phase}"
+
+        if from_phase not in completed_phases:
+            return False, f"Phase {from_phase} must be completed before transitioning"
+
+        return True, ""
+
+    def list_phases(self) -> list[PhaseDefinition]:
+        """List all phases in order.
+
+        Returns:
+            Ordered list of phase definitions.
+        """
+        return sorted(self._workflow_definition.phases, key=lambda p: p.order)
+
+    def get_phase_progress(self, project_state: ProjectState) -> dict[str, Any]:
+        """Get workflow progress information.
+
+        Args:
+            project_state: Current project state.
+
+        Returns:
+            Progress dict with completion stats.
+        """
+        total_phases = len(self._workflow_definition.phases)
+        completed = len(project_state.completed_phases)
+
+        return {
+            "total_phases": total_phases,
+            "completed_phases": completed,
+            "current_phase": project_state.current_phase.value,
+            "progress_percent": (completed / total_phases * 100) if total_phases > 0 else 0,
         }
-        return phase_agents.get(phase, [])
-
-    def _create_task_for_agent(
-        self,
-        agent_id: str,
-        phase: PhaseType,
-        state: ProjectState,
-    ) -> TaskDefinition:
-        """Create a task definition for an agent.
-
-        Args:
-            agent_id: Agent to create task for.
-            phase: Current phase.
-            state: Project state for context.
-
-        Returns:
-            TaskDefinition for the agent.
-
-        TODO: Implement task creation
-        TODO: Include relevant context
-        TODO: Set appropriate budget
-        """
-        return TaskDefinition(
-            task_id=f"{phase.value}_{agent_id}",
-            description=f"Execute {phase.value} phase tasks",
-            requirements=state.metadata.get("requirements", []),
-        )
-
-    async def _execute_agent(
-        self,
-        agent_id: str,
-        task: TaskDefinition,
-        state: ProjectState,
-    ) -> AgentSummary:
-        """Execute an agent through its full lifecycle.
-
-        Agent lifecycle (ADR-001):
-        1. Initialize with context
-        2. Plan task approach
-        3. Act on each plan step
-        4. Summarize results
-        5. Complete and cleanup
-
-        Args:
-            agent_id: Agent to execute.
-            task: Task to execute.
-            state: Project state.
-
-        Returns:
-            AgentSummary with results.
-
-        Raises:
-            AgentError: If agent execution fails.
-
-        TODO: Implement full agent lifecycle
-        TODO: Track token usage
-        TODO: Validate outputs
-        """
-        # Update agent state
-        agent_state = state.agent_states.get(
-            agent_id,
-            AgentState(agent_id=agent_id)
-        )
-        agent_state.status = AgentStatus.INITIALIZING
-
-        # Create context
-        context = AgentContext(
-            project_state=state,
-            task=task,
-        )
-
-        # TODO: Initialize agent
-        agent_state.status = AgentStatus.PLANNING
-
-        # TODO: Agent creates plan
-        plan = AgentPlan(
-            plan_id=f"{task.task_id}_plan",
-            agent_id=agent_id,
-            task_id=task.task_id,
-        )
-
-        # TODO: Execute plan steps
-        agent_state.status = AgentStatus.ACTING
-        outputs: list[AgentOutput] = []
-
-        for step in plan.steps:
-            output = await self._execute_step(step, context)
-            outputs.append(output)
-
-        # TODO: Summarize
-        agent_state.status = AgentStatus.SUMMARIZING
-        summary = AgentSummary(
-            agent_id=agent_id,
-            task_id=task.task_id,
-            success=True,
-        )
-
-        # Complete
-        agent_state.status = AgentStatus.COMPLETE
-        state.agent_states[agent_id] = agent_state
-
-        return summary
-
-    async def _execute_step(
-        self,
-        step: Any,  # AgentPlanStep
-        context: AgentContext,
-    ) -> AgentOutput:
-        """Execute a single plan step.
-
-        This handles:
-        - Tool invocation
-        - Skill execution
-        - Output validation
-
-        Args:
-            step: Plan step to execute.
-            context: Agent context.
-
-        Returns:
-            AgentOutput from step execution.
-
-        TODO: Implement step execution
-        TODO: Invoke tools/skills
-        TODO: Track token usage
-        TODO: Validate output
-        """
-        return AgentOutput(
-            step_id=step.step_id if hasattr(step, 'step_id') else "unknown",
-            success=True,
-        )
-
-    async def validate_phase_artifacts(
-        self,
-        phase: PhaseType,
-        artifacts: dict[str, ArtifactInfo],
-    ) -> bool:
-        """Validate artifacts for a phase.
-
-        This checks:
-        - Required artifacts present
-        - Artifact schemas valid
-        - Files exist and match hashes
-
-        See ADR-002 for artifact validation.
-
-        Args:
-            phase: Phase to validate.
-            artifacts: Collected artifacts.
-
-        Returns:
-            True if valid.
-
-        TODO: Implement artifact validation
-        TODO: Check required artifacts per phase
-        TODO: Validate file hashes
-        """
-        return True
-
-    async def delegate_to_subagent(
-        self,
-        parent_agent_id: str,
-        subagent_id: str,
-        task: TaskDefinition,
-        state: ProjectState,
-    ) -> AgentSummary:
-        """Delegate a task to a subagent.
-
-        Parent agents can delegate to specialized subagents.
-        See ADR-001 for subagent delegation.
-
-        Args:
-            parent_agent_id: Parent agent delegating.
-            subagent_id: Subagent to delegate to.
-            task: Task to delegate.
-            state: Project state.
-
-        Returns:
-            Subagent execution summary.
-
-        TODO: Implement subagent delegation
-        TODO: Set up subagent context
-        TODO: Track delegation in parent
-        """
-        return await self._execute_agent(subagent_id, task, state)
-
-    async def execute_parallel(
-        self,
-        agent_ids: list[str],
-        tasks: list[TaskDefinition],
-        state: ProjectState,
-    ) -> list[AgentSummary]:
-        """Execute multiple agents in parallel.
-
-        Used when agents can work concurrently
-        (e.g., frontend + backend development).
-
-        See ADR-001 for parallel execution.
-
-        Args:
-            agent_ids: Agents to execute.
-            tasks: Tasks for each agent.
-            state: Project state.
-
-        Returns:
-            List of agent summaries.
-
-        TODO: Implement parallel execution
-        TODO: Use asyncio.gather
-        TODO: Aggregate results
-        """
-        # TODO: Implement with asyncio.gather
-        results = []
-        for agent_id, task in zip(agent_ids, tasks):
-            summary = await self._execute_agent(agent_id, task, state)
-            results.append(summary)
-        return results

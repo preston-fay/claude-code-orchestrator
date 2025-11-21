@@ -333,3 +333,47 @@ class AgentContext(BaseModel):
     available_skills: list[str] = Field(default_factory=list)
     governance_constraints: dict[str, Any] = Field(default_factory=dict)
     budget_remaining: TokenUsage = Field(default_factory=TokenUsage)
+
+
+# -----------------------------------------------------------------------------
+# Phase Definition (ADR-002)
+# -----------------------------------------------------------------------------
+
+class PhaseDefinition(BaseModel):
+    """Definition of a workflow phase.
+
+    See ADR-002 for phase model details.
+    """
+    name: PhaseType
+    order: int
+    responsible_agents: list[str] = Field(default_factory=list)
+    inputs: list[str] = Field(default_factory=list)
+    outputs: list[str] = Field(default_factory=list)
+    quality_gates: list[str] = Field(default_factory=list)
+    description: str = ""
+    optional: bool = False
+
+
+class WorkflowDefinition(BaseModel):
+    """Definition of a complete workflow.
+
+    See ADR-002 for workflow structure.
+    """
+    name: str
+    description: str = ""
+    phases: list[PhaseDefinition] = Field(default_factory=list)
+    project_type: str = "analytics"
+
+    def get_phase_by_type(self, phase_type: PhaseType) -> PhaseDefinition | None:
+        """Get phase definition by type."""
+        for phase in self.phases:
+            if phase.name == phase_type:
+                return phase
+        return None
+
+    def get_phase_order(self, phase_type: PhaseType) -> int:
+        """Get the order index of a phase."""
+        for phase in self.phases:
+            if phase.name == phase_type:
+                return phase.order
+        return -1
