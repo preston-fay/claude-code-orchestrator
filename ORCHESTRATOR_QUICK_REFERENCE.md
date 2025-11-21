@@ -362,5 +362,54 @@ GitHub Actions workflow: `.github/workflows/build-and-publish-image.yml`
 
 - Triggers on push to main branch
 - Builds and tests container image
-- Prepared for AWS ECR integration (future)
+- Pushes to Amazon ECR with `latest` and `GITHUB_SHA` tags
+
+---
+
+## Setting Up Amazon ECR and GitHub Secrets
+
+### 1. Create the ECR repository (one-time)
+
+Make sure you have AWS CLI configured locally with the right account.
+
+```bash
+aws ecr create-repository \
+  --repository-name orchestrator-api \
+  --image-scanning-configuration scanOnPush=true \
+  --region us-east-1
+```
+
+### 2. Add GitHub Secrets
+
+In your GitHub repo settings, add:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+These should correspond to an IAM user/role with permissions to:
+- `ecr:GetAuthorizationToken`
+- `ecr:BatchCheckLayerAvailability`
+- `ecr:PutImage`
+- `ecr:InitiateLayerUpload`
+- `ecr:UploadLayerPart`
+- `ecr:CompleteLayerUpload`
+- `ecr:DescribeRepositories`
+- `sts:GetCallerIdentity`
+
+### 3. Run the workflow
+
+Push to main or trigger the workflow manually from GitHub Actions.
+
+On success, you should see the image in ECR with tags:
+- `latest`
+- `<GITHUB_SHA>`
+
+### 4. Get ECR Image URI
+
+```bash
+python scripts/print_ecr_uri.py
+# Example output:
+# 123456789012.dkr.ecr.us-east-1.amazonaws.com/orchestrator-api
+```
+
+This URI will be used in App Runner deployment.
 

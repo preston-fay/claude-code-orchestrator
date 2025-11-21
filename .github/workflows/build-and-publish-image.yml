@@ -9,6 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_REGION: us-east-1
+      ECR_REPOSITORY: orchestrator-api
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -33,19 +37,27 @@ jobs:
       run: |
         docker build -t orchestrator-api:latest .
 
-    # Future AWS Steps (commented)
-    # - name: Configure AWS credentials
-    #   uses: aws-actions/configure-aws-credentials@v4
-    #   with:
-    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     aws-region: us-east-1
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
-    # - name: Login to Amazon ECR
-    #   uses: aws-actions/amazon-ecr-login@v2
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
 
-    # - name: Build, Tag, and Push to ECR
-    #   run: |
-    #     IMAGE_TAG=${GITHUB_SHA}
-    #     docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-    #     docker push $ECR_REPOSITORY:$IMAGE_TAG
+    - name: Build, tag, and push image to ECR
+      env:
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+        ECR_URI=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}
+
+        echo "ECR URI: $ECR_URI"
+
+        docker tag orchestrator-api:latest $ECR_URI:latest
+        docker tag orchestrator-api:latest $ECR_URI:${IMAGE_TAG}
+
+        docker push $ECR_URI:latest
+        docker push $ECR_URI:${IMAGE_TAG}
