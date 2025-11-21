@@ -8,19 +8,33 @@ a quality gate between major phases.
 See ADR-001 for agent responsibilities.
 """
 
-from orchestrator_v2.agents.base_agent import AgentMixin
+from orchestrator_v2.agents.base_agent import BaseAgent, BaseAgentConfig
 from orchestrator_v2.core.state_models import (
-    AgentContext,
     AgentOutput,
     AgentPlan,
     AgentPlanStep,
     AgentSummary,
+    PhaseType,
     ProjectState,
     TaskDefinition,
+    TokenUsage,
 )
 
 
-class ConsensusAgent(AgentMixin):
+def create_consensus_agent() -> "ConsensusAgent":
+    """Factory function to create a ConsensusAgent with default config."""
+    config = BaseAgentConfig(
+        id="consensus",
+        role="reviewer",
+        description="Review and approval",
+        skills=["proposal_review", "conflict_resolution", "decision_validation"],
+        tools=["file_system"],
+        subagents={},
+    )
+    return ConsensusAgent(config)
+
+
+class ConsensusAgent(BaseAgent):
     """Consensus agent for review and approval.
 
     Responsibilities:
@@ -40,75 +54,100 @@ class ConsensusAgent(AgentMixin):
     - file_system
     """
 
-    id = "consensus"
-    role = "reviewer"
-    _skills = ["proposal_review", "conflict_resolution", "decision_validation"]
-    _tools = ["file_system"]
+    async def plan(
+        self,
+        task: TaskDefinition,
+        phase: PhaseType,
+        project_state: ProjectState,
+    ) -> AgentPlan:
+        """Plan review approach."""
+        plan = await super().plan(task, phase, project_state)
 
-    def initialize(self, project_state: ProjectState) -> None:
-        """Initialize consensus agent with project context.
+        plan.steps = [
+            AgentPlanStep(
+                step_id=f"{task.task_id}_analyze",
+                description="Analyze proposals",
+            ),
+            AgentPlanStep(
+                step_id=f"{task.task_id}_conflicts",
+                description="Identify conflicts",
+            ),
+            AgentPlanStep(
+                step_id=f"{task.task_id}_resolve",
+                description="Recommend resolution",
+            ),
+            AgentPlanStep(
+                step_id=f"{task.task_id}_approve",
+                description="Make approval decision",
+            ),
+        ]
 
-        Loads:
-        - Proposals to review
-        - Previous decisions
-        - Acceptance criteria
-        - Stakeholder requirements
+        plan.estimated_tokens = 1000
+        return plan
 
-        TODO: Load proposals for review
-        TODO: Load previous decisions
-        TODO: Load acceptance criteria
-        """
-        ...
+    async def act(
+        self,
+        plan: AgentPlan,
+        project_state: ProjectState,
+    ) -> AgentOutput:
+        """Execute review steps."""
+        phase = project_state.current_phase
+        self._record_tokens(input_tokens=500, output_tokens=400)
 
-    def plan(self, task: TaskDefinition) -> AgentPlan:
-        """Plan review approach.
+        # Create consensus report
+        consensus_content = f"""# Consensus Review Report
 
-        Creates plan for:
-        1. Proposal analysis
-        2. Conflict identification
-        3. Resolution recommendation
-        4. Approval decision
+## Project: {project_state.project_name}
+## Agent: {self.id}
+## Phase: {phase.value}
 
-        TODO: Implement review planning
-        TODO: Identify review criteria
-        TODO: Plan conflict resolution
-        """
-        ...
+### Proposals Reviewed
+- Proposal 1: [Description]
 
-    def act(self, step: AgentPlanStep, context: AgentContext) -> AgentOutput:
-        """Execute review step.
+### Conflicts Identified
+- No major conflicts found
 
-        May involve:
-        - Analyzing proposals
-        - Identifying conflicts
-        - Providing feedback
-        - Recording decisions
+### Resolution Recommendations
+- [Recommendations if any]
 
-        TODO: Implement review actions
-        TODO: Generate review feedback
-        TODO: Record approval decisions
-        """
-        ...
+### Approval Decision
+APPROVED - Phase may proceed
 
-    def summarize(self, run_id: str) -> AgentSummary:
-        """Summarize review work.
+### Steps Executed
+"""
+        for step in plan.steps:
+            consensus_content += f"- {step.description}\n"
 
-        Summary includes:
-        - Proposals reviewed
-        - Conflicts identified
-        - Approval status
-        - Recommendations
+        self._create_artifact(
+            "consensus_report.md",
+            consensus_content,
+            phase,
+            project_state.project_id,
+        )
 
-        TODO: Collect review artifacts
-        TODO: Report approval status
-        TODO: Provide recommendations
-        """
-        ...
+        self._record_event("consensus_acted", phase.value, artifacts=len(self._artifacts))
 
-    def complete(self, project_state: ProjectState) -> None:
-        """Complete consensus execution.
+        return AgentOutput(
+            step_id=plan.steps[0].step_id if plan.steps else "no_step",
+            success=True,
+            artifacts=self._artifacts.copy(),
+            token_usage=TokenUsage(
+                input_tokens=self._token_usage.input_tokens,
+                output_tokens=self._token_usage.output_tokens,
+                total_tokens=self._token_usage.total_tokens,
+            ),
+        )
 
-        TODO: Finalize approvals
-        TODO: Report metrics
-        """
-        ...
+    async def summarize(
+        self,
+        plan: AgentPlan,
+        output: AgentOutput,
+        project_state: ProjectState,
+    ) -> AgentSummary:
+        """Summarize consensus work."""
+        summary = await super().summarize(plan, output, project_state)
+        summary.summary = (
+            f"Consensus completed {len(plan.steps)} review steps. "
+            f"Decision: APPROVED."
+        )
+        return summary

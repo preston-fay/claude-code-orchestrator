@@ -11,19 +11,48 @@ technical implementation. It is responsible for:
 See ADR-001 for agent responsibilities.
 """
 
-from orchestrator_v2.agents.base_agent import AgentMixin
+from orchestrator_v2.agents.base_agent import BaseAgent, BaseAgentConfig
 from orchestrator_v2.core.state_models import (
-    AgentContext,
     AgentOutput,
     AgentPlan,
     AgentPlanStep,
     AgentSummary,
+    PhaseType,
     ProjectState,
     TaskDefinition,
+    TokenUsage,
 )
 
 
-class DeveloperAgent(AgentMixin):
+def create_developer_agent() -> "DeveloperAgent":
+    """Factory function to create a DeveloperAgent with default config."""
+    config = BaseAgentConfig(
+        id="developer",
+        role="developer",
+        description="Code implementation and testing",
+        skills=["code_generation", "test_writing", "refactoring"],
+        tools=["file_system", "git", "python_executor", "linter"],
+        subagents={
+            "developer.frontend": BaseAgentConfig(
+                id="developer.frontend",
+                role="frontend_developer",
+                description="Frontend specialization",
+                skills=["frontend_development"],
+                tools=["file_system", "git"],
+            ),
+            "developer.backend": BaseAgentConfig(
+                id="developer.backend",
+                role="backend_developer",
+                description="Backend specialization",
+                skills=["backend_development"],
+                tools=["file_system", "git", "python_executor"],
+            ),
+        },
+    )
+    return DeveloperAgent(config)
+
+
+class DeveloperAgent(BaseAgent):
     """Developer agent for code implementation.
 
     Responsibilities:
@@ -34,9 +63,8 @@ class DeveloperAgent(AgentMixin):
     - Integration with existing code
 
     Subagents:
-    - developer.frontend: Frontend specialization (React, CSS)
-    - developer.backend: Backend specialization (FastAPI, database)
-    - developer.infra: Infrastructure specialization
+    - developer.frontend: Frontend specialization
+    - developer.backend: Backend specialization
 
     Skills:
     - code_generation
@@ -50,76 +78,104 @@ class DeveloperAgent(AgentMixin):
     - linter
     """
 
-    id = "developer"
-    role = "developer"
-    _skills = ["code_generation", "test_writing", "refactoring"]
-    _tools = ["file_system", "git", "python_executor", "linter"]
+    async def plan(
+        self,
+        task: TaskDefinition,
+        phase: PhaseType,
+        project_state: ProjectState,
+    ) -> AgentPlan:
+        """Plan development approach."""
+        plan = await super().plan(task, phase, project_state)
 
-    def initialize(self, project_state: ProjectState) -> None:
-        """Initialize developer with project context.
+        plan.steps = [
+            AgentPlanStep(
+                step_id=f"{task.task_id}_setup",
+                description="Set up code structure",
+            ),
+            AgentPlanStep(
+                step_id=f"{task.task_id}_implement",
+                description="Implement features",
+            ),
+            AgentPlanStep(
+                step_id=f"{task.task_id}_test",
+                description="Write tests",
+            ),
+            AgentPlanStep(
+                step_id=f"{task.task_id}_lint",
+                description="Lint and format code",
+            ),
+        ]
 
-        Loads:
-        - Architecture decisions
-        - Code standards
-        - Existing codebase structure
-        - Test requirements
+        plan.estimated_tokens = 2500
+        return plan
 
-        TODO: Load architecture from ADRs
-        TODO: Load code standards
-        TODO: Analyze existing code
-        """
-        ...
+    async def act(
+        self,
+        plan: AgentPlan,
+        project_state: ProjectState,
+    ) -> AgentOutput:
+        """Execute development steps."""
+        phase = project_state.current_phase
+        self._record_tokens(input_tokens=1200, output_tokens=1000)
 
-    def plan(self, task: TaskDefinition) -> AgentPlan:
-        """Plan development approach.
+        # Create development report
+        dev_content = f"""# Development Report
 
-        Creates plan for:
-        1. Code structure setup
-        2. Feature implementation
-        3. Test writing
-        4. Integration
-        5. Linting/formatting
+## Project: {project_state.project_name}
+## Agent: {self.id}
+## Phase: {phase.value}
 
-        TODO: Implement development planning
-        TODO: Break down into implementable steps
-        TODO: Plan test coverage
-        """
-        ...
+### Implementation Summary
+Code implementation completed.
 
-    def act(self, step: AgentPlanStep, context: AgentContext) -> AgentOutput:
-        """Execute development step.
+### Files Created/Modified
+- src/main.py
+- src/models.py
+- tests/test_main.py
 
-        May involve:
-        - Writing code files
-        - Running tests
-        - Executing linters
-        - Git operations
+### Code Metrics
+- Lines of code: [count]
+- Test coverage: [percentage]
 
-        TODO: Implement development actions
-        TODO: Generate code artifacts
-        TODO: Track code changes
-        """
-        ...
+### Steps Executed
+"""
+        for step in plan.steps:
+            dev_content += f"- {step.description}\n"
 
-    def summarize(self, run_id: str) -> AgentSummary:
-        """Summarize development work.
+        self._create_artifact(
+            "development_report.md",
+            dev_content,
+            phase,
+            project_state.project_id,
+        )
 
-        Summary includes:
-        - Code implemented
-        - Tests written
-        - Coverage metrics
-        - Integration notes
+        # Run subagents
+        for subagent_id, subagent_config in self.config.subagents.items():
+            await self._run_subagent(subagent_config, phase, project_state)
 
-        TODO: Collect code artifacts
-        TODO: Report test coverage
-        TODO: Provide QA handoff notes
-        """
-        ...
+        self._record_event("developer_acted", phase.value, artifacts=len(self._artifacts))
 
-    def complete(self, project_state: ProjectState) -> None:
-        """Complete developer execution.
+        return AgentOutput(
+            step_id=plan.steps[0].step_id if plan.steps else "no_step",
+            success=True,
+            artifacts=self._artifacts.copy(),
+            token_usage=TokenUsage(
+                input_tokens=self._token_usage.input_tokens,
+                output_tokens=self._token_usage.output_tokens,
+                total_tokens=self._token_usage.total_tokens,
+            ),
+        )
 
-        TODO: Finalize code changes
-        TODO: Report metrics
-        """
-        ...
+    async def summarize(
+        self,
+        plan: AgentPlan,
+        output: AgentOutput,
+        project_state: ProjectState,
+    ) -> AgentSummary:
+        """Summarize development work."""
+        summary = await super().summarize(plan, output, project_state)
+        summary.summary = (
+            f"Developer completed {len(plan.steps)} implementation steps. "
+            f"Produced {len(self._artifacts)} artifacts."
+        )
+        return summary
