@@ -1,0 +1,73 @@
+skill:
+  id: optimization_modeling
+  version: "1.0.0"
+  category: optimization
+
+  triggers:
+    - "optimize"
+    - "minimize"
+    - "maximize"
+    - "linear programming"
+    - "constraint"
+    - "objective function"
+
+  input_schema:
+    type: object
+    properties:
+      problem_type:
+        type: string
+        enum: [linear, integer, mixed_integer, nonlinear]
+      objective:
+        type: string
+        enum: [minimize, maximize]
+      constraints_path:
+        type: string
+      variables_path:
+        type: string
+    required: [problem_type, objective]
+
+  output_schema:
+    type: object
+    properties:
+      solution:
+        type: object
+      objective_value:
+        type: number
+      status:
+        type: string
+      sensitivity:
+        type: object
+
+  methodology:
+    - step: problem_formulation
+      description: "Define decision variables, objective, constraints"
+      tools: [file_system]
+    - step: model_building
+      description: "Build optimization model in solver format"
+      tools: [python_executor]
+    - step: solving
+      description: "Run solver and obtain solution"
+      tools: [python_executor]
+    - step: analysis
+      description: "Analyze solution and sensitivity"
+      tools: [python_executor, visualization]
+    - step: validation
+      description: "Validate solution against business rules"
+      tools: [python_executor]
+
+  best_practices:
+    - "Start with simple model and iterate"
+    - "Validate constraints are not over-restrictive"
+    - "Check for numerical stability"
+
+  common_pitfalls:
+    - "Infeasible constraints"
+    - "Unbounded objective"
+    - "Local vs global optima"
+
+  tools_required:
+    - file_system
+    - python_executor
+    - visualization
+
+  validation_criteria: "Solution satisfies all constraints and improves objective"
