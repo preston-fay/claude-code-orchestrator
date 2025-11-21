@@ -142,6 +142,10 @@ const ProjectDetailPage: React.FC = () => {
       <div className="project-info-card">
         <div className="info-grid">
           <div className="info-item">
+            <span className="info-label">Type</span>
+            <span className="info-value project-type-value">{project.project_type || 'generic'}</span>
+          </div>
+          <div className="info-item">
             <span className="info-label">Client</span>
             <span className="info-value">{project.client}</span>
           </div>
@@ -155,11 +159,13 @@ const ProjectDetailPage: React.FC = () => {
             <span className="info-label">Created</span>
             <span className="info-value">{formatDate(project.created_at)}</span>
           </div>
-          <div className="info-item">
-            <span className="info-label">Updated</span>
-            <span className="info-value">{formatDate(project.updated_at)}</span>
-          </div>
         </div>
+        {project.workspace_path && (
+          <div className="workspace-path">
+            <span className="info-label">Workspace</span>
+            <code className="info-value">{project.workspace_path}</code>
+          </div>
+        )}
       </div>
 
       {/* RSG Macro Status */}

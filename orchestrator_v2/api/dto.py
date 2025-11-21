@@ -15,10 +15,22 @@ class ProjectDTO(BaseModel):
     project_id: str
     project_name: str
     client: str
+    project_type: str = "generic"
+    workspace_path: str | None = None
+    template_id: str | None = None
     current_phase: str
     completed_phases: list[str] = Field(default_factory=list)
     created_at: datetime
     status: str = "active"
+
+
+class ProjectTemplateDTO(BaseModel):
+    """Project template data transfer object."""
+    id: str
+    name: str
+    description: str
+    project_type: str
+    category: str = "general"
 
 
 class PhaseDTO(BaseModel):

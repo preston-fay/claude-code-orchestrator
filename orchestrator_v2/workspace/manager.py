@@ -196,6 +196,77 @@ class WorkspaceManager:
 
         shutil.rmtree(workspace_root)
 
+    def create_data_workspace(
+        self,
+        project_id: str,
+        project_type: str = "generic",
+        metadata: dict | None = None,
+    ) -> WorkspaceConfig:
+        """Create a data-oriented workspace for analytics projects.
+
+        This creates a workspace focused on data processing rather than
+        code development. Structure is:
+            workspace_root/
+                data/           - Raw and processed data
+                artifacts/      - Generated outputs
+                logs/           - Execution logs
+                tmp/            - Temporary files
+                .orchestrator/  - Orchestrator state
+
+        Args:
+            project_id: Unique project identifier.
+            project_type: Type of project (e.g., 'analytics_forecasting', 'territory_poc').
+            metadata: Optional additional metadata.
+
+        Returns:
+            Created WorkspaceConfig.
+
+        Raises:
+            WorkspaceError: If workspace creation fails.
+        """
+        workspace_root = self.base_dir / project_id
+
+        # Check if already exists
+        if workspace_root.exists():
+            raise WorkspaceError(f"Workspace already exists: {workspace_root}")
+
+        # Create directory structure for data projects
+        data_path = workspace_root / "data"
+        state_path = workspace_root / ".orchestrator"
+        artifacts_path = workspace_root / "artifacts"
+        logs_path = workspace_root / "logs"
+        tmp_path = workspace_root / "tmp"
+
+        for path in [workspace_root, data_path, state_path, artifacts_path, logs_path, tmp_path]:
+            path.mkdir(parents=True, exist_ok=True)
+
+        # Create subdirectories in state
+        (state_path / "checkpoints").mkdir(exist_ok=True)
+        (state_path / "governance").mkdir(exist_ok=True)
+
+        # Create workspace config
+        # Note: repo_path points to data_path for compatibility
+        config = WorkspaceConfig(
+            project_id=project_id,
+            workspace_root=workspace_root,
+            repo_path=data_path,  # Use data path as repo path for compatibility
+            state_path=state_path,
+            artifacts_path=artifacts_path,
+            logs_path=logs_path,
+            tmp_path=tmp_path,
+            git_url=None,
+            metadata={
+                "project_type": project_type,
+                "workspace_type": "data",
+                **(metadata or {}),
+            },
+        )
+
+        # Save workspace metadata
+        self._save_workspace_metadata(config)
+
+        return config
+
     def _clone_repo(self, git_url: str, destination: Path) -> None:
         """Clone a Git repository.
 

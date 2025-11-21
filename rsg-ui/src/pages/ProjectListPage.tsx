@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listProjects, createProject } from '../api/client';
-import { ProjectSummary, CreateProjectPayload } from '../api/types';
+import { listProjects, createProject, listProjectTemplates } from '../api/client';
+import { ProjectSummary, CreateProjectPayload, ProjectTemplate } from '../api/types';
 
 const ProjectListPage: React.FC = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newProject, setNewProject] = useState<CreateProjectPayload>({
     project_name: '',
     client: 'kearney-default',
+    template_id: undefined,
   });
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     loadProjects();
+    loadTemplates();
   }, []);
 
   const loadProjects = async () => {
@@ -33,6 +36,15 @@ const ProjectListPage: React.FC = () => {
     }
   };
 
+  const loadTemplates = async () => {
+    try {
+      const data = await listProjectTemplates();
+      setTemplates(data);
+    } catch (err) {
+      console.error('Failed to load templates:', err);
+    }
+  };
+
   const handleCreateProject = async () => {
     if (!newProject.project_name.trim()) {
       return;
@@ -43,7 +55,7 @@ const ProjectListPage: React.FC = () => {
       const created = await createProject(newProject);
       setProjects([...projects, created]);
       setShowCreateModal(false);
-      setNewProject({ project_name: '', client: 'kearney-default' });
+      setNewProject({ project_name: '', client: 'kearney-default', template_id: undefined });
       navigate(`/projects/${created.project_id}`);
     } catch (err) {
       setError('Failed to create project');
@@ -67,12 +79,23 @@ const ProjectListPage: React.FC = () => {
     }
   };
 
+  const getProjectTypeBadge = (type: string) => {
+    switch (type) {
+      case 'analytics_forecasting':
+        return 'Analytics';
+      case 'territory_poc':
+        return 'Territory';
+      default:
+        return type;
+    }
+  };
+
   return (
     <div className="page project-list-page">
       <div className="page-header">
         <h2>Projects</h2>
         <button className="button-primary" onClick={() => setShowCreateModal(true)}>
-          Create Project
+          New Project
         </button>
       </div>
 
@@ -90,10 +113,10 @@ const ProjectListPage: React.FC = () => {
           <p>No projects found.</p>
           <p>Create your first project to get started with Ready/Set/Go.</p>
           <div className="golden-path-hint">
-            <h4>Try the Golden Path Demo</h4>
-            <p>Run the canonical example project to see Ready-Set-Code in action:</p>
+            <h4>Quick Start</h4>
+            <p>Click "New Project" and select a template to begin.</p>
+            <p className="hint-text">Or run the Golden Path demo:</p>
             <code>python scripts/dev/run_golden_path_demo.py</code>
-            <p className="hint-text">Then refresh this page to see the project.</p>
           </div>
         </div>
       ) : (
@@ -101,6 +124,7 @@ const ProjectListPage: React.FC = () => {
           <thead>
             <tr>
               <th>Name</th>
+              <th>Type</th>
               <th>Client</th>
               <th>Current Phase</th>
               <th>Status</th>
@@ -120,6 +144,11 @@ const ProjectListPage: React.FC = () => {
                     <span className="badge badge-demo">Demo</span>
                   )}
                 </td>
+                <td>
+                  <span className="project-type-tag">
+                    {getProjectTypeBadge(project.project_type)}
+                  </span>
+                </td>
                 <td>{project.client}</td>
                 <td>
                   <span className="phase-badge">{project.current_phase}</span>
@@ -138,7 +167,7 @@ const ProjectListPage: React.FC = () => {
 
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content new-project-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Create New Project</h2>
               <button className="close-button" onClick={() => setShowCreateModal(false)}>
@@ -159,6 +188,23 @@ const ProjectListPage: React.FC = () => {
                   placeholder="My New Project"
                   autoFocus
                 />
+              </div>
+
+              <div className="form-group">
+                <label>Select Template</label>
+                <div className="template-cards">
+                  {templates.map((template) => (
+                    <div
+                      key={template.id}
+                      className={`template-card ${newProject.template_id === template.id ? 'selected' : ''}`}
+                      onClick={() => setNewProject({ ...newProject, template_id: template.id })}
+                    >
+                      <div className="template-name">{template.name}</div>
+                      <div className="template-description">{template.description}</div>
+                      <div className="template-category">{template.category}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="form-group">

@@ -3,6 +3,7 @@ import {
   ProjectSummary,
   Project,
   CreateProjectPayload,
+  ProjectTemplate,
   RsgOverview,
   ReadyStatus,
   SetStatus,
@@ -83,6 +84,11 @@ export function getApiConfig() {
 
 export async function listProjects(): Promise<ProjectSummary[]> {
   const response = await axiosInstance.get<ProjectSummary[]>('/projects');
+  return response.data;
+}
+
+export async function listProjectTemplates(): Promise<ProjectTemplate[]> {
+  const response = await axiosInstance.get<ProjectTemplate[]>('/project-templates');
   return response.data;
 }
 

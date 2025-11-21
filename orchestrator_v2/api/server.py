@@ -20,6 +20,7 @@ from orchestrator_v2.api.dto import (
     GoStatusDTO,
     PhaseDTO,
     ProjectDTO,
+    ProjectTemplateDTO,
     ProviderTestResultDTO,
     ReadyStatusDTO,
     RsgOverviewDTO,
@@ -30,6 +31,10 @@ from orchestrator_v2.api.dto import (
     ready_status_to_dto,
     rsg_overview_to_dto,
     set_status_to_dto,
+)
+from orchestrator_v2.config.templates import (
+    TEMPLATES,
+    get_template_by_id,
 )
 from orchestrator_v2.telemetry.events_repository import get_event_repository
 from orchestrator_v2.rsg.service import RsgService, RsgServiceError
@@ -68,6 +73,9 @@ class CreateProjectRequest(BaseModel):
     """Request to create a new project."""
     project_name: str
     client: str = "kearney-default"
+    project_type: str = "generic"
+    template_id: str | None = None
+    description: str | None = None
     intake_path: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -361,6 +369,9 @@ async def list_projects():
                 project_id=state.project_id,
                 project_name=state.project_name,
                 client=state.client,
+                project_type=state.project_type,
+                workspace_path=state.workspace_path,
+                template_id=state.template_id,
                 current_phase=state.current_phase.value,
                 completed_phases=[p.value for p in state.completed_phases],
                 created_at=state.created_at,
@@ -372,18 +383,66 @@ async def list_projects():
     return projects
 
 
+@app.get("/project-templates", response_model=list[ProjectTemplateDTO])
+async def list_project_templates():
+    """List available project templates."""
+    return [
+        ProjectTemplateDTO(
+            id=t.id,
+            name=t.name,
+            description=t.description,
+            project_type=t.project_type,
+            category=t.category,
+        )
+        for t in TEMPLATES
+    ]
+
+
 @app.post("/projects", response_model=ProjectDTO, status_code=201)
 async def create_project(request: CreateProjectRequest):
-    """Create a new project."""
+    """Create a new project with automatic workspace creation."""
     engine = WorkflowEngine()
+
+    # Resolve template if specified
+    project_type = request.project_type
+    template_id = request.template_id
+    intake_path = request.intake_path
+
+    if template_id:
+        template = get_template_by_id(template_id)
+        if template:
+            project_type = template.project_type
+            if not intake_path and template.default_intake_path:
+                intake_path = template.default_intake_path
 
     # Start the project
     state = await engine.start_project(
-        intake_path=Path(request.intake_path) if request.intake_path else None,
+        intake_path=Path(intake_path) if intake_path else None,
         project_name=request.project_name,
         client=request.client,
         metadata=request.metadata,
     )
+
+    # Set additional fields
+    state.project_type = project_type
+    state.template_id = template_id
+
+    # Create workspace for the project
+    try:
+        workspace_config = workspace_manager.create_data_workspace(
+            project_id=state.project_id,
+            project_type=project_type,
+            metadata={
+                "project_name": request.project_name,
+                "template_id": template_id,
+                "description": request.description,
+            },
+        )
+        state.workspace_path = str(workspace_config.workspace_root)
+    except Exception as e:
+        # Log error but don't fail project creation
+        import logging
+        logging.warning(f"Failed to create workspace: {e}")
 
     # Save to persistence
     await project_repo.save(state)
@@ -395,6 +454,9 @@ async def create_project(request: CreateProjectRequest):
         project_id=state.project_id,
         project_name=state.project_name,
         client=state.client,
+        project_type=state.project_type,
+        workspace_path=state.workspace_path,
+        template_id=state.template_id,
         current_phase=state.current_phase.value,
         completed_phases=[p.value for p in state.completed_phases],
         created_at=state.created_at,
@@ -414,6 +476,9 @@ async def get_project(project_id: str):
         project_id=state.project_id,
         project_name=state.project_name,
         client=state.client,
+        project_type=state.project_type,
+        workspace_path=state.workspace_path,
+        template_id=state.template_id,
         current_phase=state.current_phase.value,
         completed_phases=[p.value for p in state.completed_phases],
         created_at=state.created_at,

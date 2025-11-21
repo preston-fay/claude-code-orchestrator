@@ -4,6 +4,9 @@ export interface ProjectSummary {
   project_id: string;
   project_name: string;
   client: string;
+  project_type: string;
+  workspace_path?: string | null;
+  template_id?: string | null;
   current_phase: string;
   completed_phases: string[];
   created_at: string;
@@ -18,8 +21,19 @@ export interface Project extends ProjectSummary {
 export interface CreateProjectPayload {
   project_name: string;
   client?: string;
+  project_type?: string;
+  template_id?: string;
+  description?: string;
   intake_path?: string;
   metadata?: Record<string, unknown>;
+}
+
+export interface ProjectTemplate {
+  id: string;
+  name: string;
+  description: string;
+  project_type: string;
+  category: string;
 }
 
 export interface ReadyStatus {

@@ -250,6 +250,13 @@ class ProjectState(BaseModel):
     run_id: str
     project_name: str
     client: str = "kearney-default"
+    project_type: str = "generic"
+
+    # Workspace path (absolute path to workspace root)
+    workspace_path: str | None = None
+
+    # Template reference
+    template_id: str | None = None
 
     # Workflow progress
     current_phase: PhaseType = PhaseType.INTAKE

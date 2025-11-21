@@ -583,6 +583,34 @@ p {
   font-weight: 500;
 }
 
+.project-type-value {
+  text-transform: capitalize;
+}
+
+.workspace-path {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.workspace-path .info-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.workspace-path code {
+  font-family: var(--font-family-mono);
+  font-size: 0.8125rem;
+  background-color: var(--surface);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+}
+
 /* Sections */
 .section {
   margin-bottom: var(--spacing-xl);
@@ -681,6 +709,70 @@ p {
   background-color: var(--color-violet-1);
   color: var(--emphasis);
   border: 1px solid var(--color-violet-2);
+}
+
+/* Project Type Tag */
+.project-type-tag {
+  display: inline-block;
+  padding: 2px var(--spacing-sm);
+  background-color: var(--surface);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* Template Cards */
+.template-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-sm);
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: var(--spacing-xs);
+}
+
+.template-card {
+  padding: var(--spacing-md);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.template-card:hover {
+  border-color: var(--color-violet-2);
+  background-color: var(--surface);
+}
+
+.template-card.selected {
+  border-color: var(--emphasis);
+  background-color: var(--color-violet-1);
+}
+
+.template-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.template-description {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-xs);
+}
+
+.template-category {
+  font-size: 0.6875rem;
+  color: var(--emphasis);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* New Project Modal */
+.new-project-modal {
+  max-width: 560px;
 }
 
 /* Error Banner */
