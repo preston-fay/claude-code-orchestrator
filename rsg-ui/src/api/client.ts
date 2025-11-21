@@ -203,3 +203,89 @@ export async function getProjectEvents(
   );
   return response.data;
 }
+
+// Territory POC Endpoints
+
+export interface TerritoryConfig {
+  workspace_path: string;
+  intake_config?: {
+    territory?: {
+      target_territories?: number;
+      states?: string[];
+    };
+    scoring?: {
+      weights?: {
+        value_weight?: number;
+        opportunity_weight?: number;
+        workload_weight?: number;
+      };
+    };
+  };
+}
+
+export interface TerritoryResult {
+  success: boolean;
+  skill_id: string;
+  artifacts: Array<{
+    name: string;
+    path: string;
+    type: string;
+    description: string;
+  }>;
+  metadata: Record<string, unknown>;
+  error?: string;
+}
+
+export interface TerritoryAssignment {
+  retail_id: string;
+  retail_name: string;
+  state: string;
+  territory_id: string;
+  rvs: number;
+  ros: number;
+  rws: number;
+  composite_score: number;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface TerritoryKpi {
+  territory_id: string;
+  retailer_count: number;
+  total_revenue: number;
+  avg_rvs: number;
+  avg_ros: number;
+  avg_rws: number;
+  avg_composite: number;
+  centroid_lat: number;
+  centroid_lon: number;
+  coverage_km: number;
+}
+
+export async function runTerritoryScoring(config: TerritoryConfig): Promise<TerritoryResult> {
+  const response = await axiosInstance.post<TerritoryResult>('/territory/score', config);
+  return response.data;
+}
+
+export async function runTerritoryClustering(config: TerritoryConfig): Promise<TerritoryResult> {
+  const response = await axiosInstance.post<TerritoryResult>('/territory/cluster', config);
+  return response.data;
+}
+
+export async function getTerritoryAssignments(
+  workspacePath: string
+): Promise<{ assignments: TerritoryAssignment[]; count: number }> {
+  const response = await axiosInstance.get('/territory/assignments', {
+    params: { workspace_path: workspacePath },
+  });
+  return response.data;
+}
+
+export async function getTerritoryKpis(
+  workspacePath: string
+): Promise<{ kpis: TerritoryKpi[]; territory_count: number }> {
+  const response = await axiosInstance.get('/territory/kpis', {
+    params: { workspace_path: workspacePath },
+  });
+  return response.data;
+}

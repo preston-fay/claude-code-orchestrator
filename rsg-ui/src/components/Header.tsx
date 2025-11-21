@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 interface HeaderProps {
   userId: string;
@@ -7,10 +8,28 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ userId, userEmail, onSettingsClick }) => {
+  const location = useLocation();
+
   return (
     <header className="header">
       <div className="header-left">
-        <h1 className="header-title">Kearney Ready-Set-Code</h1>
+        <Link to="/" style={{ textDecoration: 'none' }}>
+          <h1 className="header-title">Kearney Ready-Set-Code</h1>
+        </Link>
+        <nav className="header-nav">
+          <Link
+            to="/"
+            className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+          >
+            Projects
+          </Link>
+          <Link
+            to="/territory-poc"
+            className={`nav-link ${location.pathname === '/territory-poc' ? 'active' : ''}`}
+          >
+            Territory POC
+          </Link>
+        </nav>
       </div>
       <div className="header-right">
         <div className="user-info">

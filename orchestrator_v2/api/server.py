@@ -781,6 +781,231 @@ async def get_rsg_overview(project_id: str):
     return rsg_overview_to_dto(overview)
 
 
+# -----------------------------------------------------------------------------
+# Territory POC Endpoints
+# -----------------------------------------------------------------------------
+
+class TerritoryScoreRequest(BaseModel):
+    """Request to run territory scoring."""
+    workspace_path: str
+    intake_config: dict[str, Any] | None = None
+
+
+class TerritoryClusterRequest(BaseModel):
+    """Request to run territory clustering."""
+    workspace_path: str
+    intake_config: dict[str, Any] | None = None
+
+
+class TerritoryResultDTO(BaseModel):
+    """Territory operation result."""
+    success: bool
+    skill_id: str
+    artifacts: list[dict[str, Any]]
+    metadata: dict[str, Any]
+    error: str | None = None
+
+
+class TerritoryKpiDTO(BaseModel):
+    """Territory KPI data."""
+    territory_id: str
+    retailer_count: int
+    total_revenue: float
+    avg_rvs: float
+    avg_ros: float
+    avg_rws: float
+    avg_composite: float
+    centroid_lat: float
+    centroid_lon: float
+    coverage_km: float
+
+
+class TerritoryAssignmentDTO(BaseModel):
+    """Territory assignment for a retailer."""
+    retail_id: str
+    retail_name: str
+    state: str
+    territory_id: str
+    rvs: float
+    ros: float
+    rws: float
+    latitude: float | None
+    longitude: float | None
+
+
+@app.post("/territory/score", response_model=TerritoryResultDTO)
+async def run_territory_scoring(request: TerritoryScoreRequest):
+    """Run territory scoring skill.
+
+    Computes RVS/ROS/RWS scores for retailers in workspace.
+    """
+    from orchestrator_v2.capabilities.skills.territory_poc import TerritoryScoringSkill
+    from orchestrator_v2.engine.state_models import ProjectState
+
+    # Create minimal project state for skill execution
+    state = ProjectState(
+        project_id="territory-poc",
+        run_id="scoring-run",
+        project_name="Territory POC",
+    )
+
+    skill = TerritoryScoringSkill()
+
+    try:
+        result = skill.apply(
+            state=state,
+            workspace_path=Path(request.workspace_path),
+            intake_config=request.intake_config,
+        )
+
+        return TerritoryResultDTO(
+            success=result.success,
+            skill_id=result.skill_id,
+            artifacts=[
+                {
+                    "name": a.name,
+                    "path": a.path,
+                    "type": a.artifact_type,
+                    "description": a.description,
+                }
+                for a in result.artifacts
+            ],
+            metadata=result.metadata,
+        )
+    except Exception as e:
+        return TerritoryResultDTO(
+            success=False,
+            skill_id=skill.metadata.id,
+            artifacts=[],
+            metadata={},
+            error=str(e),
+        )
+
+
+@app.post("/territory/cluster", response_model=TerritoryResultDTO)
+async def run_territory_clustering(request: TerritoryClusterRequest):
+    """Run territory clustering skill.
+
+    Assigns scored retailers to territories using k-means.
+    Requires scoring to be run first.
+    """
+    from orchestrator_v2.capabilities.skills.territory_poc import TerritoryAlignmentSkill
+    from orchestrator_v2.engine.state_models import ProjectState
+
+    # Create minimal project state for skill execution
+    state = ProjectState(
+        project_id="territory-poc",
+        run_id="cluster-run",
+        project_name="Territory POC",
+    )
+
+    skill = TerritoryAlignmentSkill()
+
+    try:
+        result = skill.apply(
+            state=state,
+            workspace_path=Path(request.workspace_path),
+            intake_config=request.intake_config,
+        )
+
+        return TerritoryResultDTO(
+            success=result.success,
+            skill_id=result.skill_id,
+            artifacts=[
+                {
+                    "name": a.name,
+                    "path": a.path,
+                    "type": a.artifact_type,
+                    "description": a.description,
+                }
+                for a in result.artifacts
+            ],
+            metadata=result.metadata,
+        )
+    except Exception as e:
+        return TerritoryResultDTO(
+            success=False,
+            skill_id=skill.metadata.id,
+            artifacts=[],
+            metadata={},
+            error=str(e),
+        )
+
+
+@app.get("/territory/assignments")
+async def get_territory_assignments(workspace_path: str):
+    """Get territory assignments from workspace.
+
+    Returns retailer-to-territory mapping with scores and coordinates.
+    """
+    import pandas as pd
+
+    assignments_path = Path(workspace_path) / "artifacts" / "territory_assignments.csv"
+
+    if not assignments_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Territory assignments not found. Run scoring and clustering first."
+        )
+
+    df = pd.read_csv(assignments_path)
+
+    # Convert to list of dicts
+    assignments = []
+    for _, row in df.iterrows():
+        assignments.append({
+            "retail_id": str(row.get("retail_id", "")),
+            "retail_name": str(row.get("retail_name", "")),
+            "state": str(row.get("state", "")),
+            "territory_id": str(row.get("territory_id", "")),
+            "rvs": float(row.get("RVS", 0)),
+            "ros": float(row.get("ROS", 0)),
+            "rws": float(row.get("RWS", 0)),
+            "composite_score": float(row.get("composite_score", 0)),
+            "latitude": float(row.get("latitude")) if pd.notna(row.get("latitude")) else None,
+            "longitude": float(row.get("longitude")) if pd.notna(row.get("longitude")) else None,
+        })
+
+    return {"assignments": assignments, "count": len(assignments)}
+
+
+@app.get("/territory/kpis")
+async def get_territory_kpis(workspace_path: str):
+    """Get territory KPIs from workspace.
+
+    Returns per-territory summary statistics.
+    """
+    import pandas as pd
+
+    kpis_path = Path(workspace_path) / "artifacts" / "territory_kpis.csv"
+
+    if not kpis_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Territory KPIs not found. Run scoring and clustering first."
+        )
+
+    df = pd.read_csv(kpis_path)
+
+    # Convert to list of dicts
+    kpis = []
+    for _, row in df.iterrows():
+        kpis.append({
+            "territory_id": str(row.get("territory_id", "")),
+            "retailer_count": int(row.get("retailer_count", 0)),
+            "total_revenue": float(row.get("total_revenue", 0)),
+            "avg_rvs": float(row.get("avg_rvs", 0)),
+            "avg_ros": float(row.get("avg_ros", 0)),
+            "avg_rws": float(row.get("avg_rws", 0)),
+            "avg_composite": float(row.get("avg_composite", 0)),
+            "centroid_lat": float(row.get("centroid_lat", 0)),
+            "centroid_lon": float(row.get("centroid_lon", 0)),
+            "coverage_km": float(row.get("coverage_km", 0)),
+        })
+
+    return {"kpis": kpis, "territory_count": len(kpis)}
+
+
 # Factory function for creating configured app
 def create_app(
     project_repo_override=None,

@@ -1,0 +1,54 @@
+skills:
+  - id: "territory_scoring_poc"
+    name: "Territory Scoring POC"
+    description: |
+      Compute RVS (Retail Value Score), ROS (Retail Opportunity Score),
+      and RWS (Retail Workload Score) for retailers in IA/IL/IN.
+    category: "analytics"
+    triggers:
+      - "territory_poc"
+      - "territory_scoring"
+      - "retail_scoring"
+      - "rvs_ros_rws"
+    inputs:
+      - name: "retailers_excel"
+        type: "file"
+        description: "Path to retailer segmentation Excel file in workspace"
+      - name: "scoring_weights"
+        type: "dict"
+        description: "Weights for value, opportunity, workload"
+    outputs:
+      - name: "retailers_midwest_scored.csv"
+        type: "file"
+        description: "Scored retailers with RVS/ROS/RWS columns"
+    dependencies:
+      - "pandas"
+      - "openpyxl"
+
+  - id: "territory_alignment_poc"
+    name: "Territory Alignment POC"
+    description: |
+      Assign scored retailers to territories using k-means clustering
+      on geographic and score features.
+    category: "analytics"
+    triggers:
+      - "territory_poc"
+      - "territory_alignment"
+      - "territory_clustering"
+    inputs:
+      - name: "retailers_midwest_scored.csv"
+        type: "file"
+        description: "Scored retailers from territory_scoring_poc"
+      - name: "target_territories"
+        type: "int"
+        description: "Number of territories to create"
+    outputs:
+      - name: "territory_assignments.csv"
+        type: "file"
+        description: "Retailer to territory mapping"
+      - name: "territory_kpis.csv"
+        type: "file"
+        description: "Per-territory KPIs and summary"
+    dependencies:
+      - "pandas"
+      - "scikit-learn"
