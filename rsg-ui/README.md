@@ -1,6 +1,6 @@
-# Kearney Ready-Set-Go! UI
+# Kearney Ready-Set-Code UI
 
-A React SPA for managing and visualizing Ready/Set/Go orchestration projects.
+A React SPA for managing and visualizing Ready/Set/Code orchestration projects.
 
 ## Features
 

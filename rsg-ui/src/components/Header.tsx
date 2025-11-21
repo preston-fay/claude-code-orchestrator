@@ -10,7 +10,7 @@ const Header: React.FC<HeaderProps> = ({ userId, userEmail, onSettingsClick }) =
   return (
     <header className="header">
       <div className="header-left">
-        <h1 className="header-title">Kearney Ready-Set-Go!</h1>
+        <h1 className="header-title">Kearney Ready-Set-Code</h1>
       </div>
       <div className="header-right">
         <div className="user-info">
