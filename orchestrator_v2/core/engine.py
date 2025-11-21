@@ -8,12 +8,26 @@ checkpoints, and governance gates.
 See docs/orchestrator-v2-architecture.md for architecture overview.
 """
 
+import asyncio
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping
 from uuid import uuid4
 
 from orchestrator_v2.agents.base_agent import BaseAgent
+from orchestrator_v2.core.model_selection import (
+    select_model_for_agent,
+    estimate_tokens_for_agent,
+)
+from orchestrator_v2.telemetry.budget_enforcer import (
+    BudgetEnforcer,
+    BudgetExceededError as BudgetError,
+)
+from orchestrator_v2.user.models import UserProfile
+from orchestrator_v2.user.repository import FileSystemUserRepository
+
+logger = logging.getLogger(__name__)
 from orchestrator_v2.checkpoints.checkpoint_manager import CheckpointManager
 from orchestrator_v2.core.exceptions import (
     BudgetExceededError,
@@ -68,6 +82,7 @@ class WorkflowEngine:
         token_tracker: TokenTracker | None = None,
         agents: Mapping[str, BaseAgent] | None = None,
         workspace: WorkspaceConfig | None = None,
+        user_repository: FileSystemUserRepository | None = None,
     ):
         """Initialize the WorkflowEngine.
 
@@ -78,6 +93,7 @@ class WorkflowEngine:
             token_tracker: Token tracker instance.
             agents: Mapping of agent_id to agent instances.
             workspace: Workspace configuration for file isolation.
+            user_repository: User repository for BYOK and entitlements.
         """
         self._phase_manager = phase_manager or PhaseManager()
         self._checkpoint_manager = checkpoint_manager or CheckpointManager()
@@ -87,6 +103,8 @@ class WorkflowEngine:
         self._state: ProjectState | None = None
         self._workspace: WorkspaceConfig | None = workspace
         self._repo_adapter: RepoAdapter | None = None
+        self._user_repository = user_repository or FileSystemUserRepository()
+        self._budget_enforcer = BudgetEnforcer(self._user_repository, self._token_tracker)
 
         # Initialize repo adapter if workspace provided
         if workspace:
@@ -188,6 +206,7 @@ class WorkflowEngine:
     async def run_phase(
         self,
         phase: PhaseType | None = None,
+        user: UserProfile | None = None,
     ) -> PhaseState:
         """Execute a workflow phase.
 
@@ -231,9 +250,16 @@ class WorkflowEngine:
         self.state.phase_states[phase.value] = phase_state
 
         try:
-            # Execute each responsible agent
-            for agent_id in phase_def.responsible_agents:
-                agent_state = await self._execute_agent(agent_id, phase)
+            # Execute agents in parallel
+            logger.info(
+                f"Running phase {phase.value} with {len(phase_def.responsible_agents)} agents: "
+                f"{phase_def.responsible_agents}"
+            )
+
+            agent_states = await self._run_agents_for_phase(phase_def, user)
+
+            # Store results and track usage
+            for agent_id, agent_state in agent_states.items():
                 self.state.agent_states[agent_id] = agent_state
 
                 # Track token usage
@@ -244,6 +270,19 @@ class WorkflowEngine:
                     input_tokens=agent_state.token_usage.input_tokens,
                     output_tokens=agent_state.token_usage.output_tokens,
                 )
+
+                # Record usage for budget tracking
+                if user and agent_state.token_usage:
+                    await self._budget_enforcer.record_usage(
+                        user=user,
+                        project_id=self.state.project_id,
+                        agent_role=agent_id,
+                        model=agent_state.model_used or "unknown",
+                        input_tokens=agent_state.token_usage.input_tokens,
+                        output_tokens=agent_state.token_usage.output_tokens,
+                    )
+
+            logger.info(f"Phase {phase.value} agents completed successfully")
 
             # Evaluate governance gates
             governance_results = await self.evaluate_governance(phase)
@@ -377,6 +416,120 @@ class WorkflowEngine:
             agent_state.status = AgentStatus.FAILED
             agent_state.error_message = str(e)
             agent_state.completed_at = datetime.utcnow()
+
+        return agent_state
+
+    async def _run_agents_for_phase(
+        self,
+        phase_def: Any,  # PhaseDefinition
+        user: UserProfile | None = None,
+    ) -> dict[str, AgentState]:
+        """
+        Execute all responsible agents for a phase, possibly in parallel.
+
+        Uses asyncio.gather to run agents concurrently when they have no
+        dependencies on each other within the phase.
+
+        Args:
+            phase_def: Phase definition with responsible agents.
+            user: User profile for BYOK and entitlements.
+
+        Returns:
+            Mapping of agent_id to AgentState results.
+        """
+        from orchestrator_v2.core.state_models import PhaseDefinition
+
+        agent_ids = phase_def.responsible_agents
+        if not agent_ids:
+            return {}
+
+        logger.info(f"Starting parallel execution of {len(agent_ids)} agents")
+
+        # Create tasks for all agents
+        tasks = []
+        for agent_id in agent_ids:
+            tasks.append(self._execute_agent_with_budget(agent_id, phase_def.name, user))
+
+        # Execute all agents in parallel
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Process results
+        agent_states: dict[str, AgentState] = {}
+        errors = []
+
+        for agent_id, result in zip(agent_ids, results):
+            if isinstance(result, Exception):
+                logger.error(f"Agent {agent_id} failed: {result}")
+                errors.append((agent_id, result))
+                # Create failed state
+                agent_states[agent_id] = AgentState(
+                    agent_id=agent_id,
+                    status=AgentStatus.FAILED,
+                    error_message=str(result),
+                    completed_at=datetime.utcnow(),
+                )
+            else:
+                agent_states[agent_id] = result
+                logger.info(
+                    f"Agent {agent_id} completed: model={result.model_used}, "
+                    f"tokens={result.token_usage.total_tokens}"
+                )
+
+        # If any agent failed, raise the first error
+        if errors:
+            agent_id, error = errors[0]
+            raise PhaseError(f"Agent {agent_id} failed: {error}")
+
+        logger.info(f"Parallel execution complete: {len(agent_states)} agents succeeded")
+        return agent_states
+
+    async def _execute_agent_with_budget(
+        self,
+        agent_id: str,
+        phase: PhaseType,
+        user: UserProfile | None = None,
+    ) -> AgentState:
+        """
+        Execute an agent with budget checking and model selection.
+
+        Args:
+            agent_id: Agent to execute.
+            phase: Current phase.
+            user: User profile for BYOK and entitlements.
+
+        Returns:
+            Agent execution state.
+        """
+        # Select model for this agent
+        model_config = select_model_for_agent(
+            user=user,
+            agent_role=agent_id,
+            project_metadata=self.state.metadata if self._state else None,
+        )
+
+        logger.info(
+            f"Selected model for {agent_id}: {model_config.provider}:{model_config.model}"
+        )
+
+        # Check budget before execution
+        if user:
+            estimated_tokens = estimate_tokens_for_agent(agent_id)
+            try:
+                await self._budget_enforcer.check_and_reserve(
+                    user=user,
+                    project_id=self.state.project_id,
+                    estimated_tokens=estimated_tokens,
+                )
+            except BudgetError as e:
+                logger.error(f"Budget exceeded for {agent_id}: {e}")
+                raise BudgetExceededError(str(e))
+
+        # Execute the agent
+        agent_state = await self._execute_agent(agent_id, phase)
+
+        # Update state with model info
+        agent_state.model_used = model_config.model
+        agent_state.provider_used = model_config.provider
 
         return agent_state
 

@@ -178,6 +178,9 @@ class AgentState(BaseModel):
     error_message: str | None = None
     started_at: datetime | None = None
     completed_at: datetime | None = None
+    # Model used for this agent execution
+    model_used: str | None = None
+    provider_used: str | None = None
 
 
 # -----------------------------------------------------------------------------
@@ -373,6 +376,9 @@ class AgentContext(BaseModel):
     llm_api_key: str | None = None
     llm_provider: str = "anthropic"
     model_preferences: list[str] = Field(default_factory=list)
+    # Selected model for this execution
+    provider: str | None = None
+    model: str | None = None
 
 
 # -----------------------------------------------------------------------------
