@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from orchestrator_v2.api.dto import (
@@ -124,6 +125,20 @@ app = FastAPI(
     title="Orchestrator v2 API",
     description="HTTP API for Claude Code Orchestrator v2",
     version="2.0.0",
+)
+
+# Configure CORS for development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -904,8 +919,12 @@ async def run_territory_scoring(request: TerritoryScoreRequest):
 
     Computes RVS/ROS/RWS scores for retailers in workspace.
     """
+    import logging
     from orchestrator_v2.capabilities.skills.territory_poc import TerritoryScoringSkill
     from orchestrator_v2.engine.state_models import ProjectState
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"Territory scoring requested for workspace: {request.workspace_path}")
 
     # Create minimal project state for skill execution
     state = ProjectState(
@@ -923,28 +942,31 @@ async def run_territory_scoring(request: TerritoryScoreRequest):
             intake_config=request.intake_config,
         )
 
+        logger.info(f"Scoring complete: {result.metadata.get('retailer_count', 0)} retailers scored")
+
         return TerritoryResultDTO(
             success=result.success,
             skill_id=result.skill_id,
             artifacts=[
                 {
-                    "name": a.name,
                     "path": a.path,
+                    "hash": a.hash,
+                    "size_bytes": a.size_bytes,
                     "type": a.artifact_type,
-                    "description": a.description,
                 }
                 for a in result.artifacts
             ],
             metadata=result.metadata,
         )
+    except FileNotFoundError as e:
+        logger.error(f"File not found during scoring: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except ValueError as e:
+        logger.error(f"Value error during scoring: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        return TerritoryResultDTO(
-            success=False,
-            skill_id=skill.metadata.id,
-            artifacts=[],
-            metadata={},
-            error=str(e),
-        )
+        logger.error(f"Unexpected error during scoring: {e}")
+        raise HTTPException(status_code=500, detail=f"Scoring failed: {str(e)}")
 
 
 @app.post("/territory/cluster", response_model=TerritoryResultDTO)
@@ -954,8 +976,12 @@ async def run_territory_clustering(request: TerritoryClusterRequest):
     Assigns scored retailers to territories using k-means.
     Requires scoring to be run first.
     """
+    import logging
     from orchestrator_v2.capabilities.skills.territory_poc import TerritoryAlignmentSkill
     from orchestrator_v2.engine.state_models import ProjectState
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"Territory clustering requested for workspace: {request.workspace_path}")
 
     # Create minimal project state for skill execution
     state = ProjectState(
@@ -973,28 +999,158 @@ async def run_territory_clustering(request: TerritoryClusterRequest):
             intake_config=request.intake_config,
         )
 
+        logger.info(f"Clustering complete: {result.metadata.get('territory_count', 0)} territories created")
+
         return TerritoryResultDTO(
             success=result.success,
             skill_id=result.skill_id,
             artifacts=[
                 {
-                    "name": a.name,
                     "path": a.path,
+                    "hash": a.hash,
+                    "size_bytes": a.size_bytes,
                     "type": a.artifact_type,
-                    "description": a.description,
                 }
                 for a in result.artifacts
             ],
             metadata=result.metadata,
         )
+    except FileNotFoundError as e:
+        logger.error(f"File not found during clustering: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except ValueError as e:
+        logger.error(f"Value error during clustering: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        return TerritoryResultDTO(
+        logger.error(f"Unexpected error during clustering: {e}")
+        raise HTTPException(status_code=500, detail=f"Clustering failed: {str(e)}")
+
+
+class TerritoryRunFullRequest(BaseModel):
+    """Request to run full territory pipeline (scoring + clustering)."""
+    workspace_path: str
+    intake_config: dict[str, Any] | None = None
+
+
+class TerritoryRunFullResultDTO(BaseModel):
+    """Result of full territory pipeline."""
+    success: bool
+    scoring: TerritoryResultDTO
+    clustering: TerritoryResultDTO | None = None
+    error: str | None = None
+
+
+@app.post("/territory/run-full", response_model=TerritoryRunFullResultDTO)
+async def run_territory_full_pipeline(request: TerritoryRunFullRequest):
+    """Run full territory pipeline (scoring then clustering).
+
+    This runs both scoring and clustering in sequence, stopping on first error.
+    """
+    import logging
+    from orchestrator_v2.capabilities.skills.territory_poc import TerritoryScoringSkill, TerritoryAlignmentSkill
+    from orchestrator_v2.engine.state_models import ProjectState
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"Full territory pipeline requested for workspace: {request.workspace_path}")
+
+    workspace_path = Path(request.workspace_path)
+    intake_config = request.intake_config
+
+    # Create minimal project state for skill execution
+    state = ProjectState(
+        project_id="territory-poc",
+        run_id="full-pipeline-run",
+        project_name="Territory POC",
+    )
+
+    # Step 1: Run scoring
+    scoring_skill = TerritoryScoringSkill()
+    try:
+        scoring_result = scoring_skill.apply(
+            state=state,
+            workspace_path=workspace_path,
+            intake_config=intake_config,
+        )
+
+        logger.info(f"Scoring complete: {scoring_result.metadata.get('retailer_count', 0)} retailers scored")
+
+        scoring_dto = TerritoryResultDTO(
+            success=scoring_result.success,
+            skill_id=scoring_result.skill_id,
+            artifacts=[
+                {
+                    "path": a.path,
+                    "hash": a.hash,
+                    "size_bytes": a.size_bytes,
+                    "type": a.artifact_type,
+                }
+                for a in scoring_result.artifacts
+            ],
+            metadata=scoring_result.metadata,
+        )
+    except Exception as e:
+        logger.error(f"Scoring failed in full pipeline: {e}")
+        scoring_dto = TerritoryResultDTO(
             success=False,
-            skill_id=skill.metadata.id,
+            skill_id=scoring_skill.metadata.id,
             artifacts=[],
             metadata={},
             error=str(e),
         )
+        return TerritoryRunFullResultDTO(
+            success=False,
+            scoring=scoring_dto,
+            clustering=None,
+            error=f"Scoring failed: {str(e)}",
+        )
+
+    # Step 2: Run clustering
+    clustering_skill = TerritoryAlignmentSkill()
+    try:
+        clustering_result = clustering_skill.apply(
+            state=state,
+            workspace_path=workspace_path,
+            intake_config=intake_config,
+        )
+
+        logger.info(f"Clustering complete: {clustering_result.metadata.get('territory_count', 0)} territories created")
+
+        clustering_dto = TerritoryResultDTO(
+            success=clustering_result.success,
+            skill_id=clustering_result.skill_id,
+            artifacts=[
+                {
+                    "path": a.path,
+                    "hash": a.hash,
+                    "size_bytes": a.size_bytes,
+                    "type": a.artifact_type,
+                }
+                for a in clustering_result.artifacts
+            ],
+            metadata=clustering_result.metadata,
+        )
+    except Exception as e:
+        logger.error(f"Clustering failed in full pipeline: {e}")
+        clustering_dto = TerritoryResultDTO(
+            success=False,
+            skill_id=clustering_skill.metadata.id,
+            artifacts=[],
+            metadata={},
+            error=str(e),
+        )
+        return TerritoryRunFullResultDTO(
+            success=False,
+            scoring=scoring_dto,
+            clustering=clustering_dto,
+            error=f"Clustering failed: {str(e)}",
+        )
+
+    # Both succeeded
+    return TerritoryRunFullResultDTO(
+        success=True,
+        scoring=scoring_dto,
+        clustering=clustering_dto,
+    )
 
 
 @app.get("/territory/assignments")

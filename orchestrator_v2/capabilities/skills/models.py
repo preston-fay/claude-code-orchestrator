@@ -62,6 +62,7 @@ class SkillResult(BaseModel):
     success: bool = True
     messages: list[str] = Field(default_factory=list)
     artifacts: list[ArtifactInfo] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     token_usage: TokenUsage = Field(default_factory=TokenUsage)
     error_message: str | None = None
 

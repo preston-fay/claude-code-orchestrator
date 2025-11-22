@@ -38,13 +38,14 @@ TEMPLATES = [
         default_intake_path="examples/golden_path/intake_analytics_forecasting.yaml",
         category="analytics",
     ),
+    # Territory Demo - backend endpoints remain for external Territory Optimizer app
     ProjectTemplate(
         id="territory_poc_midwest",
-        name="Territory POC - IA/IL/IN Retail Realignment",
-        description="Territory scoring and clustering for Midwest retailers",
+        name="Territory Demo (internal)",
+        description="Demo template for Territory Optimizer app - creates workspace for scoring/clustering",
         project_type="territory_poc",
         default_intake_path="examples/territory_poc/intake_territory_poc.yaml",
-        category="territory",
+        category="demo",
     ),
 ]
 

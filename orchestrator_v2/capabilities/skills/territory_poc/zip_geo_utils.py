@@ -163,8 +163,8 @@ def add_coordinates_to_dataframe(df, zip_column: str = "zip", state_column: str 
         lons.append(lon)
 
     df = df.copy()
-    df["lat"] = lats
-    df["lon"] = lons
+    df["latitude"] = lats
+    df["longitude"] = lons
 
     return df
 

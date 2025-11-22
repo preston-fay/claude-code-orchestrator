@@ -23,12 +23,6 @@ const Header: React.FC<HeaderProps> = ({ userId, userEmail, onSettingsClick }) =
           >
             Projects
           </Link>
-          <Link
-            to="/territory-poc"
-            className={`nav-link ${location.pathname === '/territory-poc' ? 'active' : ''}`}
-          >
-            Territory POC
-          </Link>
         </nav>
       </div>
       <div className="header-right">

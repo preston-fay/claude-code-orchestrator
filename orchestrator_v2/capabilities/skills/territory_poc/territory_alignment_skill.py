@@ -5,6 +5,7 @@ This skill reads scored retailers, adds geographic coordinates, applies k-means
 clustering, and produces territory assignments with per-territory KPIs.
 """
 
+import hashlib
 import logging
 from pathlib import Path
 
@@ -14,6 +15,15 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
 from orchestrator_v2.capabilities.skills.models import BaseSkill, SkillMetadata, SkillResult
+
+
+def compute_file_hash(path: Path) -> str:
+    """Compute SHA-256 hash of file."""
+    sha256_hash = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            sha256_hash.update(chunk)
+    return sha256_hash.hexdigest()
 from orchestrator_v2.capabilities.skills.territory_poc.zip_geo_utils import (
     add_coordinates_to_dataframe,
     calculate_distance_km,
@@ -152,16 +162,16 @@ class TerritoryAlignmentSkill(BaseSkill):
             success=True,
             artifacts=[
                 ArtifactInfo(
-                    name="territory_assignments.csv",
                     path=str(assignments_path),
+                    hash=compute_file_hash(assignments_path),
+                    size_bytes=assignments_path.stat().st_size,
                     artifact_type="csv",
-                    description="Retailer to territory mapping with coordinates",
                 ),
                 ArtifactInfo(
-                    name="territory_kpis.csv",
                     path=str(kpis_path),
+                    hash=compute_file_hash(kpis_path),
+                    size_bytes=kpis_path.stat().st_size,
                     artifact_type="csv",
-                    description="Per-territory KPIs and summary statistics",
                 ),
             ],
             metadata={

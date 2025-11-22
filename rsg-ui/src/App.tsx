@@ -4,7 +4,6 @@ import Header from './components/Header';
 import SettingsPanel from './components/SettingsPanel';
 import ProjectListPage from './pages/ProjectListPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
-import TerritoryPocPage from './pages/TerritoryPocPage';
 import { getApiConfig } from './api/client';
 
 function App() {
@@ -32,7 +31,6 @@ function App() {
         <Routes>
           <Route path="/" element={<ProjectListPage />} />
           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-          <Route path="/territory-poc" element={<TerritoryPocPage />} />
         </Routes>
       </main>
 

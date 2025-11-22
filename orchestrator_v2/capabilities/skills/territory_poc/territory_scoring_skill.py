@@ -5,6 +5,7 @@ This skill reads retailer data from the workspace, filters to IA/IL/IN,
 computes value/opportunity/workload scores, and writes scored CSV to artifacts.
 """
 
+import hashlib
 import logging
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,15 @@ import pandas as pd
 
 from orchestrator_v2.capabilities.skills.models import BaseSkill, SkillMetadata, SkillResult
 from orchestrator_v2.engine.state_models import ArtifactInfo, ProjectState, TokenUsage
+
+
+def compute_file_hash(path: Path) -> str:
+    """Compute SHA-256 hash of file."""
+    sha256_hash = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            sha256_hash.update(chunk)
+    return sha256_hash.hexdigest()
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +72,13 @@ class TerritoryScoringSkill(BaseSkill):
         config = intake_config or {}
         excel_filename = config.get("data", {}).get("retailers_excel", "Retailer_Segmentation_CROP.xlsx")
 
-        # Handle relative paths
+        # Handle relative paths - look in data/ folder by default
         if not excel_filename.startswith("/"):
-            excel_path = workspace_path / excel_filename
+            # First try data/ folder
+            excel_path = data_path / excel_filename
+            # If not found there, try workspace root as fallback
+            if not excel_path.exists():
+                excel_path = workspace_path / excel_filename
         else:
             excel_path = Path(excel_filename)
 
@@ -80,9 +94,13 @@ class TerritoryScoringSkill(BaseSkill):
         logger.info(f"Loaded {len(df)} rows")
 
         # Find state column (flexible naming)
-        state_col = self._find_column(df, ["State", "state", "ST", "st"])
+        state_col = self._find_column(df, [
+            "State", "state", "ST", "st",
+            "static_entity_state",  # Corteva segmentation format
+        ])
         if not state_col:
-            raise ValueError("Could not find state column in Excel file")
+            available = ", ".join(df.columns[:20].tolist())
+            raise ValueError(f"Could not find state column in Excel file. Available columns: {available}...")
 
         # Filter to IA, IL, IN
         states = config.get("territory", {}).get("states", ["IA", "IL", "IN"])
@@ -122,10 +140,10 @@ class TerritoryScoringSkill(BaseSkill):
             success=True,
             artifacts=[
                 ArtifactInfo(
-                    name="retailers_midwest_scored.csv",
                     path=str(output_path),
+                    hash=compute_file_hash(output_path),
+                    size_bytes=output_path.stat().st_size,
                     artifact_type="csv",
-                    description="Scored retailers with RVS/ROS/RWS",
                 )
             ],
             metadata={
@@ -152,12 +170,12 @@ class TerritoryScoringSkill(BaseSkill):
         """Create standardized output DataFrame."""
         # Map potential column names to standard names
         column_mapping = {
-            "retail_id": ["GLN", "Ship To", "ShipTo", "ID", "RetailID", "Retail_ID"],
-            "retail_name": ["Name", "Retailer Name", "RetailerName", "Customer Name"],
-            "parent_org": ["Parent", "Parent Org", "ParentOrg", "Organization"],
-            "city": ["City", "CITY"],
-            "zip": ["Zip", "ZIP", "Postal Code", "PostalCode"],
-            "segment": ["Segment", "SEGMENT", "Seg", "Segmentation"],
+            "retail_id": ["GLN", "Ship To", "ShipTo", "ID", "RetailID", "Retail_ID", "static_GLN", "R_INCA"],
+            "retail_name": ["Name", "Retailer Name", "RetailerName", "Customer Name", "static_entity_name", "static_entity_dba_name"],
+            "parent_org": ["Parent", "Parent Org", "ParentOrg", "Organization", "static_L5_Name"],
+            "city": ["City", "CITY", "static_entity_city"],
+            "zip": ["Zip", "ZIP", "Postal Code", "PostalCode", "static_entity_postal_code"],
+            "segment": ["Segment", "SEGMENT", "Seg", "Segmentation", "Segment_Label", "segment_description"],
         }
 
         result = pd.DataFrame()
@@ -175,7 +193,9 @@ class TerritoryScoringSkill(BaseSkill):
 
         # Try to find revenue columns
         rev_cols = ["CY Rev", "PY Rev", "PPY Rev", "CY_Rev", "PY_Rev", "PPY_Rev",
-                    "Revenue", "Sales", "Volume"]
+                    "Revenue", "Sales", "Volume",
+                    "sum_net_value", "sum_gross_value",  # Corteva format
+                    "df_yoy_sales_2024", "df_yoy_sales_2023", "df_yoy_sales_2022"]
         for col in rev_cols:
             if col in df.columns:
                 result[col.replace(" ", "_")] = pd.to_numeric(df[col], errors="coerce").fillna(0)
@@ -189,8 +209,12 @@ class TerritoryScoringSkill(BaseSkill):
         config: dict,
     ) -> pd.DataFrame:
         """Compute Retail Value Score (RVS)."""
-        # Find revenue columns
-        sales_cols = config.get("sales_columns", ["CY Rev", "PY Rev", "PPY Rev"])
+        # Find revenue columns - try multiple formats
+        sales_cols = config.get("sales_columns", [
+            "CY Rev", "PY Rev", "PPY Rev",
+            "sum_net_value",  # Corteva primary revenue
+            "df_yoy_sales_2024", "df_yoy_sales_2023", "df_yoy_sales_2022"
+        ])
 
         # Try to find actual revenue data
         revenue_values = []
@@ -200,7 +224,7 @@ class TerritoryScoringSkill(BaseSkill):
             for col in sales_cols:
                 if col in df_original.columns:
                     val = pd.to_numeric(row.get(col, 0), errors="coerce")
-                    if pd.notna(val):
+                    if pd.notna(val) and val > 0:
                         rev_sum += val
                         count += 1
             avg_rev = rev_sum / max(count, 1)

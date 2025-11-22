@@ -278,6 +278,18 @@ export async function runTerritoryClustering(config: TerritoryConfig): Promise<T
   return response.data;
 }
 
+export interface TerritoryRunFullResult {
+  success: boolean;
+  scoring: TerritoryResult;
+  clustering: TerritoryResult | null;
+  error?: string;
+}
+
+export async function runTerritoryFullPipeline(config: TerritoryConfig): Promise<TerritoryRunFullResult> {
+  const response = await axiosInstance.post<TerritoryRunFullResult>('/territory/run-full', config);
+  return response.data;
+}
+
 export async function getTerritoryAssignments(
   workspacePath: string
 ): Promise<{ assignments: TerritoryAssignment[]; count: number }> {
