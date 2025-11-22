@@ -1,5 +1,16 @@
 // API Types for Orchestrator RSG
 
+// Model name types for type-safe model selection
+export type ModelName =
+  | 'claude-sonnet-4-5-20250929'
+  | 'claude-haiku-4-5-20251015';
+
+// Model aliases that resolve to actual model names
+export type ModelAlias = 'sonnet-latest' | 'haiku-fallback';
+
+// Model tier for cost tracking
+export type ModelTier = 'premium' | 'cost-efficient' | 'deprecated';
+
 export interface ProjectSummary {
   project_id: string;
   project_name: string;

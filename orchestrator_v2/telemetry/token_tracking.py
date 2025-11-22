@@ -37,6 +37,8 @@ class TokenTracker:
         agent_id: str,
         input_tokens: int,
         output_tokens: int,
+        model_name: str | None = None,
+        provider: str | None = None,
     ) -> TokenUsage:
         """Track tokens for an LLM call.
 
@@ -46,6 +48,8 @@ class TokenTracker:
             agent_id: Agent making the call.
             input_tokens: Input token count.
             output_tokens: Output token count.
+            model_name: Model used (e.g., 'claude-sonnet-4-5', 'gpt-5.1').
+            provider: Provider name (e.g., 'anthropic', 'bedrock', 'openai').
 
         Returns:
             Updated token usage.
@@ -59,7 +63,7 @@ class TokenTracker:
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             total_tokens=input_tokens + output_tokens,
-            cost_usd=self._calculate_cost(input_tokens, output_tokens),
+            cost_usd=self._calculate_cost(input_tokens, output_tokens, model_name, provider),
         )
 
         # Attribute to workflow
@@ -81,16 +85,28 @@ class TokenTracker:
         self,
         input_tokens: int,
         output_tokens: int,
+        model_name: str | None = None,
+        provider: str | None = None,
     ) -> Decimal:
-        """Calculate cost based on Claude pricing.
+        """Calculate cost based on model pricing.
 
-        TODO: Make pricing configurable
+        Uses model-specific pricing when available, otherwise defaults to Claude Sonnet 4.5 pricing.
         """
-        INPUT_COST_PER_1K = Decimal("0.003")
-        OUTPUT_COST_PER_1K = Decimal("0.015")
+        # Model-specific pricing (per 1K tokens)
+        MODEL_PRICING = {
+            # Current models with full version IDs
+            'claude-sonnet-4-5-20250929': {'input': Decimal("0.003"), 'output': Decimal("0.015"), 'tier': 'premium'},
+            'claude-haiku-4-5-20251015': {'input': Decimal("0.001"), 'output': Decimal("0.005"), 'tier': 'cost-efficient'},
+            # Legacy aliases (map to same pricing)
+            'claude-sonnet-4-5': {'input': Decimal("0.003"), 'output': Decimal("0.015"), 'tier': 'premium'},
+            'claude-haiku-4-5': {'input': Decimal("0.001"), 'output': Decimal("0.005"), 'tier': 'cost-efficient'},
+        }
 
-        input_cost = (Decimal(input_tokens) / 1000) * INPUT_COST_PER_1K
-        output_cost = (Decimal(output_tokens) / 1000) * OUTPUT_COST_PER_1K
+        # Get pricing for model (default to Sonnet 4.5 pricing)
+        pricing = MODEL_PRICING.get(model_name or '', MODEL_PRICING['claude-sonnet-4-5-20250929'])
+
+        input_cost = (Decimal(input_tokens) / 1000) * pricing['input']
+        output_cost = (Decimal(output_tokens) / 1000) * pricing['output']
 
         return input_cost + output_cost
 

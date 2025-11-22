@@ -19,6 +19,137 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Model configuration with tiers and pricing
+MODEL_CONFIG = {
+    "anthropic": {
+        "default_model": "claude-sonnet-4-5-20250929",
+        "aliases": {
+            "sonnet-latest": "claude-sonnet-4-5-20250929",
+            "haiku-fallback": "claude-haiku-4-5-20251015",
+        },
+        "models": {
+            "claude-sonnet-4-5-20250929": {
+                "tier": "premium",
+                "display_name": "Claude Sonnet 4.5",
+                "input_cost_per_1k": 0.003,
+                "output_cost_per_1k": 0.015,
+            },
+            "claude-haiku-4-5-20251015": {
+                "tier": "cost-efficient",
+                "display_name": "Claude Haiku 4.5",
+                "input_cost_per_1k": 0.001,
+                "output_cost_per_1k": 0.005,
+            },
+            # Deprecated models - map to new versions
+            "claude-sonnet-4-5": {
+                "tier": "deprecated",
+                "maps_to": "claude-sonnet-4-5-20250929",
+            },
+            "claude-haiku-4-5": {
+                "tier": "deprecated",
+                "maps_to": "claude-haiku-4-5-20251015",
+            },
+            "claude-sonnet-4": {
+                "tier": "deprecated",
+                "maps_to": "claude-sonnet-4-5-20250929",
+            },
+            "claude-3-5-sonnet-20241022": {
+                "tier": "deprecated",
+                "maps_to": "claude-sonnet-4-5-20250929",
+            },
+        },
+    },
+    "bedrock": {
+        "default_model": "claude-sonnet-4-5-20250929",
+        "aliases": {
+            "sonnet-latest": "claude-sonnet-4-5-20250929",
+            "haiku-fallback": "claude-haiku-4-5-20251015",
+        },
+        "models": {
+            "claude-sonnet-4-5-20250929": {
+                "tier": "premium",
+                "display_name": "Claude Sonnet 4.5",
+                "input_cost_per_1k": 0.003,
+                "output_cost_per_1k": 0.015,
+            },
+            "claude-haiku-4-5-20251015": {
+                "tier": "cost-efficient",
+                "display_name": "Claude Haiku 4.5",
+                "input_cost_per_1k": 0.001,
+                "output_cost_per_1k": 0.005,
+            },
+        },
+    },
+}
+
+
+def resolve_model_alias(provider: str, model: str) -> str:
+    """Resolve model alias to actual model ID.
+
+    Args:
+        provider: Provider name.
+        model: Model name or alias.
+
+    Returns:
+        Resolved model ID.
+    """
+    if provider not in MODEL_CONFIG:
+        return model
+
+    config = MODEL_CONFIG[provider]
+
+    # Check if it's an alias
+    if model in config.get("aliases", {}):
+        resolved = config["aliases"][model]
+        logger.info(f"Resolved alias '{model}' to '{resolved}'")
+        return resolved
+
+    # Check if it's a deprecated model
+    models = config.get("models", {})
+    if model in models and models[model].get("tier") == "deprecated":
+        new_model = models[model].get("maps_to", config["default_model"])
+        logger.warning(
+            f"Model '{model}' is deprecated. Mapping to '{new_model}'. "
+            "Please update your configuration."
+        )
+        return new_model
+
+    return model
+
+
+def get_model_tier(provider: str, model: str) -> str:
+    """Get the tier for a model.
+
+    Args:
+        provider: Provider name.
+        model: Model name.
+
+    Returns:
+        Model tier (premium, fallback, deprecated).
+    """
+    if provider not in MODEL_CONFIG:
+        return "unknown"
+
+    models = MODEL_CONFIG[provider].get("models", {})
+    if model in models:
+        return models[model].get("tier", "unknown")
+
+    return "unknown"
+
+
+def get_default_model(provider: str) -> str:
+    """Get default model for a provider.
+
+    Args:
+        provider: Provider name.
+
+    Returns:
+        Default model ID.
+    """
+    if provider in MODEL_CONFIG:
+        return MODEL_CONFIG[provider]["default_model"]
+    return "claude-sonnet-4-5-20250929"  # Global default
+
 
 class ProviderRegistry:
     """Registry for LLM providers.
@@ -111,7 +242,7 @@ class ProviderRegistry:
 
         Args:
             prompt: The formatted prompt.
-            model: Model identifier.
+            model: Model identifier or alias.
             context: Agent context with provider and credentials.
 
         Returns:
@@ -120,9 +251,18 @@ class ProviderRegistry:
         provider = self.get_for_context(context)
         provider_name = context.llm_provider or self._default_provider
 
+        # Resolve model alias and get default if not specified
+        if not model:
+            model = get_default_model(provider_name)
+        else:
+            model = resolve_model_alias(provider_name, model)
+
+        # Get model tier for logging
+        tier = get_model_tier(provider_name, model)
+
         logger.info(
             f"Generating with provider={provider_name}, model={model}, "
-            f"user={context.user_id}"
+            f"tier={tier}, user={context.user_id}"
         )
 
         try:

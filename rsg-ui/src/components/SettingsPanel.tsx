@@ -28,7 +28,19 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
   // LLM Provider settings
   const [llmProvider, setLlmProvider] = useState<string>('anthropic');
   const [apiKey, setApiKey] = useState<string>('');
-  const [defaultModel, setDefaultModel] = useState<string>('claude-3-5-sonnet-20241022');
+  const [defaultModel, setDefaultModel] = useState<string>('claude-sonnet-4-5-20250929');
+
+  // Model options per provider
+  const modelOptions: Record<string, { value: string; label: string; tooltip?: string }[]> = {
+    anthropic: [
+      { value: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5 (default)', tooltip: 'Recommended for most tasks' },
+      { value: 'claude-haiku-4-5-20251015', label: 'Claude Haiku 4.5 (cost-efficient)', tooltip: 'Use for cost-efficient mode' },
+    ],
+    bedrock: [
+      { value: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5 (default)', tooltip: 'Recommended for most tasks' },
+      { value: 'claude-haiku-4-5-20251015', label: 'Claude Haiku 4.5 (cost-efficient)', tooltip: 'Use for cost-efficient mode' },
+    ],
+  };
 
   // Test connection state
   const [testStatus, setTestStatus] = useState<ProviderTestResult | null>(null);
@@ -178,7 +190,15 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
                   <select
                     id="llmProvider"
                     value={llmProvider}
-                    onChange={(e) => setLlmProvider(e.target.value)}
+                    onChange={(e) => {
+                      const newProvider = e.target.value;
+                      setLlmProvider(newProvider);
+                      // Reset to provider's default model
+                      const providerModels = modelOptions[newProvider];
+                      if (providerModels && providerModels.length > 0) {
+                        setDefaultModel(providerModels[0].value);
+                      }
+                    }}
                   >
                     <option value="anthropic">Anthropic API (BYOK)</option>
                     <option value="bedrock">AWS Bedrock (IAM)</option>
@@ -208,14 +228,19 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
 
                 <div className="form-group">
                   <label htmlFor="defaultModel">Default Model</label>
-                  <input
+                  <select
                     id="defaultModel"
-                    type="text"
                     value={defaultModel}
                     onChange={(e) => setDefaultModel(e.target.value)}
-                    placeholder="claude-3-5-sonnet-20241022"
-                  />
-                  <small>Model used for agent execution</small>
+                    title="Recommended default: Sonnet 4.5. Use Haiku 4.5 for cost-efficient mode."
+                  >
+                    {(modelOptions[llmProvider] || []).map((option) => (
+                      <option key={option.value} value={option.value} title={option.tooltip}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <small>Recommended default: Sonnet 4.5. Use Haiku 4.5 for cost-efficient mode.</small>
                 </div>
 
                 <div className="button-row">

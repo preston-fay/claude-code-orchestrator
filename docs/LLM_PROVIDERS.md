@@ -33,16 +33,25 @@ Uses the official Anthropic Python SDK with user-supplied API keys.
 - User API key stored in `UserProfile.anthropic_api_key`
 
 **Supported Models:**
-- `claude-3-5-sonnet-20241022`
-- `claude-3-sonnet-20240229`
-- `claude-3-haiku-20240307`
-- `claude-3-opus-20240229`
+- `claude-sonnet-4-5-20250929` (Default) - Premium tier
+- `claude-haiku-4-5-20251015` (Fallback) - Cost-efficient tier
+
+**Model Aliases:**
+- `sonnet-latest` → `claude-sonnet-4-5-20250929`
+- `haiku-fallback` → `claude-haiku-4-5-20251015`
+
+**Deprecated Models (auto-mapped):**
+- `claude-sonnet-4-5` → `claude-sonnet-4-5-20250929`
+- `claude-haiku-4-5` → `claude-haiku-4-5-20251015`
+- `claude-3-5-sonnet-20241022` → `claude-sonnet-4-5-20250929`
+- `claude-sonnet-4` → `claude-sonnet-4-5-20250929`
 
 **Configuration:**
 ```yaml
 # In user profile
 default_provider: anthropic
 anthropic_api_key: sk-ant-...
+default_model: claude-sonnet-4-5-20250929
 ```
 
 ### AWS Bedrock
@@ -54,10 +63,12 @@ Uses `boto3` to call Claude models via AWS Bedrock. No API key required - uses A
 - AWS credentials configured (environment variables, IAM role, or AWS CLI)
 
 **Supported Models:**
-- `anthropic.claude-3-5-sonnet-20241022-v2:0`
-- `anthropic.claude-3-sonnet-20240229-v1:0`
-- `anthropic.claude-3-haiku-20240307-v1:0`
-- `anthropic.claude-3-opus-20240229-v1:0`
+- `claude-sonnet-4-5-20250929` (Default) - Premium tier
+- `claude-haiku-4-5-20251015` (Fallback) - Cost-efficient tier
+
+**Model Aliases:**
+- `sonnet-latest` → `claude-sonnet-4-5-20250929`
+- `haiku-fallback` → `claude-haiku-4-5-20251015`
 
 **Configuration:**
 ```bash
@@ -72,6 +83,7 @@ export AWS_DEFAULT_REGION=us-east-1
 ```yaml
 # In user profile
 default_provider: bedrock
+default_model: claude-sonnet-4-5-20250929
 # No API key needed - uses AWS IAM
 ```
 
@@ -124,16 +136,33 @@ model_config = select_model_for_agent(
 )
 ```
 
-## Model Mapping
+## Model Configuration
 
-The orchestrator uses friendly model names that are mapped to provider-specific IDs:
+We recommend starting with **Claude Sonnet 4.5** (alias `sonnet-latest`). For cost-efficient mode, choose **Claude Haiku 4.5** (alias `haiku-fallback`).
 
-| Orchestrator Name | Anthropic API | AWS Bedrock |
-|-------------------|--------------|-------------|
-| `claude-3-sonnet` | `claude-3-sonnet-20240229` | `anthropic.claude-3-sonnet-20240229-v1:0` |
-| `claude-3-haiku` | `claude-3-haiku-20240307` | `anthropic.claude-3-haiku-20240307-v1:0` |
-| `claude-3-opus` | `claude-3-opus-20240229` | `anthropic.claude-3-opus-20240229-v1:0` |
-| `claude-3-5-sonnet` | `claude-3-5-sonnet-20241022` | `anthropic.claude-3-5-sonnet-20241022-v2:0` |
+### Current Models
+
+| Model ID | Provider | Tier | Input Cost (per 1K) | Output Cost (per 1K) |
+|----------|----------|------|---------------------|----------------------|
+| `claude-sonnet-4-5-20250929` | Anthropic/Bedrock | Premium | $0.003 | $0.015 |
+| `claude-haiku-4-5-20251015` | Anthropic/Bedrock | Cost-efficient | $0.001 | $0.005 |
+
+### Model Aliases
+
+Aliases allow using friendly names that resolve to specific model versions:
+
+| Alias | Resolves To | Description |
+|-------|-------------|-------------|
+| `sonnet-latest` | `claude-sonnet-4-5-20250929` | Latest Sonnet model (recommended) |
+| `haiku-fallback` | `claude-haiku-4-5-20251015` | Cost-efficient fallback |
+
+### Model Tiers
+
+- **Premium**: Full-featured models for complex tasks (Claude Sonnet 4.5)
+- **Cost-efficient**: Faster, cheaper models for simpler tasks (Claude Haiku 4.5)
+- **Deprecated**: Old models that auto-map to current versions
+
+**Note:** For production deployments, use the full version-specific IDs (e.g., `claude-sonnet-4-5-20250929`) to ensure consistent behavior.
 
 ## Usage in Agents
 
@@ -162,6 +191,7 @@ All LLM calls automatically track:
 - Output tokens
 - Provider used
 - Model used
+- Cost (calculated from model-specific pricing)
 
 This feeds into the budget enforcement system:
 
@@ -173,8 +203,16 @@ self._token_tracker.track_llm_call(
     agent_id=agent_id,
     input_tokens=result.input_tokens,
     output_tokens=result.output_tokens,
+    model_name="claude-sonnet-4-5-20250929",
+    provider="anthropic",
 )
 ```
+
+Cost calculation uses model-specific pricing:
+- Claude Sonnet 4.5: $0.003/1K input, $0.015/1K output (premium tier)
+- Claude Haiku 4.5: $0.001/1K input, $0.005/1K output (cost-efficient tier)
+
+Token reports differentiate model tier usage, showing "Model in use: Claude Sonnet 4.5" or "Model in use: Claude Haiku 4.5".
 
 ## Error Handling
 
