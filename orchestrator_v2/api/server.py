@@ -68,6 +68,19 @@ from orchestrator_v2.user.models import (
     to_public_profile,
 )
 from orchestrator_v2.api.app_builder import router as app_builder_router
+from orchestrator_v2.feature_engine import (
+    FeatureOrchestrationService,
+    FeatureOrchestrationError,
+    FeatureRequest,
+    FeaturePlan,
+    FeatureBuildPlan,
+    FeatureBuildResult,
+    FeatureDetail,
+    FeatureStatus,
+)
+
+# Initialize feature service
+feature_service = FeatureOrchestrationService()
 
 
 # Request/Response models
@@ -93,6 +106,64 @@ class ErrorResponse(BaseModel):
     """Error response."""
     error: str
     detail: str | None = None
+
+
+class CreateFeatureRequest(BaseModel):
+    """Request to create a feature."""
+    title: str
+    description: str
+
+
+class FeatureRequestDTO(BaseModel):
+    """Feature request data transfer object."""
+    id: str
+    project_id: str
+    title: str
+    description: str
+    status: str
+    created_at: str
+    created_by: str
+
+
+class FeaturePlanDTO(BaseModel):
+    """Feature plan data transfer object."""
+    feature_id: str
+    prd: str
+    acceptance_criteria: list[str]
+    adr_summaries: list[str]
+    risks: list[str]
+    estimated_effort: str
+
+
+class FeatureBuildPlanDTO(BaseModel):
+    """Feature build plan data transfer object."""
+    feature_id: str
+    steps: list[str]
+    repo_changes: list[dict]
+    required_agents: list[str]
+    required_tests: list[str]
+
+
+class FeatureBuildResultDTO(BaseModel):
+    """Feature build result data transfer object."""
+    feature_id: str
+    status: str
+    branch_name: str
+    diff_summary: list[str]
+    created_files: list[str]
+    updated_files: list[str]
+    test_results: list[dict]
+    governance_results: str
+    pr_url: str | None
+    error_message: str | None
+
+
+class FeatureDetailDTO(BaseModel):
+    """Complete feature detail data transfer object."""
+    request: FeatureRequestDTO
+    plan: FeaturePlanDTO | None
+    build_plan: FeatureBuildPlanDTO | None
+    result: FeatureBuildResultDTO | None
 
 
 # Initialize repositories
@@ -1231,6 +1302,154 @@ async def get_territory_kpis(workspace_path: str):
         })
 
     return {"kpis": kpis, "territory_count": len(kpis)}
+
+
+# -----------------------------------------------------------------------------
+# Feature Orchestration Endpoints
+# -----------------------------------------------------------------------------
+
+def _feature_to_dto(feature: FeatureRequest) -> FeatureRequestDTO:
+    """Convert FeatureRequest to DTO."""
+    return FeatureRequestDTO(
+        id=feature.id,
+        project_id=feature.project_id,
+        title=feature.title,
+        description=feature.description,
+        status=feature.status.value,
+        created_at=feature.created_at.isoformat(),
+        created_by=feature.created_by,
+    )
+
+
+def _plan_to_dto(plan: FeaturePlan) -> FeaturePlanDTO:
+    """Convert FeaturePlan to DTO."""
+    return FeaturePlanDTO(
+        feature_id=plan.feature_id,
+        prd=plan.prd,
+        acceptance_criteria=plan.acceptance_criteria,
+        adr_summaries=plan.adr_summaries,
+        risks=plan.risks,
+        estimated_effort=plan.estimated_effort,
+    )
+
+
+def _build_plan_to_dto(build_plan: FeatureBuildPlan) -> FeatureBuildPlanDTO:
+    """Convert FeatureBuildPlan to DTO."""
+    return FeatureBuildPlanDTO(
+        feature_id=build_plan.feature_id,
+        steps=build_plan.steps,
+        repo_changes=[
+            {"file_path": c.file_path, "action": c.action, "description": c.description}
+            for c in build_plan.repo_changes
+        ],
+        required_agents=build_plan.required_agents,
+        required_tests=build_plan.required_tests,
+    )
+
+
+def _result_to_dto(result: FeatureBuildResult) -> FeatureBuildResultDTO:
+    """Convert FeatureBuildResult to DTO."""
+    return FeatureBuildResultDTO(
+        feature_id=result.feature_id,
+        status=result.status.value,
+        branch_name=result.branch_name,
+        diff_summary=result.diff_summary,
+        created_files=result.created_files,
+        updated_files=result.updated_files,
+        test_results=[
+            {"test_name": t.test_name, "passed": t.passed, "output": t.output}
+            for t in result.test_results
+        ],
+        governance_results=result.governance_results,
+        pr_url=result.pr_url,
+        error_message=result.error_message,
+    )
+
+
+@app.post("/projects/{project_id}/features", response_model=FeatureRequestDTO, status_code=201)
+async def create_feature(
+    project_id: str,
+    request: CreateFeatureRequest,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Create a new feature request for a project."""
+    try:
+        feature = feature_service.create_feature_request(
+            project_id=project_id,
+            title=request.title,
+            description=request.description,
+            user=user.user_id,
+        )
+        return _feature_to_dto(feature)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/projects/{project_id}/features", response_model=list[FeatureRequestDTO])
+async def list_features(project_id: str):
+    """List all features for a project."""
+    features = feature_service.list_features(project_id)
+    return [_feature_to_dto(f) for f in features]
+
+
+@app.get("/projects/{project_id}/features/{feature_id}")
+async def get_feature(project_id: str, feature_id: str):
+    """Get a specific feature with all its details."""
+    detail = feature_service.get_feature_detail(project_id, feature_id)
+    if not detail:
+        raise HTTPException(status_code=404, detail="Feature not found")
+
+    return {
+        "request": _feature_to_dto(detail.request),
+        "plan": _plan_to_dto(detail.plan) if detail.plan else None,
+        "build_plan": _build_plan_to_dto(detail.build_plan) if detail.build_plan else None,
+        "result": _result_to_dto(detail.result) if detail.result else None,
+    }
+
+
+@app.post("/projects/{project_id}/features/{feature_id}/plan", response_model=FeaturePlanDTO)
+async def plan_feature(project_id: str, feature_id: str):
+    """Generate a plan for a feature using the Architect agent."""
+    try:
+        plan = feature_service.plan_feature(project_id, feature_id)
+        return _plan_to_dto(plan)
+    except FeatureOrchestrationError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/projects/{project_id}/features/{feature_id}/build-plan", response_model=FeatureBuildPlanDTO)
+async def generate_build_plan(project_id: str, feature_id: str):
+    """Generate a build plan for a feature."""
+    try:
+        build_plan = feature_service.generate_build_plan(project_id, feature_id)
+        return _build_plan_to_dto(build_plan)
+    except FeatureOrchestrationError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/projects/{project_id}/features/{feature_id}/build", response_model=FeatureBuildResultDTO)
+async def build_feature(project_id: str, feature_id: str):
+    """Execute the feature build."""
+    try:
+        result = feature_service.build_feature(project_id, feature_id)
+        return _result_to_dto(result)
+    except FeatureOrchestrationError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/projects/{project_id}/features/{feature_id}/outputs")
+async def get_feature_outputs(project_id: str, feature_id: str):
+    """Get all outputs for a feature build."""
+    outputs = feature_service.get_feature_outputs(project_id, feature_id)
+    if not outputs:
+        raise HTTPException(status_code=404, detail="Feature not found")
+    return outputs
 
 
 # Factory function for creating configured app

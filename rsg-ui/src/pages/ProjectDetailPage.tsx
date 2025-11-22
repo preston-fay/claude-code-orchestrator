@@ -127,6 +127,9 @@ const ProjectDetailPage: React.FC = () => {
           <span>{project.project_name}</span>
         </div>
         <div className="header-actions">
+          <Link to={`/projects/${projectId}/features`} className="feature-link">
+            Features
+          </Link>
           {project.project_type === 'app_build' && (
             <Link to={`/projects/${projectId}/build`} className="app-build-link">
               App Build
