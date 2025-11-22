@@ -42,12 +42,14 @@ class GovernanceEngine:
         self,
         project_state: ProjectState,
         phase: PhaseType,
+        from_phase: PhaseType | None = None,
     ) -> GovernanceResults:
         """Evaluate governance gates for phase transition.
 
         Args:
             project_state: Current project state.
             phase: Phase to evaluate.
+            from_phase: Previous phase (optional, for backward compatibility).
 
         Returns:
             Governance evaluation results.

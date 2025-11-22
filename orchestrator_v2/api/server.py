@@ -939,7 +939,12 @@ async def get_rsg_overview(project_id: str):
 
 
 # -----------------------------------------------------------------------------
-# Territory POC Endpoints
+# Territory POC Demo Endpoints
+# -----------------------------------------------------------------------------
+# These endpoints are DEMO-ONLY APIs for the Territory Optimizer example app.
+# They demonstrate how an external application can call RSC-managed skills.
+# RSC itself does NOT depend on these endpoints - they are consumer examples.
+# The Territory Optimizer UI (separate repo) calls these directly.
 # -----------------------------------------------------------------------------
 
 class TerritoryScoreRequest(BaseModel):
