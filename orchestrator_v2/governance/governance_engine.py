@@ -40,45 +40,34 @@ class GovernanceEngine:
 
     async def evaluate_phase_transition(
         self,
+        project_state: ProjectState,
+        phase: PhaseType,
         from_phase: PhaseType | None = None,
-        to_phase: PhaseType | None = None,
-        state: ProjectState | None = None,
-        # Legacy parameter names for backwards compatibility
-        project_state: ProjectState | None = None,
-        phase: PhaseType | None = None,
     ) -> GovernanceResults:
         """Evaluate governance gates for phase transition.
 
         Args:
-            from_phase: Phase transitioning from.
-            to_phase: Phase transitioning to.
-            state: Current project state.
-            project_state: Legacy param - use state instead.
-            phase: Legacy param - use from_phase instead.
+            project_state: Current project state.
+            phase: Phase to evaluate.
+            from_phase: Previous phase (for backward compatibility, currently unused).
 
         Returns:
             Governance evaluation results.
         """
-        # Handle both new and legacy parameter styles
-        actual_state = state or project_state
-        actual_phase = from_phase or phase
-
-        if actual_state is None:
-            raise ValueError("Project state required (use state= or project_state=)")
-        if actual_phase is None:
-            raise ValueError("Phase required (use from_phase= or phase=)")
-
+        # from_phase is accepted for backward compatibility but not currently used
+        # Future: could use for transition-specific governance rules
+        _ = from_phase  # Acknowledge parameter to avoid unused warning
         if self._policy is None:
-            self.load_policy(actual_state.client)
+            self.load_policy(project_state.client)
 
         results = GovernanceResults()
 
         # Evaluate quality gates
-        quality_results = await self._evaluate_quality_gates(actual_phase, actual_state)
+        quality_results = await self._evaluate_quality_gates(phase, project_state)
         results.quality_gates.extend(quality_results)
 
         # Evaluate compliance
-        compliance_results = await self._evaluate_compliance(actual_state)
+        compliance_results = await self._evaluate_compliance(project_state)
         results.compliance_checks.extend(compliance_results)
 
         # Determine overall status
@@ -92,7 +81,7 @@ class GovernanceEngine:
             ]
 
         # Log to audit trail
-        self._log_governance_evaluation(actual_phase, actual_state, results)
+        self._log_governance_evaluation(phase, project_state, results)
 
         return results
 
