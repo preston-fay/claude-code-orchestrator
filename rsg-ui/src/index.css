@@ -1542,11 +1542,11 @@ p {
 }
 
 .build-result.success .card-title {
-  color: var(--color-green);
+  color: var(--color-purple);
 }
 
 .build-result.failure .card-title {
-  color: var(--color-red);
+  color: var(--color-grey-600);
 }
 
 .result-section {
@@ -1599,20 +1599,20 @@ p {
 }
 
 .result-section.errors {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: var(--color-violet-1);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
 }
 
 .error-list li {
-  color: var(--color-red);
+  color: var(--color-grey-600);
   margin-bottom: var(--spacing-xs);
 }
 
 .error-message {
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-red);
-  color: var(--color-red);
+  background-color: var(--color-violet-1);
+  border: 1px solid var(--color-violet-3);
+  color: var(--color-charcoal);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-lg);
@@ -1729,18 +1729,18 @@ p {
 }
 
 .status-building {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: #3b82f6;
+  background-color: var(--color-violet-2);
+  color: var(--color-purple);
 }
 
 .status-completed {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  background-color: var(--color-violet-1);
+  color: var(--color-purple);
 }
 
 .status-failed {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background-color: var(--color-grey-200);
+  color: var(--color-grey-600);
 }
 
 .btn-small {
@@ -1899,13 +1899,13 @@ p {
 }
 
 .detail-section.error {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: var(--color-violet-1);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
 }
 
 .detail-section.error h4 {
-  color: #ef4444;
+  color: var(--color-grey-600);
 }
 
 .actions-tab {

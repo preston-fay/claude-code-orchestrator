@@ -85,8 +85,12 @@ const ProjectListPage: React.FC = () => {
         return 'Analytics';
       case 'territory_poc':
         return 'Territory';
+      case 'app_build':
+        return 'App Build';
+      case 'generic':
+        return 'Blank';
       default:
-        return type;
+        return type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     }
   };
 
