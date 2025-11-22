@@ -42,16 +42,21 @@ class GovernanceEngine:
         self,
         project_state: ProjectState,
         phase: PhaseType,
+        from_phase: PhaseType | None = None,
     ) -> GovernanceResults:
         """Evaluate governance gates for phase transition.
 
         Args:
             project_state: Current project state.
             phase: Phase to evaluate.
+            from_phase: Previous phase (for backward compatibility, currently unused).
 
         Returns:
             Governance evaluation results.
         """
+        # from_phase is accepted for backward compatibility but not currently used
+        # Future: could use for transition-specific governance rules
+        _ = from_phase  # Acknowledge parameter to avoid unused warning
         if self._policy is None:
             self.load_policy(project_state.client)
 
