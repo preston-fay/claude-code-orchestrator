@@ -1452,6 +1452,106 @@ async def get_feature_outputs(project_id: str, feature_id: str):
     return outputs
 
 
+# -----------------------------------------------------------------------------
+# Project Chat Endpoint
+# -----------------------------------------------------------------------------
+
+class ChatRequest(BaseModel):
+    """Request for project chat."""
+    message: str
+    model_override: str | None = None
+
+
+class ChatResponse(BaseModel):
+    """Response from project chat."""
+    reply: str
+    tokens: dict[str, int]
+    model: str
+    agent: str = "orchestrator"
+
+
+@app.post("/projects/{project_id}/chat", response_model=ChatResponse)
+async def project_chat(
+    project_id: str,
+    request: ChatRequest,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Chat with the orchestrator about a specific project.
+
+    This endpoint provides a project-scoped prompt console that can
+    answer questions about the project, suggest next steps, and provide
+    guidance on using orchestrator features.
+    """
+    from orchestrator_v2.llm import get_provider_registry
+    from orchestrator_v2.engine.state_models import AgentContext, TaskDefinition, ProjectState
+
+    # Load project to include context
+    try:
+        project_state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    # Determine model to use
+    model = request.model_override or user.default_model
+
+    # Create context for LLM call
+    context = AgentContext(
+        project_state=project_state,
+        task=TaskDefinition(
+            task_id="chat",
+            description="Project chat",
+            phase=project_state.current_phase,
+        ),
+        user_id=user.user_id,
+        llm_api_key=user.llm_api_key,
+        llm_provider=user.llm_provider,
+    )
+
+    # Build system prompt with project context
+    system_prompt = f"""You are the RSC (Ready-Set-Code) Orchestrator assistant for this project.
+
+Project: {project_state.project_name}
+Type: {project_state.project_type}
+Client: {project_state.client}
+Current Phase: {project_state.current_phase.value}
+Completed Phases: {', '.join(p.value for p in project_state.completed_phases) or 'None'}
+Workspace: {project_state.workspace_path or 'Not set'}
+
+You help users:
+- Understand project status and next steps
+- Navigate RSC phases (Ready/Set/Go)
+- Use App Builder and Feature Engine capabilities
+- Troubleshoot issues with the orchestrator
+
+Be concise and helpful. Focus on actionable guidance.
+"""
+
+    # Format the prompt
+    full_prompt = f"{system_prompt}\n\nUser: {request.message}\n\nAssistant:"
+
+    # Call LLM
+    registry = get_provider_registry()
+    try:
+        result = await registry.generate(
+            prompt=full_prompt,
+            model=model,
+            context=context,
+        )
+
+        return ChatResponse(
+            reply=result.text,
+            tokens={
+                "input": result.input_tokens,
+                "output": result.output_tokens,
+                "total": result.input_tokens + result.output_tokens,
+            },
+            model=model,
+            agent="orchestrator",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
+
+
 # Factory function for creating configured app
 def create_app(
     project_repo_override=None,

@@ -307,3 +307,35 @@ export async function getTerritoryKpis(
   });
   return response.data;
 }
+
+// Project Chat
+export interface ChatRequest {
+  message: string;
+  model_override?: string;
+}
+
+export interface ChatResponse {
+  reply: string;
+  tokens: {
+    input: number;
+    output: number;
+    total: number;
+  };
+  model: string;
+  agent: string;
+}
+
+export async function sendProjectChat(
+  projectId: string,
+  message: string,
+  modelOverride?: string
+): Promise<ChatResponse> {
+  const response = await axiosInstance.post<ChatResponse>(
+    `/projects/${projectId}/chat`,
+    {
+      message,
+      model_override: modelOverride,
+    }
+  );
+  return response.data;
+}

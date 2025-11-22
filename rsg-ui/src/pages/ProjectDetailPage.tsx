@@ -5,6 +5,7 @@ import { Project, Checkpoint } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
 import LlmSettings from '../components/LlmSettings';
+import ProjectConsole from '../components/ProjectConsole';
 
 // Standard phases for different project types
 const STANDARD_PHASES = ['planning', 'architecture', 'data', 'development', 'qa', 'documentation'];
@@ -335,6 +336,14 @@ const ProjectDetailPage: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Orchestrator Console */}
+      {projectId && (
+        <section className="section">
+          <h3>Orchestrator Console</h3>
+          <ProjectConsole projectId={projectId} />
+        </section>
+      )}
     </div>
   );
 };
