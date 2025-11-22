@@ -67,6 +67,7 @@ from orchestrator_v2.user.models import (
     UserProfileUpdate,
     to_public_profile,
 )
+from orchestrator_v2.api.app_builder import router as app_builder_router
 
 
 # Request/Response models
@@ -142,6 +143,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register App Builder router
+app.include_router(app_builder_router)
 
 
 @app.get("/health", response_model=HealthResponse)

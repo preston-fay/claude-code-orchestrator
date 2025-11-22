@@ -4,6 +4,7 @@ import Header from './components/Header';
 import SettingsPanel from './components/SettingsPanel';
 import ProjectListPage from './pages/ProjectListPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
+import ProjectAppBuildPage from './pages/ProjectAppBuildPage';
 import { getApiConfig } from './api/client';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
         <Routes>
           <Route path="/" element={<ProjectListPage />} />
           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+          <Route path="/projects/:projectId/build" element={<ProjectAppBuildPage />} />
         </Routes>
       </main>
 

@@ -47,6 +47,20 @@ TEMPLATES = [
         default_intake_path="examples/territory_poc/intake_territory_poc.yaml",
         category="demo",
     ),
+    # App Builder - for building complete applications
+    ProjectTemplate(
+        id="app_build",
+        name="App Build (React + FastAPI)",
+        description="Build complete applications with React frontend and FastAPI backend using agent-driven development",
+        project_type="app_build",
+        default_intake_path=None,
+        default_metadata={
+            "stack": ["react", "fastapi"],
+            "include_scaffolding": True,
+            "use_kds": True,
+        },
+        category="application",
+    ),
 ]
 
 
