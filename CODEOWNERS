@@ -1,0 +1,32 @@
+# CODEOWNERS - Defines who is responsible for code review
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+*                                   @preston-fay
+
+# Orchestrator core engine
+/orchestrator_v2/engine/            @preston-fay
+/orchestrator_v2/agents/            @preston-fay
+/orchestrator_v2/governance/        @preston-fay
+
+# LLM providers and integrations
+/orchestrator_v2/llm/               @preston-fay
+
+# API and authentication
+/orchestrator_v2/api/               @preston-fay
+/orchestrator_v2/auth/              @preston-fay
+
+# React UI
+/rsg-ui/                            @preston-fay
+
+# Infrastructure and deployment
+/Dockerfile                         @preston-fay
+/.github/workflows/                 @preston-fay
+/scripts/deploy/                    @preston-fay
+
+# Documentation
+/docs/                              @preston-fay
+*.md                                @preston-fay
+
+# Skills and capabilities
+/orchestrator_v2/capabilities/      @preston-fay
