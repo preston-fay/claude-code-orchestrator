@@ -79,6 +79,8 @@ class CreateProjectRequest(BaseModel):
     description: str | None = None
     intake_path: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # Capabilities for this project (overrides template defaults if provided)
+    capabilities: list[str] | None = None
 
 
 class HealthResponse(BaseModel):
@@ -393,6 +395,8 @@ async def list_projects():
                 completed_phases=[p.value for p in state.completed_phases],
                 created_at=state.created_at,
                 status="complete" if state.current_phase == PhaseType.COMPLETE else "active",
+                capabilities=state.capabilities,
+                phases=[p.value for p in state.phases],
             ))
         except Exception:
             continue
@@ -402,7 +406,7 @@ async def list_projects():
 
 @app.get("/project-templates", response_model=list[ProjectTemplateDTO])
 async def list_project_templates():
-    """List available project templates."""
+    """List available project templates (public templates only)."""
     return [
         ProjectTemplateDTO(
             id=t.id,
@@ -410,6 +414,8 @@ async def list_project_templates():
             description=t.description,
             project_type=t.project_type,
             category=t.category,
+            default_capabilities=t.default_capabilities,
+            allow_capability_override=t.allow_capability_override,
         )
         for t in TEMPLATES
     ]
@@ -418,12 +424,15 @@ async def list_project_templates():
 @app.post("/projects", response_model=ProjectDTO, status_code=201)
 async def create_project(request: CreateProjectRequest):
     """Create a new project with automatic workspace creation."""
+    from orchestrator_v2.engine.capabilities import get_project_phases
+
     engine = WorkflowEngine()
 
     # Resolve template if specified
     project_type = request.project_type
     template_id = request.template_id
     intake_path = request.intake_path
+    capabilities = request.capabilities or []
 
     if template_id:
         template = get_template_by_id(template_id)
@@ -431,6 +440,9 @@ async def create_project(request: CreateProjectRequest):
             project_type = template.project_type
             if not intake_path and template.default_intake_path:
                 intake_path = template.default_intake_path
+            # Use template default capabilities if not overridden
+            if not request.capabilities:
+                capabilities = template.default_capabilities
 
     # Start the project
     state = await engine.start_project(
@@ -443,6 +455,11 @@ async def create_project(request: CreateProjectRequest):
     # Set additional fields
     state.project_type = project_type
     state.template_id = template_id
+    state.capabilities = capabilities
+
+    # Derive effective phases from capabilities
+    effective_phases = get_project_phases(capabilities)
+    state.phases = effective_phases
 
     # Create workspace for the project
     try:
@@ -453,6 +470,7 @@ async def create_project(request: CreateProjectRequest):
                 "project_name": request.project_name,
                 "template_id": template_id,
                 "description": request.description,
+                "capabilities": capabilities,
             },
         )
         state.workspace_path = str(workspace_config.workspace_root)
@@ -478,6 +496,8 @@ async def create_project(request: CreateProjectRequest):
         completed_phases=[p.value for p in state.completed_phases],
         created_at=state.created_at,
         status="active",
+        capabilities=state.capabilities,
+        phases=[p.value for p in state.phases],
     )
 
 
@@ -500,6 +520,8 @@ async def get_project(project_id: str):
         completed_phases=[p.value for p in state.completed_phases],
         created_at=state.created_at,
         status="complete" if state.current_phase == PhaseType.COMPLETE else "active",
+        capabilities=state.capabilities,
+        phases=[p.value for p in state.phases],
     )
 
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listProjects, createProject, listProjectTemplates } from '../api/client';
-import { ProjectSummary, CreateProjectPayload, ProjectTemplate } from '../api/types';
+import { ProjectSummary, CreateProjectPayload, ProjectTemplate, CAPABILITIES, getCapabilityLabel } from '../api/types';
 
 const ProjectListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ const ProjectListPage: React.FC = () => {
     project_name: '',
     client: 'kearney-default',
     template_id: undefined,
+    capabilities: [],
   });
   const [creating, setCreating] = useState(false);
 
@@ -55,13 +56,38 @@ const ProjectListPage: React.FC = () => {
       const created = await createProject(newProject);
       setProjects([...projects, created]);
       setShowCreateModal(false);
-      setNewProject({ project_name: '', client: 'kearney-default', template_id: undefined });
+      setNewProject({ project_name: '', client: 'kearney-default', template_id: undefined, capabilities: [] });
       navigate(`/projects/${created.project_id}`);
     } catch (err) {
       setError('Failed to create project');
       console.error(err);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleTemplateSelect = (template: ProjectTemplate) => {
+    setNewProject({
+      ...newProject,
+      template_id: template.id,
+      capabilities: [...template.default_capabilities],
+    });
+  };
+
+  const handleCapabilityToggle = (capabilityId: string) => {
+    const currentCapabilities = newProject.capabilities || [];
+    const isSelected = currentCapabilities.includes(capabilityId);
+
+    if (isSelected) {
+      setNewProject({
+        ...newProject,
+        capabilities: currentCapabilities.filter(c => c !== capabilityId),
+      });
+    } else {
+      setNewProject({
+        ...newProject,
+        capabilities: [...currentCapabilities, capabilityId],
+      });
     }
   };
 
@@ -85,10 +111,47 @@ const ProjectListPage: React.FC = () => {
         return 'Analytics';
       case 'territory_poc':
         return 'Territory';
+      case 'application':
+        return 'App';
+      case 'service':
+        return 'API';
+      case 'ml_classification':
+        return 'ML';
+      case 'ml_regression':
+        return 'ML';
+      case 'optimization':
+        return 'Optimization';
+      case 'data_engineering':
+        return 'Data Eng';
       default:
         return type;
     }
   };
+
+  const getCapabilitiesSummary = (capabilities: string[]) => {
+    if (!capabilities || capabilities.length === 0) {
+      return null;
+    }
+    // Show first 2 capabilities, then "+N more" if needed
+    const labels = capabilities.slice(0, 2).map(c => {
+      // Short labels for compact display
+      const cap = CAPABILITIES.find(cap => cap.id === c);
+      if (!cap) return c;
+      // Shorten labels for badges
+      return cap.label
+        .replace(' (Forecasting)', '')
+        .replace(' (BI Dashboard)', '')
+        .replace(' (Classification)', '')
+        .replace(' (Regression)', '')
+        .replace(' / UI', '')
+        .replace(' / API', '');
+    });
+    const more = capabilities.length > 2 ? ` +${capabilities.length - 2}` : '';
+    return labels.join(' · ') + more;
+  };
+
+  const selectedTemplate = templates.find(t => t.id === newProject.template_id);
+  const canOverrideCapabilities = selectedTemplate?.allow_capability_override !== false;
 
   return (
     <div className="page project-list-page">
@@ -115,8 +178,6 @@ const ProjectListPage: React.FC = () => {
           <div className="golden-path-hint">
             <h4>Quick Start</h4>
             <p>Click "New Project" and select a template to begin.</p>
-            <p className="hint-text">Or run the Golden Path demo:</p>
-            <code>python scripts/dev/run_golden_path_demo.py</code>
           </div>
         </div>
       ) : (
@@ -125,6 +186,7 @@ const ProjectListPage: React.FC = () => {
             <tr>
               <th>Name</th>
               <th>Type</th>
+              <th>Capabilities</th>
               <th>Client</th>
               <th>Current Phase</th>
               <th>Status</th>
@@ -140,14 +202,20 @@ const ProjectListPage: React.FC = () => {
               >
                 <td className="project-name">
                   {project.project_name}
-                  {project.project_name.startsWith('Golden Path') && (
-                    <span className="badge badge-demo">Demo</span>
-                  )}
                 </td>
                 <td>
                   <span className="project-type-tag">
                     {getProjectTypeBadge(project.project_type)}
                   </span>
+                </td>
+                <td>
+                  {project.capabilities && project.capabilities.length > 0 ? (
+                    <span className="capabilities-badge">
+                      {getCapabilitiesSummary(project.capabilities)}
+                    </span>
+                  ) : (
+                    <span className="no-capabilities">—</span>
+                  )}
                 </td>
                 <td>{project.client}</td>
                 <td>
@@ -197,13 +265,39 @@ const ProjectListPage: React.FC = () => {
                     <div
                       key={template.id}
                       className={`template-card ${newProject.template_id === template.id ? 'selected' : ''}`}
-                      onClick={() => setNewProject({ ...newProject, template_id: template.id })}
+                      onClick={() => handleTemplateSelect(template)}
                     >
                       <div className="template-name">{template.name}</div>
                       <div className="template-description">{template.description}</div>
                       <div className="template-category">{template.category}</div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Capabilities for this project</label>
+                {!canOverrideCapabilities && selectedTemplate && (
+                  <p className="hint-text">This template has fixed capabilities.</p>
+                )}
+                <div className="capabilities-grid">
+                  {CAPABILITIES.map((capability) => {
+                    const isSelected = (newProject.capabilities || []).includes(capability.id);
+                    return (
+                      <label
+                        key={capability.id}
+                        className={`capability-checkbox ${isSelected ? 'selected' : ''} ${!canOverrideCapabilities ? 'disabled' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleCapabilityToggle(capability.id)}
+                          disabled={!canOverrideCapabilities}
+                        />
+                        <span className="capability-label">{capability.label}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 

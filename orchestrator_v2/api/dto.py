@@ -22,6 +22,10 @@ class ProjectDTO(BaseModel):
     completed_phases: list[str] = Field(default_factory=list)
     created_at: datetime
     status: str = "active"
+    # Capabilities attached to this project
+    capabilities: list[str] = Field(default_factory=list)
+    # Effective phases for this project (derived from capabilities)
+    phases: list[str] = Field(default_factory=list)
 
 
 class ProjectTemplateDTO(BaseModel):
@@ -31,6 +35,10 @@ class ProjectTemplateDTO(BaseModel):
     description: str
     project_type: str
     category: str = "general"
+    # Default capabilities for this template
+    default_capabilities: list[str] = Field(default_factory=list)
+    # Whether user can override default capabilities
+    allow_capability_override: bool = True
 
 
 class PhaseDTO(BaseModel):

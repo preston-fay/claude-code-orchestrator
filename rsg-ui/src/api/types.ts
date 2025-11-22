@@ -22,6 +22,10 @@ export interface ProjectSummary {
   completed_phases: string[];
   created_at: string;
   status: string;
+  // Capabilities attached to this project
+  capabilities: string[];
+  // Effective phases for this project (derived from capabilities)
+  phases: string[];
 }
 
 export interface Project extends ProjectSummary {
@@ -37,6 +41,8 @@ export interface CreateProjectPayload {
   description?: string;
   intake_path?: string;
   metadata?: Record<string, unknown>;
+  // Capabilities for this project (overrides template defaults if provided)
+  capabilities?: string[];
 }
 
 export interface ProjectTemplate {
@@ -45,6 +51,35 @@ export interface ProjectTemplate {
   description: string;
   project_type: string;
   category: string;
+  // Default capabilities for this template
+  default_capabilities: string[];
+  // Whether user can override default capabilities
+  allow_capability_override: boolean;
+}
+
+// Capability metadata for UI display
+export interface CapabilityInfo {
+  id: string;
+  label: string;
+}
+
+// All available capabilities with their labels
+export const CAPABILITIES: CapabilityInfo[] = [
+  { id: 'data_pipeline', label: 'Data Pipeline' },
+  { id: 'analytics_forecasting', label: 'Analytics (Forecasting)' },
+  { id: 'analytics_bi_dashboard', label: 'Analytics (BI Dashboard)' },
+  { id: 'ml_classification', label: 'ML (Classification)' },
+  { id: 'ml_regression', label: 'ML (Regression)' },
+  { id: 'optimization', label: 'Optimization' },
+  { id: 'app_build', label: 'App Build / UI' },
+  { id: 'service_api', label: 'Service / API' },
+  { id: 'data_engineering', label: 'Data Engineering' },
+];
+
+// Helper function to get capability label
+export function getCapabilityLabel(capabilityId: string): string {
+  const cap = CAPABILITIES.find(c => c.id === capabilityId);
+  return cap?.label || capabilityId;
 }
 
 export interface ReadyStatus {

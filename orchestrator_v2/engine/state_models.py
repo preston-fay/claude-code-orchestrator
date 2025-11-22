@@ -258,6 +258,14 @@ class ProjectState(BaseModel):
     # Template reference
     template_id: str | None = None
 
+    # Capabilities - list of capability IDs attached to this project
+    # e.g., ["data_pipeline", "analytics_forecasting", "app_build"]
+    capabilities: list[str] = Field(default_factory=list)
+
+    # Effective phases for this project (derived from capabilities)
+    # If empty, uses default 6-phase workflow
+    phases: list[PhaseType] = Field(default_factory=list)
+
     # Workflow progress
     current_phase: PhaseType = PhaseType.INTAKE
     completed_phases: list[PhaseType] = Field(default_factory=list)

@@ -1412,6 +1412,102 @@ p {
   }
 }
 
+/* Capabilities Grid - New Project Modal */
+.capabilities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.capability-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8125rem;
+}
+
+.capability-checkbox:hover:not(.disabled) {
+  border-color: var(--color-violet-2);
+  background-color: var(--surface);
+}
+
+.capability-checkbox.selected {
+  border-color: var(--emphasis);
+  background-color: var(--color-violet-1);
+}
+
+.capability-checkbox.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.capability-checkbox input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  accent-color: var(--emphasis);
+}
+
+.capability-label {
+  flex: 1;
+  font-size: 0.75rem;
+}
+
+/* Capabilities Badge - Project List */
+.capabilities-badge {
+  display: inline-block;
+  padding: 2px var(--spacing-sm);
+  background-color: var(--color-violet-1);
+  color: var(--color-purple);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.no-capabilities {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* Capabilities Section - Project Detail */
+.capabilities-section {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.capabilities-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.capability-tag {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-violet-1);
+  color: var(--color-purple);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Hint text */
+.hint-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: var(--spacing-xs) 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .main-content {
@@ -1441,5 +1537,9 @@ p {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-md);
+  }
+
+  .capabilities-grid {
+    grid-template-columns: 1fr;
   }
 }

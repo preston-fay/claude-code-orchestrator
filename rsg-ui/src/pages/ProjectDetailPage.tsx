@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
-import { Project, Checkpoint } from '../api/types';
+import { Project, Checkpoint, getCapabilityLabel } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
 
@@ -160,6 +160,18 @@ const ProjectDetailPage: React.FC = () => {
             <span className="info-value">{formatDate(project.created_at)}</span>
           </div>
         </div>
+        {project.capabilities && project.capabilities.length > 0 && (
+          <div className="capabilities-section">
+            <span className="info-label">Capabilities</span>
+            <div className="capabilities-tags">
+              {project.capabilities.map((cap) => (
+                <span key={cap} className="capability-tag">
+                  {getCapabilityLabel(cap)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
         {project.workspace_path && (
           <div className="workspace-path">
             <span className="info-label">Workspace</span>
