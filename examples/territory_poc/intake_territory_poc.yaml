@@ -1,0 +1,75 @@
+################################################################################
+# Territory POC Intake - IA/IL/IN Retail Realignment
+#
+# This is the intake configuration for the Territory POC. Contains only
+# metadata and configuration - NO client data. The actual data file
+# (Retailer_Segmentation_CROP.xlsx) must be placed in the workspace.
+################################################################################
+
+project:
+  id: "territory-poc-midwest"
+  name: "Territory POC - IA/IL/IN Retail Realignment"
+  type: "territory_poc"
+  domain: "crop_protection"
+  description: |
+    POC demonstrating territory realignment using RVS/ROS/RWS scoring
+    for retailers in Iowa, Illinois, and Indiana.
+
+data:
+  # Workspace-relative path - the engine will resolve via WorkspaceConfig
+  retailers_excel: "data/Retailer_Segmentation_CROP.xlsx"
+
+territory:
+  target_territories: 12
+  geography_level: "zip"
+  states: ["IA", "IL", "IN"]
+
+scoring:
+  weights:
+    value_weight: 0.5
+    opportunity_weight: 0.3
+    workload_weight: 0.2
+
+  value:
+    # Column names in the Excel that contain sales/revenue data
+    sales_columns: ["CY Rev", "PY Rev", "PPY Rev"]
+
+  opportunity:
+    segment_field: "Segment"
+
+  workload:
+    segment_field: "Segment"
+
+scenario:
+  max_movement_fraction: 0.25
+  continuity_priority: "medium"
+
+orchestration:
+  enabled_agents:
+    - "architect"
+    - "data"
+    - "developer"
+    - "qa"
+    - "documentarian"
+
+rsg:
+  ready_phases:
+    - "planning"
+    - "architecture"
+  set_phases:
+    - "data"
+  go_phases:
+    - "development"
+    - "qa"
+    - "documentation"
+
+notes: |
+  IMPORTANT: This intake file contains ONLY configuration metadata.
+
+  The actual data file must be placed in the WORKSPACE, not the repo:
+    /home/user/workspaces/territory_poc/data/Retailer_Segmentation_CROP.xlsx
+
+  The orchestrator will read from the workspace and write all outputs
+  (scored CSVs, territory assignments) to workspace/artifacts/.
+
+  No client data should ever be committed to the orchestrator repo.

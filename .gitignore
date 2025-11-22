@@ -109,6 +109,11 @@ analytics/dashboards/*.pdf
 .claude/checkpoints/*.joblib
 .claude/checkpoints/*.h5
 
+# Orchestrator state and runtime (CCW-first workflow)
+.claude/orchestrator/
+.backup/
+runs/
+
 # Build artifacts
 *.whl
 *.tar.gz

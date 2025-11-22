@@ -1,0 +1,80 @@
+skill:
+  id: survey_analysis
+  version: "1.0.0"
+  category: analytics
+
+  triggers:
+    - "survey"
+    - "questionnaire"
+    - "respondent"
+    - "likert"
+    - "sentiment"
+    - "customer feedback"
+
+  input_schema:
+    type: object
+    properties:
+      data_path:
+        type: string
+      response_columns:
+        type: array
+        items:
+          type: string
+      demographic_columns:
+        type: array
+        items:
+          type: string
+      analysis_type:
+        type: string
+        enum: [descriptive, segmentation, sentiment, correlation]
+    required: [data_path, response_columns]
+
+  output_schema:
+    type: object
+    properties:
+      summary_stats:
+        type: object
+      visualizations:
+        type: array
+      insights:
+        type: array
+      segments:
+        type: array
+
+  methodology:
+    - step: data_loading
+      description: "Load and clean survey data"
+      tools: [file_system, duckdb]
+    - step: response_validation
+      description: "Check response quality and completeness"
+      tools: [duckdb]
+    - step: descriptive_analysis
+      description: "Calculate summary statistics"
+      tools: [duckdb, python_executor]
+    - step: cross_tabulation
+      description: "Analyze responses by demographics"
+      tools: [duckdb, python_executor]
+    - step: visualization
+      description: "Create charts and graphs"
+      tools: [visualization]
+    - step: insight_generation
+      description: "Extract key insights and recommendations"
+      tools: [python_executor]
+
+  best_practices:
+    - "Check for response bias"
+    - "Handle missing data appropriately"
+    - "Use appropriate statistical tests"
+
+  common_pitfalls:
+    - "Overgeneralizing from small samples"
+    - "Ignoring response rate issues"
+    - "Misinterpreting correlation as causation"
+
+  tools_required:
+    - file_system
+    - duckdb
+    - python_executor
+    - visualization
+
+  validation_criteria: "Analysis covers all response categories with appropriate visualizations"

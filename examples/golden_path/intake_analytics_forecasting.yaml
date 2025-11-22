@@ -1,0 +1,180 @@
+################################################################################
+# Golden Path Intake - Customer Demand Forecasting
+#
+# This is the canonical example project for demonstrating Ready-Set-Code
+# end-to-end orchestration. Use this as a template for real client projects.
+################################################################################
+
+project:
+  id: "golden-path-analytics-forecast"
+  name: "Golden Path - Customer Demand Forecast"
+  type: "analytics_forecasting"
+  domain: "retail"
+  description: |
+    Demonstrate the full Ready-Set-Code orchestration flow with a realistic
+    analytics project: forecasting weekly product demand by region and
+    producing an executive KPI dashboard.
+
+goals:
+  primary:
+    - "Forecast weekly demand by product category and region for next 12 weeks"
+    - "Generate executive KPI dashboard spec with 4 key metrics"
+    - "Achieve MAPE < 15% on held-out test set"
+  secondary:
+    - "Demonstrate Ready-Set-Code end-to-end orchestration"
+    - "Showcase checkpoint artifacts and governance gates"
+    - "Generate comprehensive documentation for handoff"
+
+success_metrics:
+  - metric: "forecast_mape"
+    target: 0.15
+    direction: "below"
+  - metric: "test_coverage"
+    target: 0.70
+    direction: "above"
+  - metric: "documentation_complete"
+    target: true
+
+data:
+  sources:
+    - name: "demand_history"
+      path: "data/raw/demand_history.csv"
+      format: "csv"
+      description: "Historical weekly demand by product and region"
+      rows_estimate: 5000
+      columns:
+        - "week_date"
+        - "product_category"
+        - "region"
+        - "units_sold"
+        - "revenue_usd"
+
+  assumptions:
+    - "Data is anonymized and contains no PII"
+    - "Historical data covers at least 52 weeks"
+    - "No major supply chain disruptions in historical period"
+
+  privacy_requirements:
+    - "No client-identifiable fields"
+    - "No export of data outside workspace"
+    - "Aggregated outputs only"
+
+deliverables:
+  - name: "Forecasting Pipeline"
+    type: "code"
+    description: "Python scripts for data processing and model training"
+    artifacts:
+      - "src/etl/load_demand.py"
+      - "src/models/forecast_model.py"
+      - "src/evaluation/metrics.py"
+
+  - name: "Trained Model"
+    type: "model"
+    description: "Serialized forecasting model"
+    artifacts:
+      - "models/demand_forecast.pkl"
+      - "models/metrics.json"
+
+  - name: "KPI Dashboard Spec"
+    type: "documentation"
+    description: "Dashboard design and implementation guide"
+    artifacts:
+      - "docs/dashboard_spec.md"
+      - "docs/kpi_definitions.md"
+
+orchestration:
+  enabled_agents:
+    - "architect"
+    - "data"
+    - "developer"
+    - "qa"
+    - "documentarian"
+
+  consensus_required_phases:
+    - "planning"
+    - "architecture"
+
+  phase_config:
+    planning:
+      max_iterations: 2
+      require_approval: false
+
+    architecture:
+      adr_required: true
+      require_approval: true
+
+    data:
+      validation_required: true
+      checkpoint_artifacts:
+        - "data/processed/features.parquet"
+        - "models/metrics.json"
+
+    development:
+      test_required: true
+      lint_required: true
+
+    qa:
+      min_test_coverage: 0.70
+      regression_tests: true
+
+    documentation:
+      readme_required: true
+      api_docs: false
+
+governance:
+  client_profile: "kearney-default"
+
+  quality_gates:
+    min_test_coverage: 0.70
+    require_security_scan: false
+    require_documentation: true
+    max_complexity: 10
+
+  compliance:
+    gdpr: false
+    hipaa: false
+    sox: false
+
+  brand_constraints:
+    colors:
+      - "#7823DC"  # Kearney purple
+      - "#1E1E1E"  # Charcoal
+      - "#A5A5A5"  # Silver
+    fonts:
+      - "Inter"
+    forbidden_terms: []
+
+rsg:
+  ready_phases:
+    - "planning"
+    - "architecture"
+
+  set_phases:
+    - "data"
+
+  go_phases:
+    - "development"
+    - "qa"
+    - "documentation"
+
+timeline:
+  estimated_duration_hours: 4
+  checkpoints:
+    - phase: "architecture"
+      expected_at: "hour_1"
+    - phase: "data"
+      expected_at: "hour_2"
+    - phase: "qa"
+      expected_at: "hour_3"
+
+notes: |
+  This golden path project is designed to demonstrate the full capabilities
+  of Ready-Set-Code. It includes:
+
+  - Realistic analytics workflow (forecasting + dashboard)
+  - All standard phases enabled
+  - Governance gates configured
+  - Sample data included
+
+  Use this as a starting point for real client engagements. Copy this file,
+  update the project details, and replace the sample data with client data.
