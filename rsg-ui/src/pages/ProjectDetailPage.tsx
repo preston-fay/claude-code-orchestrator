@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
+import { getProject, runPhase, getProjectCheckpoints, deleteProject } from '../api/client';
 import { Project, Checkpoint, getCapabilityLabel } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
@@ -13,6 +13,24 @@ const ProjectDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [runningPhase, setRunningPhase] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteProject = async () => {
+    if (!projectId) return;
+
+    try {
+      setDeleting(true);
+      setError(null);
+      await deleteProject(projectId);
+      navigate('/projects');
+    } catch (err) {
+      setError('Failed to delete project');
+      console.error(err);
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
 
   useEffect(() => {
     if (projectId) {
@@ -126,9 +144,17 @@ const ProjectDetailPage: React.FC = () => {
           <span className="separator">/</span>
           <span>{project.project_name}</span>
         </div>
-        <button className="button-secondary" onClick={loadProject}>
-          Refresh
-        </button>
+        <div className="header-actions">
+          <button className="button-secondary" onClick={loadProject}>
+            Refresh
+          </button>
+          <button
+            className="button-danger"
+            onClick={() => setShowDeleteModal(true)}
+          >
+            Delete Project
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -271,6 +297,41 @@ const ProjectDetailPage: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Delete Project</h3>
+            </div>
+            <div className="modal-body">
+              <p>
+                Are you sure you want to delete <strong>{project.project_name}</strong>?
+              </p>
+              <p className="warning-text">
+                This action is irreversible. All project data, checkpoints, and artifacts will be permanently deleted.
+              </p>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="button-secondary"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="button-danger"
+                onClick={handleDeleteProject}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete Project'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

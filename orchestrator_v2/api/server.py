@@ -525,6 +525,62 @@ async def get_project(project_id: str):
     )
 
 
+@app.delete("/projects/{project_id}")
+async def delete_project(project_id: str):
+    """Delete a project and all associated data.
+
+    This removes:
+    - Project state
+    - Workspace directory
+    - Checkpoints
+    - Artifacts
+    - Governance logs
+    """
+    import shutil
+
+    # Verify project exists
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    # Delete workspace directory
+    if state.workspace_path:
+        workspace_path = Path(state.workspace_path)
+        if workspace_path.exists():
+            try:
+                shutil.rmtree(workspace_path)
+            except Exception as e:
+                import logging
+                logging.warning(f"Failed to delete workspace {workspace_path}: {e}")
+
+    # Delete checkpoints for this project
+    checkpoint_ids = await checkpoint_repo.list_for_project(project_id)
+    for cid in checkpoint_ids:
+        await checkpoint_repo.delete(cid)
+
+    # Delete artifacts for this project
+    artifacts = await artifact_repo.list_for_project(project_id)
+    for artifact in artifacts:
+        await artifact_repo.delete(project_id, artifact.path)
+
+    # Delete project state
+    await project_repo.delete(project_id)
+
+    # Remove from engine tracking
+    if project_id in _engines:
+        del _engines[project_id]
+
+    # Emit deletion event
+    emit_event(
+        event_type=EventType.WORKFLOW_COMPLETED,
+        project_id=project_id,
+        message=f"Project {project_id} deleted",
+    )
+
+    return {"project_id": project_id, "status": "deleted"}
+
+
 @app.get("/projects/{project_id}/status", response_model=StatusDTO)
 async def get_project_status(project_id: str):
     """Get project workflow status."""
