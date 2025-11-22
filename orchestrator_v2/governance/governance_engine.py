@@ -40,43 +40,58 @@ class GovernanceEngine:
 
     async def evaluate_phase_transition(
         self,
-        project_state: ProjectState,
-        phase: PhaseType,
+        from_phase: PhaseType | None = None,
+        to_phase: PhaseType | None = None,
+        state: ProjectState | None = None,
+        project_state: ProjectState | None = None,
+        phase: PhaseType | None = None,
     ) -> GovernanceResults:
         """Evaluate governance gates for phase transition.
 
         Args:
-            project_state: Current project state.
-            phase: Phase to evaluate.
+            from_phase: Source phase (current phase being completed).
+            to_phase: Destination phase (next phase to start).
+            state: Current project state (alternative to project_state).
+            project_state: Current project state (legacy parameter).
+            phase: Phase to evaluate (legacy parameter).
 
         Returns:
             Governance evaluation results.
         """
+        # Handle both old and new calling conventions
+        actual_state = state or project_state
+        actual_phase = from_phase or phase
+
+        if actual_state is None:
+            raise GovernanceError("No project state provided to evaluate_phase_transition")
+        if actual_phase is None:
+            raise GovernanceError("No phase provided to evaluate_phase_transition")
+
         if self._policy is None:
-            self.load_policy(project_state.client)
+            self.load_policy(actual_state.client)
 
         results = GovernanceResults()
 
         # Evaluate quality gates
-        quality_results = await self._evaluate_quality_gates(phase, project_state)
+        quality_results = await self._evaluate_quality_gates(actual_phase, actual_state)
         results.quality_gates.extend(quality_results)
 
         # Evaluate compliance
-        compliance_results = await self._evaluate_compliance(project_state)
+        compliance_results = await self._evaluate_compliance(actual_state)
         results.compliance_checks.extend(compliance_results)
 
         # Determine overall status
         blocked = any(g.status == GateStatus.BLOCKED for g in results.quality_gates)
         results.passed = not blocked
 
-        if blocked:
-            results.failed_rules = [
-                g.gate_id for g in results.quality_gates
-                if g.status == GateStatus.BLOCKED
-            ]
+        # Always populate failed_rules (empty if passed)
+        results.failed_rules = [
+            g.gate_id for g in results.quality_gates
+            if g.status == GateStatus.BLOCKED
+        ]
 
         # Log to audit trail
-        self._log_governance_evaluation(phase, project_state, results)
+        self._log_governance_evaluation(actual_phase, actual_state, results)
 
         return results
 

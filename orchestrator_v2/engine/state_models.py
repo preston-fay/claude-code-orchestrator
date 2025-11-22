@@ -159,6 +159,8 @@ class GovernanceResults(BaseModel):
     quality_gates: list[GateResult] = Field(default_factory=list)
     compliance_checks: list[ComplianceResult] = Field(default_factory=list)
     passed: bool = True
+    # List of gate IDs that failed/blocked
+    failed_rules: list[str] = Field(default_factory=list)
 
 
 # -----------------------------------------------------------------------------

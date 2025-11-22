@@ -466,7 +466,7 @@ class WorkflowEngine:
         try:
             # Initialize
             agent_state.status = AgentStatus.INITIALIZING
-            agent.initialize(self.state)
+            await agent.initialize(self.state)
 
             # Plan
             agent_state.status = AgentStatus.PLANNING
@@ -475,7 +475,7 @@ class WorkflowEngine:
                 description=f"Execute {phase.value} phase tasks",
                 requirements=self.state.metadata.get("requirements", []),
             )
-            plan = agent.plan(task)
+            plan = await agent.plan(task)
 
             # Act
             agent_state.status = AgentStatus.ACTING
@@ -503,15 +503,15 @@ class WorkflowEngine:
                 context.model = model_config.model
 
             for step in plan.steps:
-                output = agent.act(step, context)
+                output = await agent.act(step, context)
                 context.previous_outputs.append(output)
 
             # Summarize
             agent_state.status = AgentStatus.SUMMARIZING
-            summary = agent.summarize(self.state.run_id)
+            summary = await agent.summarize(self.state.run_id)
 
             # Complete
-            agent.complete(self.state)
+            await agent.complete(self.state)
             agent_state.status = AgentStatus.COMPLETE
             agent_state.completed_at = datetime.utcnow()
             agent_state.summary = summary.summary
