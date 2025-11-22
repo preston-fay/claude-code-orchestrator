@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
 import { Project, Checkpoint } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
@@ -126,9 +126,16 @@ const ProjectDetailPage: React.FC = () => {
           <span className="separator">/</span>
           <span>{project.project_name}</span>
         </div>
-        <button className="button-secondary" onClick={loadProject}>
-          Refresh
-        </button>
+        <div className="header-actions">
+          {project.project_type === 'app_build' && (
+            <Link to={`/projects/${projectId}/build`} className="app-build-link">
+              App Build
+            </Link>
+          )}
+          <button className="button-secondary" onClick={loadProject}>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error && (

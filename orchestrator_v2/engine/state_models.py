@@ -23,6 +23,7 @@ class PhaseType(str, Enum):
     INTAKE = "intake"
     PLANNING = "planning"
     ARCHITECTURE = "architecture"
+    SCAFFOLDING = "scaffolding"  # App Builder: scaffold project structure
     DATA = "data"
     SECURITY = "security"
     CONSENSUS = "consensus"
@@ -257,6 +258,10 @@ class ProjectState(BaseModel):
 
     # Template reference
     template_id: str | None = None
+
+    # App Builder fields (for app_build project type)
+    app_repo_url: str | None = None  # Git URL of target app repository
+    app_repo_local_path: str | None = None  # Local checkout path for app repo
 
     # Workflow progress
     current_phase: PhaseType = PhaseType.INTAKE
