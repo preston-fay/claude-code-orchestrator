@@ -32,6 +32,7 @@ function App() {
       <main className="main-content">
         <Routes>
           <Route path="/" element={<ProjectListPage />} />
+          <Route path="/projects" element={<ProjectListPage />} />
           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
           <Route path="/projects/:projectId/build" element={<ProjectAppBuildPage />} />
           <Route path="/projects/:projectId/features" element={<ProjectFeaturesPage />} />
