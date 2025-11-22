@@ -61,6 +61,11 @@ dependencies = [
 
     # AI/LLM integration
     "anthropic>=0.40.0",
+
+    # Orchestrator v2 dependencies
+    "typing_extensions>=4.8.0",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
 ]
 
 [project.optional-dependencies]
@@ -94,7 +99,8 @@ Repository = "https://github.com/claude-code-orchestrator/claude-code-orchestrat
 Issues = "https://github.com/claude-code-orchestrator/claude-code-orchestrator/issues"
 
 [tool.setuptools]
-packages = ["src"]
+packages = ["src", "orchestrator_v2"]
+package-data = {"orchestrator_v2" = ["py.typed"]}
 
 [tool.black]
 line-length = 100
@@ -178,7 +184,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src"]
+source = ["src", "orchestrator_v2"]
 omit = [
     "*/tests/*",
     "*/test_*.py",

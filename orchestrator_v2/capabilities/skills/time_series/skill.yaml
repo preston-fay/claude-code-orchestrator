@@ -1,0 +1,76 @@
+skill:
+  id: time_series_forecasting
+  version: "1.0.0"
+  category: analytics
+
+  triggers:
+    - "forecast"
+    - "predict future"
+    - "time series"
+    - "trend analysis"
+    - "demand forecasting"
+
+  input_schema:
+    type: object
+    properties:
+      data_path:
+        type: string
+      target_column:
+        type: string
+      horizon:
+        type: integer
+      frequency:
+        type: string
+        enum: [daily, weekly, monthly]
+    required: [data_path, target_column, horizon]
+
+  output_schema:
+    type: object
+    properties:
+      forecast:
+        type: array
+      metrics:
+        type: object
+      model_path:
+        type: string
+
+  methodology:
+    - step: data_preparation
+      description: "Load and validate time series data"
+      tools: [file_system, duckdb]
+    - step: exploration
+      description: "Analyze patterns, seasonality, stationarity"
+      tools: [duckdb, visualization]
+    - step: model_selection
+      description: "Choose appropriate model (ARIMA, Prophet, LSTM)"
+      decision_factors:
+        - data_size
+        - seasonality_strength
+        - required_interpretability
+    - step: training
+      description: "Train model with cross-validation"
+      tools: [python_executor]
+    - step: evaluation
+      description: "Calculate MAPE, RMSE, residual analysis"
+      tools: [python_executor, visualization]
+    - step: forecasting
+      description: "Generate predictions with confidence intervals"
+      tools: [python_executor]
+
+  best_practices:
+    - "Always check for stationarity before ARIMA"
+    - "Use walk-forward validation for time series"
+    - "Include uncertainty estimates in forecasts"
+
+  common_pitfalls:
+    - "Data leakage from future values"
+    - "Ignoring seasonality patterns"
+    - "Over-fitting to recent trends"
+
+  tools_required:
+    - file_system
+    - duckdb
+    - python_executor
+    - visualization
+
+  validation_criteria: "MAPE < 15% on holdout set"
