@@ -5,6 +5,22 @@ import { Project, Checkpoint } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
 
+// Standard phases for different project types
+const STANDARD_PHASES = ['planning', 'architecture', 'data', 'development', 'qa', 'documentation'];
+const APP_BUILD_PHASES = ['scaffolding', 'development', 'qa', 'documentation'];
+const TERRITORY_PHASES = ['planning', 'data', 'development', 'qa'];
+
+function getPhasesForProjectType(projectType: string): string[] {
+  switch (projectType) {
+    case 'app_build':
+      return APP_BUILD_PHASES;
+    case 'territory_poc':
+      return TERRITORY_PHASES;
+    default:
+      return STANDARD_PHASES;
+  }
+}
+
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
@@ -13,6 +29,9 @@ const ProjectDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [runningPhase, setRunningPhase] = useState<string | null>(null);
+
+  // Derive phases from project type
+  const phases = project ? getPhasesForProjectType(project.project_type) : [];
 
   useEffect(() => {
     if (projectId) {
@@ -74,15 +93,19 @@ const ProjectDetailPage: React.FC = () => {
   const getPhaseStatus = (phaseName: string): 'pending' | 'in_progress' | 'completed' | 'failed' => {
     if (!project) return 'pending';
 
-    const phaseIndex = project.phases.indexOf(phaseName);
-    const currentIndex = project.phases.indexOf(project.current_phase);
+    // Check if phase is in completed_phases
+    const completedPhases = project.completed_phases || [];
+    if (completedPhases.includes(phaseName)) {
+      return 'completed';
+    }
 
-    if (phaseIndex < currentIndex) return 'completed';
-    if (phaseIndex === currentIndex) {
+    // Check if it's the current phase
+    if (phaseName === project.current_phase) {
       if (project.status === 'running') return 'in_progress';
       if (project.status === 'failed') return 'failed';
-      return 'pending';
+      return 'in_progress'; // Current phase but not running = ready to run
     }
+
     return 'pending';
   };
 
@@ -90,11 +113,10 @@ const ProjectDetailPage: React.FC = () => {
     if (!project || runningPhase) return false;
     if (project.status === 'running') return false;
 
-    const phaseIndex = project.phases.indexOf(phaseName);
-    const currentIndex = project.phases.indexOf(project.current_phase);
+    const completedPhases = project.completed_phases || [];
 
-    // Can run current phase or any completed phase (re-run)
-    return phaseIndex <= currentIndex;
+    // Can run if it's current phase or already completed (re-run)
+    return phaseName === project.current_phase || completedPhases.includes(phaseName);
   };
 
   if (loading) {
@@ -182,17 +204,35 @@ const ProjectDetailPage: React.FC = () => {
       <section className="section">
         <h3>Ready / Set / Go Status</h3>
         <RsgStatus
-          currentPhase={project.current_phase}
-          phases={project.phases}
-          status={project.status}
+          currentStage={
+            (project.completed_phases || []).includes('qa') ? 'go' :
+            (project.completed_phases || []).includes('development') ? 'go' :
+            (project.completed_phases || []).includes('data') ? 'set' :
+            (project.completed_phases || []).includes('architecture') ? 'set' :
+            'ready'
+          }
+          readyCompleted={(project.completed_phases || []).some(p =>
+            ['planning', 'architecture'].includes(p)
+          )}
+          setCompleted={(project.completed_phases || []).some(p =>
+            ['data', 'development'].includes(p)
+          )}
+          goCompleted={(project.completed_phases || []).some(p =>
+            ['qa', 'documentation'].includes(p)
+          )}
         />
       </section>
 
       {/* Phase List */}
       <section className="section">
         <h3>Phases</h3>
+        {phases.length === 0 ? (
+          <div className="empty-state">
+            <p>No phases defined for this project type.</p>
+          </div>
+        ) : (
         <div className="phase-list">
-          {project.phases.map((phase, index) => {
+          {phases.map((phase, index) => {
             const status = getPhaseStatus(phase);
             const canRun = canRunPhase(phase);
             const isRunning = runningPhase === phase;
@@ -221,6 +261,7 @@ const ProjectDetailPage: React.FC = () => {
             );
           })}
         </div>
+        )}
       </section>
 
       {/* Run Activity */}

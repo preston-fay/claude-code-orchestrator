@@ -27,6 +27,8 @@ export interface ProjectSummary {
 export interface Project extends ProjectSummary {
   run_id?: string;
   metadata?: Record<string, unknown>;
+  // Note: phases is derived client-side from project_type, not returned by API
+  phases?: string[];
 }
 
 export interface CreateProjectPayload {
