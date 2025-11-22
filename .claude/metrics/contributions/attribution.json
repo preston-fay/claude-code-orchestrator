@@ -1,8 +1,19 @@
 {
   "metric": "contribution_attribution",
-  "period": "2025-08-23/2025-11-21",
-  "collection_timestamp": "2025-11-21T09:18:51.003355",
+  "period": "2025-08-24/2025-11-22",
+  "collection_timestamp": "2025-11-22T09:16:55.365074",
   "commits": [
+    {
+      "sha": "00454b1f4fc568175a09f58b21d4668becba752a",
+      "author": "github-actions[bot]",
+      "date": "2025-11-21 09:19:55 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 184,
+      "lines_deleted": 173,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
     {
       "sha": "ab30727682448ec7f299b1006713747acd3cecef",
       "author": "github-actions[bot]",
@@ -419,19 +430,19 @@
     }
   ],
   "summary": {
-    "total_commits": 33,
-    "human_commits": 20,
+    "total_commits": 34,
+    "human_commits": 21,
     "ai_commits": 1,
     "collaborative_commits": 12,
-    "human_percentage": 60.61,
-    "ai_percentage": 3.03,
-    "collaborative_percentage": 36.36,
-    "human_lines_added": 6759,
+    "human_percentage": 61.76,
+    "ai_percentage": 2.94,
+    "collaborative_percentage": 35.29,
+    "human_lines_added": 6943,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 85720,
-    "total_lines_added": 135365,
-    "human_lines_percentage": 4.99,
-    "ai_lines_percentage": 31.68,
-    "collaborative_lines_percentage": 63.33
+    "total_lines_added": 135549,
+    "human_lines_percentage": 5.12,
+    "ai_lines_percentage": 31.64,
+    "collaborative_lines_percentage": 63.24
   }
 }
