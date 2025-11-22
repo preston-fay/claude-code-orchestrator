@@ -71,11 +71,14 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
+  // Derive phases from project or use default RSG phases
+  const phases = project?.phases ?? ['planning', 'architecture', 'data', 'development', 'qa', 'documentation'];
+
   const getPhaseStatus = (phaseName: string): 'pending' | 'in_progress' | 'completed' | 'failed' => {
     if (!project) return 'pending';
 
-    const phaseIndex = project.phases.indexOf(phaseName);
-    const currentIndex = project.phases.indexOf(project.current_phase);
+    const phaseIndex = phases.indexOf(phaseName);
+    const currentIndex = phases.indexOf(project.current_phase);
 
     if (phaseIndex < currentIndex) return 'completed';
     if (phaseIndex === currentIndex) {
@@ -90,11 +93,38 @@ const ProjectDetailPage: React.FC = () => {
     if (!project || runningPhase) return false;
     if (project.status === 'running') return false;
 
-    const phaseIndex = project.phases.indexOf(phaseName);
-    const currentIndex = project.phases.indexOf(project.current_phase);
+    const phaseIndex = phases.indexOf(phaseName);
+    const currentIndex = phases.indexOf(project.current_phase);
 
     // Can run current phase or any completed phase (re-run)
     return phaseIndex <= currentIndex;
+  };
+
+  // Determine RSG stage completion based on completed_phases
+  const getReadyCompleted = (): boolean => {
+    if (!project) return false;
+    const readyPhases = ['planning', 'architecture'];
+    return readyPhases.every(p => project.completed_phases?.includes(p));
+  };
+
+  const getSetCompleted = (): boolean => {
+    if (!project) return false;
+    const setPhases = ['data', 'development'];
+    return setPhases.every(p => project.completed_phases?.includes(p));
+  };
+
+  const getGoCompleted = (): boolean => {
+    if (!project) return false;
+    const goPhases = ['qa', 'documentation'];
+    return goPhases.every(p => project.completed_phases?.includes(p));
+  };
+
+  const getCurrentStage = (): string => {
+    if (!project) return 'ready';
+    if (getGoCompleted()) return 'complete';
+    if (getSetCompleted()) return 'go';
+    if (getReadyCompleted()) return 'set';
+    return 'ready';
   };
 
   if (loading) {
@@ -172,9 +202,10 @@ const ProjectDetailPage: React.FC = () => {
       <section className="section">
         <h3>Ready / Set / Go Status</h3>
         <RsgStatus
-          currentPhase={project.current_phase}
-          phases={project.phases}
-          status={project.status}
+          currentStage={getCurrentStage()}
+          readyCompleted={getReadyCompleted()}
+          setCompleted={getSetCompleted()}
+          goCompleted={getGoCompleted()}
         />
       </section>
 
@@ -182,7 +213,7 @@ const ProjectDetailPage: React.FC = () => {
       <section className="section">
         <h3>Phases</h3>
         <div className="phase-list">
-          {project.phases.map((phase, index) => {
+          {phases.map((phase, index) => {
             const status = getPhaseStatus(phase);
             const canRun = canRunPhase(phase);
             const isRunning = runningPhase === phase;

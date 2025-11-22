@@ -27,6 +27,8 @@ export interface ProjectSummary {
 export interface Project extends ProjectSummary {
   run_id?: string;
   metadata?: Record<string, unknown>;
+  // Optional phases array - derived from workflow or explicitly provided
+  phases?: string[];
 }
 
 export interface CreateProjectPayload {
