@@ -152,7 +152,7 @@ class GovernanceEngine:
             return results
 
         # GDPR compliance check
-        if self._policy.compliance.gdpr_enabled:
+        if self._policy.compliance.gdpr:
             pii_in_repo = state.metadata.get("pii_in_repo", False)
             if pii_in_repo:
                 results.append({

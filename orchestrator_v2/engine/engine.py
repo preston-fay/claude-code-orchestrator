@@ -775,9 +775,8 @@ class WorkflowEngine:
         )
 
         results = await self._governance_engine.evaluate_phase_transition(
-            from_phase=phase,
-            to_phase=self._get_next_phase_type(phase),
-            state=self.state,
+            project_state=self.state,
+            phase=phase,
         )
 
         # Emit governance check result event
