@@ -1,8 +1,350 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-24/2025-11-22",
-  "collection_timestamp": "2025-11-22T09:16:55.365074",
+  "collection_timestamp": "2025-11-22T16:24:36.790046",
   "commits": [
+    {
+      "sha": "ea8f950d9db4ce35164a35ce22cb72b3fdfb2456",
+      "author": "Claude",
+      "date": "2025-11-22 16:15:59 +0000",
+      "message": "chore: add CODEOWNERS and update .gitignore for CCW workflow",
+      "contributor_type": "human",
+      "lines_added": 37,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "c01a2247b4cd581fdcbf83908ea71411485112f4",
+      "author": "Preston Fay",
+      "date": "2025-11-22 09:49:10 -0600",
+      "message": "docs: add CCW development workflow documentation",
+      "contributor_type": "collaborative",
+      "lines_added": 94,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "630a1b768aaaf7bece5622d3987e5c7c7027881f",
+      "author": "Preston Fay",
+      "date": "2025-11-22 09:48:24 -0600",
+      "message": "feat(llm): update model configuration to Sonnet 4.5 and Haiku 4.5",
+      "contributor_type": "collaborative",
+      "lines_added": 264,
+      "lines_deleted": 32,
+      "files_changed": 6,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "ab2a2ff97340ed4bdf98279f49ffc4f8f55e0a5a",
+      "author": "github-actions[bot]",
+      "date": "2025-11-22 09:18:00 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 197,
+      "lines_deleted": 186,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
+    {
+      "sha": "e20cfb2f92d9fa3af704d4d8b70f72739d8c009c",
+      "author": "Preston Fay",
+      "date": "2025-11-21 18:40:32 -0600",
+      "message": "refactor: extract Territory Optimizer into separate repo and clean RSC core",
+      "contributor_type": "collaborative",
+      "lines_added": 250,
+      "lines_deleted": 397,
+      "files_changed": 11,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "2b361c41da613b3965c375e56b2dc4d7790ee49b",
+      "author": "Claude",
+      "date": "2025-11-21 22:45:20 +0000",
+      "message": "feat: auto-create workspace on project creation with template support",
+      "contributor_type": "human",
+      "lines_added": 418,
+      "lines_deleted": 14,
+      "files_changed": 10,
+      "ai_indicators": []
+    },
+    {
+      "sha": "f9184c159efc1e28f5158b32b6f7f16306aca823",
+      "author": "Claude",
+      "date": "2025-11-21 22:16:44 +0000",
+      "message": "feat: add Territory POC engine and UI for IA/IL/IN retail realignment",
+      "contributor_type": "human",
+      "lines_added": 2269,
+      "lines_deleted": 2,
+      "files_changed": 14,
+      "ai_indicators": []
+    },
+    {
+      "sha": "8419d35bc2038bd289eed2fbd7592f69b9618593",
+      "author": "Claude",
+      "date": "2025-11-21 19:12:53 +0000",
+      "message": "feat: add Golden Path project template and demo",
+      "contributor_type": "human",
+      "lines_added": 1031,
+      "lines_deleted": 1,
+      "files_changed": 7,
+      "ai_indicators": []
+    },
+    {
+      "sha": "23f7b32fb55b88b9bbc468b7e997ccd43765a5a5",
+      "author": "Claude",
+      "date": "2025-11-21 19:02:34 +0000",
+      "message": "refactor: full repo cleanup and restructure",
+      "contributor_type": "human",
+      "lines_added": 663,
+      "lines_deleted": 114,
+      "files_changed": 79,
+      "ai_indicators": []
+    },
+    {
+      "sha": "5df044e38ed793913c79d88a3582ba5d40a17f25",
+      "author": "Claude",
+      "date": "2025-11-21 18:53:32 +0000",
+      "message": "feat: add Run Activity Events API and Live Activity Panel",
+      "contributor_type": "human",
+      "lines_added": 893,
+      "lines_deleted": 2,
+      "files_changed": 11,
+      "ai_indicators": []
+    },
+    {
+      "sha": "899f17488eb3f4a633b1eae668daafe2e8697363",
+      "author": "Claude",
+      "date": "2025-11-21 18:39:33 +0000",
+      "message": "feat: add user credential UI and provider settings integration",
+      "contributor_type": "human",
+      "lines_added": 599,
+      "lines_deleted": 50,
+      "files_changed": 7,
+      "ai_indicators": []
+    },
+    {
+      "sha": "cffcc27f2b5161172f254eaebbb362c2b482333d",
+      "author": "Claude",
+      "date": "2025-11-21 18:24:35 +0000",
+      "message": "feat: implement multi-provider LLM integration (Anthropic + Bedrock)",
+      "contributor_type": "human",
+      "lines_added": 1183,
+      "lines_deleted": 2,
+      "files_changed": 10,
+      "ai_indicators": []
+    },
+    {
+      "sha": "65bbb8903ca27ece31af668a00694488c0e67e71",
+      "author": "Claude",
+      "date": "2025-11-21 17:58:14 +0000",
+      "message": "chore: rename app to Kearney Ready-Set-Code",
+      "contributor_type": "human",
+      "lines_added": 6,
+      "lines_deleted": 6,
+      "files_changed": 5,
+      "ai_indicators": []
+    },
+    {
+      "sha": "104227c2d5b50dd9ccaa23336611107ddb1581d4",
+      "author": "Claude",
+      "date": "2025-11-21 17:57:01 +0000",
+      "message": "feat: create Ready-Set-Go React UI with KDS styling",
+      "contributor_type": "human",
+      "lines_added": 2049,
+      "lines_deleted": 0,
+      "files_changed": 17,
+      "ai_indicators": []
+    },
+    {
+      "sha": "924f753cade23c49596440be5d8be31a69fd3a6b",
+      "author": "Claude",
+      "date": "2025-11-21 17:41:10 +0000",
+      "message": "feat: implement parallel execution, model selection, and token budgets",
+      "contributor_type": "human",
+      "lines_added": 1267,
+      "lines_deleted": 3,
+      "files_changed": 7,
+      "ai_indicators": []
+    },
+    {
+      "sha": "f0dadc727712453ee97958860e638ff1b3c8abfe",
+      "author": "Claude",
+      "date": "2025-11-21 17:14:42 +0000",
+      "message": "feat: implement authentication, user profiles, and BYOK support",
+      "contributor_type": "human",
+      "lines_added": 1090,
+      "lines_deleted": 1,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
+    {
+      "sha": "f3f76b729555ba40fcddc42ab83835fc2d8154ac",
+      "author": "Claude",
+      "date": "2025-11-21 16:48:04 +0000",
+      "message": "infra: add post-deploy verification artifacts and health validation",
+      "contributor_type": "human",
+      "lines_added": 592,
+      "lines_deleted": 0,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "e5e57c636178e4be80b42d80c66bef63a593239a",
+      "author": "Claude",
+      "date": "2025-11-21 16:44:16 +0000",
+      "message": "infra: prepare App Runner deployment artifacts and documentation",
+      "contributor_type": "human",
+      "lines_added": 415,
+      "lines_deleted": 0,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "aa17aa2e83ca2c819a852504aef7aee4d142d89e",
+      "author": "Claude",
+      "date": "2025-11-21 16:39:09 +0000",
+      "message": "infra: wire GitHub Actions to push images to Amazon ECR",
+      "contributor_type": "human",
+      "lines_added": 131,
+      "lines_deleted": 17,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "76f106efe8529c3831171f71b24e3aac8855c77b",
+      "author": "Claude",
+      "date": "2025-11-21 16:00:27 +0000",
+      "message": "infra: dockerize orchestrator API with production entrypoint",
+      "contributor_type": "human",
+      "lines_added": 171,
+      "lines_deleted": 0,
+      "files_changed": 4,
+      "ai_indicators": []
+    },
+    {
+      "sha": "704e4d06f3672bb02cb72837b5bef8b4cd37d8d4",
+      "author": "Claude",
+      "date": "2025-11-21 15:49:12 +0000",
+      "message": "feat: implement Rich-enhanced RSG CLI with Typer",
+      "contributor_type": "human",
+      "lines_added": 758,
+      "lines_deleted": 0,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "5f322a4519eb9b9422f5805a445c118411e0d3b6",
+      "author": "Claude",
+      "date": "2025-11-21 15:33:05 +0000",
+      "message": "feat: implement Ready/Set/Go (RSG) backend service layer + API",
+      "contributor_type": "human",
+      "lines_added": 942,
+      "lines_deleted": 0,
+      "files_changed": 7,
+      "ai_indicators": []
+    },
+    {
+      "sha": "1816b70354f59a3374a04ada0d0d50dd5ad4e775",
+      "author": "Claude",
+      "date": "2025-11-21 15:18:04 +0000",
+      "message": "feat: implement Workspace Manager and RepoAdapter layer",
+      "contributor_type": "human",
+      "lines_added": 1485,
+      "lines_deleted": 0,
+      "files_changed": 9,
+      "ai_indicators": []
+    },
+    {
+      "sha": "fd8950ffbf743c3a2ea32d17c778bdd111bae348",
+      "author": "Claude",
+      "date": "2025-11-21 14:56:33 +0000",
+      "message": "feat: implement Persistence Layer and FastAPI HTTP API",
+      "contributor_type": "human",
+      "lines_added": 1518,
+      "lines_deleted": 4,
+      "files_changed": 7,
+      "ai_indicators": []
+    },
+    {
+      "sha": "21a28830c49022197b399099069cb2a0d36a11f5",
+      "author": "Claude",
+      "date": "2025-11-21 14:41:03 +0000",
+      "message": "feat: implement Skills, Tools, and Governance integration",
+      "contributor_type": "human",
+      "lines_added": 1202,
+      "lines_deleted": 398,
+      "files_changed": 6,
+      "ai_indicators": []
+    },
+    {
+      "sha": "adbaa1e089ee4ef2592eed5636384c320e8c147d",
+      "author": "Claude",
+      "date": "2025-11-21 13:57:36 +0000",
+      "message": "feat: implement Agent Runtime with full lifecycle support",
+      "contributor_type": "human",
+      "lines_added": 1638,
+      "lines_deleted": 705,
+      "files_changed": 11,
+      "ai_indicators": []
+    },
+    {
+      "sha": "d88a6510c5fdefff3694fad60c2513ee668cc046",
+      "author": "Claude",
+      "date": "2025-11-21 13:41:12 +0000",
+      "message": "feat: implement WorkflowEngine and PhaseManager core logic",
+      "contributor_type": "human",
+      "lines_added": 636,
+      "lines_deleted": 461,
+      "files_changed": 6,
+      "ai_indicators": []
+    },
+    {
+      "sha": "c21c0a5bf2fd7b89f5c3a21d339baab61530c267",
+      "author": "Claude",
+      "date": "2025-11-21 13:30:29 +0000",
+      "message": "feat: scaffold Orchestrator v2 code structure",
+      "contributor_type": "human",
+      "lines_added": 5842,
+      "lines_deleted": 2,
+      "files_changed": 55,
+      "ai_indicators": []
+    },
+    {
+      "sha": "9fc08c70d985b86a497cb539a0f533ab6dcc7fca",
+      "author": "Claude",
+      "date": "2025-11-21 13:18:47 +0000",
+      "message": "docs: add architecture analysis and quick reference guides",
+      "contributor_type": "human",
+      "lines_added": 1257,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "ecc7bbb2334e5a4df37040aeaf6fb790b5ca1feb",
+      "author": "Claude",
+      "date": "2025-11-21 13:17:52 +0000",
+      "message": "docs: add Orchestrator v2 ADRs and architecture documentation",
+      "contributor_type": "human",
+      "lines_added": 2196,
+      "lines_deleted": 0,
+      "files_changed": 6,
+      "ai_indicators": []
+    },
     {
       "sha": "00454b1f4fc568175a09f58b21d4668becba752a",
       "author": "github-actions[bot]",
@@ -12,6 +354,105 @@
       "lines_added": 184,
       "lines_deleted": 173,
       "files_changed": 8,
+      "ai_indicators": []
+    },
+    {
+      "sha": "87cfc63d2c6306eff08fdca2e34891a12d1fc819",
+      "author": "Claude",
+      "date": "2025-11-21 00:04:48 +0000",
+      "message": "docs: fix PDF formatting issues",
+      "contributor_type": "human",
+      "lines_added": 22,
+      "lines_deleted": 13,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "8b9f2a7de07c65cac9219ebc1c613e92bbc9a5b9",
+      "author": "Claude",
+      "date": "2025-11-20 23:48:16 +0000",
+      "message": "docs: remove duplicate cover page CSS with purple gradient",
+      "contributor_type": "human",
+      "lines_added": 0,
+      "lines_deleted": 46,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "8fc3b9c8f0ea7dab47d01b452c655ba3175e7f1c",
+      "author": "Claude",
+      "date": "2025-11-20 23:43:55 +0000",
+      "message": "docs: regenerate PDF with clean cover page",
+      "contributor_type": "human",
+      "lines_added": 0,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "f0055ac6ab231e5e49a6c048e2c2d40e4ca47f9b",
+      "author": "Claude",
+      "date": "2025-11-20 23:40:32 +0000",
+      "message": "docs: simplify cover page - black text, no purple",
+      "contributor_type": "human",
+      "lines_added": 5,
+      "lines_deleted": 5,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "6e628d6ed612b6a06a35ad4fac7fa2b30225ce4c",
+      "author": "Claude",
+      "date": "2025-11-20 23:37:18 +0000",
+      "message": "docs: fix cover page with white background and purple accents",
+      "contributor_type": "human",
+      "lines_added": 82,
+      "lines_deleted": 0,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "05145963d40b710240eff5eaddeabe1067edced9",
+      "author": "Claude",
+      "date": "2025-11-20 23:34:24 +0000",
+      "message": "docs: remove cover page and fix page breaks in PDF",
+      "contributor_type": "human",
+      "lines_added": 0,
+      "lines_deleted": 18,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "d4f993e71b6358e40e5058c8e9a39c14603c0381",
+      "author": "Claude",
+      "date": "2025-11-20 23:26:54 +0000",
+      "message": "docs: add zip archive of orchestrator overview PDF for download",
+      "contributor_type": "human",
+      "lines_added": 0,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "c0d0dcc315e76ef9081ea46db65ce1a355b57ed1",
+      "author": "Claude",
+      "date": "2025-11-20 23:25:13 +0000",
+      "message": "docs: add Kearney-styled PDF version of orchestrator overview",
+      "contributor_type": "human",
+      "lines_added": 1290,
+      "lines_deleted": 0,
+      "files_changed": 4,
+      "ai_indicators": []
+    },
+    {
+      "sha": "b536b0c1d33db3e2bb9421c721b2eceb944ddae4",
+      "author": "Claude",
+      "date": "2025-11-20 22:46:53 +0000",
+      "message": "docs: add comprehensive orchestrator overview and architecture documentation",
+      "contributor_type": "human",
+      "lines_added": 1551,
+      "lines_deleted": 0,
+      "files_changed": 2,
       "ai_indicators": []
     },
     {
@@ -430,19 +871,19 @@
     }
   ],
   "summary": {
-    "total_commits": 34,
-    "human_commits": 21,
+    "total_commits": 73,
+    "human_commits": 57,
     "ai_commits": 1,
-    "collaborative_commits": 12,
-    "human_percentage": 61.76,
-    "ai_percentage": 2.94,
-    "collaborative_percentage": 35.29,
-    "human_lines_added": 6943,
+    "collaborative_commits": 15,
+    "human_percentage": 78.08,
+    "ai_percentage": 1.37,
+    "collaborative_percentage": 20.55,
+    "human_lines_added": 40378,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 85720,
-    "total_lines_added": 135549,
-    "human_lines_percentage": 5.12,
-    "ai_lines_percentage": 31.64,
-    "collaborative_lines_percentage": 63.24
+    "collaborative_lines_added": 86328,
+    "total_lines_added": 169592,
+    "human_lines_percentage": 23.81,
+    "ai_lines_percentage": 25.29,
+    "collaborative_lines_percentage": 50.9
   }
 }
