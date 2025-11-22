@@ -4,6 +4,7 @@ import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
 import { Project, Checkpoint } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
+import LlmSettings from '../components/LlmSettings';
 
 // Standard phases for different project types
 const STANDARD_PHASES = ['planning', 'architecture', 'data', 'development', 'qa', 'documentation'];
@@ -170,34 +171,58 @@ const ProjectDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Project Info */}
-      <div className="project-info-card">
-        <div className="info-grid">
-          <div className="info-item">
-            <span className="info-label">Type</span>
-            <span className="info-value project-type-value">{project.project_type || 'generic'}</span>
+      {/* Project Info & Settings */}
+      <div className="project-settings-row">
+        <div className="project-info-card">
+          <h4>Project Info</h4>
+          <div className="info-grid">
+            <div className="info-item">
+              <span className="info-label">Type</span>
+              <span className="info-value">
+                <span className="project-type-badge">{project.project_type || 'generic'}</span>
+              </span>
+            </div>
+            <div className="info-item">
+              <span className="info-label">Client</span>
+              <span className="info-value">{project.client}</span>
+            </div>
+            <div className="info-item">
+              <span className="info-label">Status</span>
+              <span className={`status-indicator status-${project.status}`}>
+                {project.status}
+              </span>
+            </div>
+            <div className="info-item">
+              <span className="info-label">Created</span>
+              <span className="info-value">{formatDate(project.created_at)}</span>
+            </div>
+            <div className="info-item">
+              <span className="info-label">Current Phase</span>
+              <span className="info-value phase-badge">{project.current_phase}</span>
+            </div>
           </div>
-          <div className="info-item">
-            <span className="info-label">Client</span>
-            <span className="info-value">{project.client}</span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Status</span>
-            <span className={`status-indicator status-${project.status}`}>
-              {project.status}
-            </span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Created</span>
-            <span className="info-value">{formatDate(project.created_at)}</span>
-          </div>
+          {project.workspace_path && (
+            <div className="workspace-path">
+              <span className="info-label">Workspace</span>
+              <div className="workspace-value">
+                <code>{project.workspace_path}</code>
+                <button
+                  className="copy-btn"
+                  onClick={() => {
+                    navigator.clipboard.writeText(project.workspace_path || '');
+                  }}
+                  title="Copy to clipboard"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        {project.workspace_path && (
-          <div className="workspace-path">
-            <span className="info-label">Workspace</span>
-            <code className="info-value">{project.workspace_path}</code>
-          </div>
-        )}
+
+        <div className="llm-settings-card">
+          <LlmSettings compact />
+        </div>
       </div>
 
       {/* RSG Macro Status */}
