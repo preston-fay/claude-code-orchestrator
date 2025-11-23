@@ -1,0 +1,19 @@
+# apprunner.yaml — Ready-Set-Code Backend (FastAPI)
+version: 1.0
+runtime: python311
+build:
+  commands:
+    pre-build:
+      - pip install --upgrade pip
+    build:
+      - pip install -r requirements.txt
+run:
+  command: uvicorn orchestrator_v2.main:app --host 0.0.0.0 --port 8000
+  network:
+    port: 8000
+health-check:
+  path: /health
+  interval: 10
+  timeout: 5
+  healthy-threshold: 3
+  unhealthy-threshold: 5
