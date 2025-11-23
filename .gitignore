@@ -124,3 +124,7 @@ reports/
 # Generated theme files
 design_system/.generated/
 *.generated.*
+
+# Node modules
+node_modules/
+
