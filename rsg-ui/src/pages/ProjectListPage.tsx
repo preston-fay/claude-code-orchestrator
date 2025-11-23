@@ -14,6 +14,8 @@ const ProjectListPage: React.FC = () => {
     project_name: '',
     client: 'kearney-default',
     template_id: undefined,
+    brief: '',
+    capabilities: [],
   });
   const [creating, setCreating] = useState(false);
 
@@ -55,7 +57,7 @@ const ProjectListPage: React.FC = () => {
       const created = await createProject(newProject);
       setProjects([...projects, created]);
       setShowCreateModal(false);
-      setNewProject({ project_name: '', client: 'kearney-default', template_id: undefined });
+      setNewProject({ project_name: '', client: 'kearney-default', template_id: undefined, brief: '', capabilities: [] });
       navigate(`/projects/${created.project_id}`);
     } catch (err) {
       setError('Failed to create project');
@@ -177,7 +179,7 @@ const ProjectListPage: React.FC = () => {
 
             <div className="modal-body">
               <div className="form-group">
-                <label htmlFor="projectName">Project Name</label>
+                <label htmlFor="projectName">Project Name *</label>
                 <input
                   id="projectName"
                   type="text"
@@ -197,14 +199,40 @@ const ProjectListPage: React.FC = () => {
                     <div
                       key={template.id}
                       className={`template-card ${newProject.template_id === template.id ? 'selected' : ''}`}
-                      onClick={() => setNewProject({ ...newProject, template_id: template.id })}
+                      onClick={() => {
+                        setNewProject({
+                          ...newProject,
+                          template_id: template.id,
+                          brief: template.brief_template || newProject.brief,
+                          capabilities: template.capabilities.length > 0 ? template.capabilities : newProject.capabilities,
+                        });
+                      }}
                     >
                       <div className="template-name">{template.name}</div>
                       <div className="template-description">{template.description}</div>
-                      <div className="template-category">{template.category}</div>
+                      <div className="template-meta">
+                        <span className="template-category">{template.category}</span>
+                        {template.capabilities.length > 0 && (
+                          <span className="template-caps">{template.capabilities.length} capabilities</span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="brief">Project Brief *</label>
+                <textarea
+                  id="brief"
+                  value={newProject.brief || ''}
+                  onChange={(e) =>
+                    setNewProject({ ...newProject, brief: e.target.value })
+                  }
+                  placeholder="Describe the project goals, requirements, and expected outcomes..."
+                  rows={4}
+                />
+                <span className="form-hint">Required: Describe what this project should accomplish</span>
               </div>
 
               <div className="form-group">
@@ -231,7 +259,7 @@ const ProjectListPage: React.FC = () => {
               <button
                 className="button-primary"
                 onClick={handleCreateProject}
-                disabled={creating || !newProject.project_name.trim()}
+                disabled={creating || !newProject.project_name.trim() || !newProject.brief?.trim()}
               >
                 {creating ? 'Creating...' : 'Create Project'}
               </button>

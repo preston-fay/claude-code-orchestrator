@@ -46,6 +46,7 @@ from orchestrator_v2.engine.state_models import (
     GateStatus,
     PhaseType,
     ProjectState,
+    get_phases_for_capabilities,
 )
 from orchestrator_v2.persistence.fs_repository import (
     FileSystemArtifactRepository,
@@ -79,6 +80,9 @@ class CreateProjectRequest(BaseModel):
     description: str | None = None
     intake_path: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # RSC Hardening - project intent and capabilities
+    brief: str | None = None
+    capabilities: list[str] = Field(default_factory=list)
 
 
 class HealthResponse(BaseModel):
@@ -382,6 +386,7 @@ async def list_projects():
     for pid in project_ids:
         try:
             state = await project_repo.load(pid)
+            phases = get_phases_for_capabilities(state.capabilities)
             projects.append(ProjectDTO(
                 project_id=state.project_id,
                 project_name=state.project_name,
@@ -393,6 +398,11 @@ async def list_projects():
                 completed_phases=[p.value for p in state.completed_phases],
                 created_at=state.created_at,
                 status="complete" if state.current_phase == PhaseType.COMPLETE else "active",
+                brief=state.brief,
+                capabilities=state.capabilities,
+                phases=phases,
+                app_repo_url=state.app_repo_url,
+                app_url=state.app_url,
             ))
         except Exception:
             continue
@@ -410,6 +420,8 @@ async def list_project_templates():
             description=t.description,
             project_type=t.project_type,
             category=t.category,
+            capabilities=t.capabilities,
+            brief_template=t.brief_template,
         )
         for t in TEMPLATES
     ]
@@ -424,6 +436,8 @@ async def create_project(request: CreateProjectRequest):
     project_type = request.project_type
     template_id = request.template_id
     intake_path = request.intake_path
+    brief = request.brief
+    capabilities = request.capabilities
 
     if template_id:
         template = get_template_by_id(template_id)
@@ -431,6 +445,11 @@ async def create_project(request: CreateProjectRequest):
             project_type = template.project_type
             if not intake_path and template.default_intake_path:
                 intake_path = template.default_intake_path
+            # Use template capabilities and brief if not provided
+            if not capabilities:
+                capabilities = template.capabilities
+            if not brief:
+                brief = template.brief_template
 
     # Start the project
     state = await engine.start_project(
@@ -443,6 +462,8 @@ async def create_project(request: CreateProjectRequest):
     # Set additional fields
     state.project_type = project_type
     state.template_id = template_id
+    state.brief = brief
+    state.capabilities = capabilities
 
     # Create workspace for the project
     try:
@@ -453,6 +474,8 @@ async def create_project(request: CreateProjectRequest):
                 "project_name": request.project_name,
                 "template_id": template_id,
                 "description": request.description,
+                "brief": brief,
+                "capabilities": capabilities,
             },
         )
         state.workspace_path = str(workspace_config.workspace_root)
@@ -467,6 +490,9 @@ async def create_project(request: CreateProjectRequest):
     # Track engine
     _engines[state.project_id] = engine
 
+    # Derive phases from capabilities
+    phases = get_phases_for_capabilities(state.capabilities)
+
     return ProjectDTO(
         project_id=state.project_id,
         project_name=state.project_name,
@@ -478,6 +504,11 @@ async def create_project(request: CreateProjectRequest):
         completed_phases=[p.value for p in state.completed_phases],
         created_at=state.created_at,
         status="active",
+        brief=state.brief,
+        capabilities=state.capabilities,
+        phases=phases,
+        app_repo_url=state.app_repo_url,
+        app_url=state.app_url,
     )
 
 
@@ -488,6 +519,8 @@ async def get_project(project_id: str):
         state = await project_repo.load(project_id)
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    phases = get_phases_for_capabilities(state.capabilities)
 
     return ProjectDTO(
         project_id=state.project_id,
@@ -500,6 +533,11 @@ async def get_project(project_id: str):
         completed_phases=[p.value for p in state.completed_phases],
         created_at=state.created_at,
         status="complete" if state.current_phase == PhaseType.COMPLETE else "active",
+        brief=state.brief,
+        capabilities=state.capabilities,
+        phases=phases,
+        app_repo_url=state.app_repo_url,
+        app_url=state.app_url,
     )
 
 
@@ -764,6 +802,37 @@ async def delete_project(project_id: str):
         del _engines[project_id]
 
     return {"status": "deleted", "project_id": project_id}
+
+
+class UpdateProjectLinksRequest(BaseModel):
+    """Request to update project external links."""
+    app_repo_url: str | None = None
+    app_url: str | None = None
+
+
+@app.post("/projects/{project_id}/links")
+async def update_project_links(project_id: str, request: UpdateProjectLinksRequest):
+    """Update external links (app repo URL and app URL) for a project."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    # Update the links
+    if request.app_repo_url is not None:
+        state.app_repo_url = request.app_repo_url
+    if request.app_url is not None:
+        state.app_url = request.app_url
+
+    # Save updated state
+    await project_repo.save(state)
+
+    return {
+        "status": "updated",
+        "project_id": project_id,
+        "app_repo_url": state.app_repo_url,
+        "app_url": state.app_url,
+    }
 
 
 # -----------------------------------------------------------------------------

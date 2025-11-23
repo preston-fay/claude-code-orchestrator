@@ -22,6 +22,13 @@ class ProjectDTO(BaseModel):
     completed_phases: list[str] = Field(default_factory=list)
     created_at: datetime
     status: str = "active"
+    # RSC Hardening - project intent and capabilities
+    brief: str | None = None
+    capabilities: list[str] = Field(default_factory=list)
+    phases: list[str] = Field(default_factory=list)  # Derived from capabilities
+    # External deliverable links
+    app_repo_url: str | None = None
+    app_url: str | None = None
 
 
 class ProjectTemplateDTO(BaseModel):
@@ -31,6 +38,9 @@ class ProjectTemplateDTO(BaseModel):
     description: str
     project_type: str
     category: str = "general"
+    # RSC Hardening - capabilities and brief template
+    capabilities: list[str] = Field(default_factory=list)
+    brief_template: str = ""
 
 
 class PhaseDTO(BaseModel):

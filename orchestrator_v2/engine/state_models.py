@@ -252,6 +252,14 @@ class ProjectState(BaseModel):
     client: str = "kearney-default"
     project_type: str = "generic"
 
+    # Project intent and capabilities (RSC Hardening)
+    brief: str | None = None  # High-level project intent/description
+    capabilities: list[str] = Field(default_factory=list)  # e.g. ["data_pipeline", "analytics_forecasting"]
+
+    # External deliverable links (RSC Hardening)
+    app_repo_url: str | None = None  # GitHub repo for the deliverable app
+    app_url: str | None = None  # Live URL for the deployed app
+
     # Workspace path (absolute path to workspace root)
     workspace_path: str | None = None
 
@@ -430,3 +438,48 @@ class WorkflowDefinition(BaseModel):
             if phase.name == phase_type:
                 return phase.order
         return -1
+
+
+# -----------------------------------------------------------------------------
+# Capability to Phase Mapping (RSC Hardening)
+# -----------------------------------------------------------------------------
+
+CAPABILITY_PHASE_MAP: dict[str, list[str]] = {
+    "data_pipeline": ["planning", "architecture", "data"],
+    "analytics_forecasting": ["planning", "architecture", "data", "development", "qa", "documentation"],
+    "ml_classification": ["planning", "architecture", "data", "development", "qa", "documentation"],
+    "ml_regression": ["planning", "architecture", "data", "development", "qa", "documentation"],
+    "app_build": ["planning", "architecture", "development", "qa", "documentation"],
+    "service_api": ["planning", "architecture", "development", "qa", "documentation"],
+    "optimization": ["planning", "architecture", "development", "qa", "documentation"],
+    "territory_poc": ["planning", "data", "development"],
+}
+
+
+def get_phases_for_capabilities(capabilities: list[str]) -> list[str]:
+    """Derive the effective phase set from project capabilities.
+
+    Args:
+        capabilities: List of capability identifiers.
+
+    Returns:
+        Ordered list of phases required for the given capabilities.
+    """
+    if not capabilities:
+        # Default 6-phase workflow
+        return ["planning", "architecture", "data", "development", "qa", "documentation"]
+
+    # Collect all phases from all capabilities
+    phase_set: set[str] = set()
+    for cap in capabilities:
+        if cap in CAPABILITY_PHASE_MAP:
+            phase_set.update(CAPABILITY_PHASE_MAP[cap])
+        else:
+            # Unknown capability - use default phases
+            phase_set.update(["planning", "architecture", "data", "development", "qa", "documentation"])
+
+    # Define canonical phase order
+    phase_order = ["planning", "architecture", "data", "development", "qa", "documentation"]
+
+    # Return phases in canonical order
+    return [p for p in phase_order if p in phase_set]

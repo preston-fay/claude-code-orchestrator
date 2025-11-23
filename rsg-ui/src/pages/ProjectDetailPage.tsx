@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
+import { getProject, getProjectCheckpoints, startReady, startSet, startGo, deleteProject } from '../api/client';
 import { Project, Checkpoint } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
@@ -12,7 +12,7 @@ const ProjectDetailPage: React.FC = () => {
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [runningPhase, setRunningPhase] = useState<string | null>(null);
+  const [rsgLoading, setRsgLoading] = useState(false);
 
   useEffect(() => {
     if (projectId) {
@@ -40,20 +40,62 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
-  const handleRunPhase = async (phaseName: string) => {
+  const handleStartReady = async () => {
     if (!projectId) return;
-
     try {
-      setRunningPhase(phaseName);
+      setRsgLoading(true);
       setError(null);
-      await runPhase(projectId, phaseName);
-      // Reload project to get updated state
+      await startReady(projectId);
       await loadProject();
     } catch (err) {
-      setError(`Failed to run phase: ${phaseName}`);
+      setError('Failed to start Ready phase');
       console.error(err);
     } finally {
-      setRunningPhase(null);
+      setRsgLoading(false);
+    }
+  };
+
+  const handleStartSet = async () => {
+    if (!projectId) return;
+    try {
+      setRsgLoading(true);
+      setError(null);
+      await startSet(projectId);
+      await loadProject();
+    } catch (err) {
+      setError('Failed to start Set phase');
+      console.error(err);
+    } finally {
+      setRsgLoading(false);
+    }
+  };
+
+  const handleStartGo = async () => {
+    if (!projectId) return;
+    try {
+      setRsgLoading(true);
+      setError(null);
+      await startGo(projectId);
+      await loadProject();
+    } catch (err) {
+      setError('Failed to start Go phase');
+      console.error(err);
+    } finally {
+      setRsgLoading(false);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!projectId || !project) return;
+    if (!window.confirm(`Are you sure you want to delete "${project.project_name}"?`)) {
+      return;
+    }
+    try {
+      await deleteProject(projectId);
+      navigate('/projects');
+    } catch (err) {
+      setError('Failed to delete project');
+      console.error(err);
     }
   };
 
@@ -71,30 +113,32 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
-  const getPhaseStatus = (phaseName: string): 'pending' | 'in_progress' | 'completed' | 'failed' => {
-    if (!project) return 'pending';
-
-    const phaseIndex = project.phases.indexOf(phaseName);
-    const currentIndex = project.phases.indexOf(project.current_phase);
-
-    if (phaseIndex < currentIndex) return 'completed';
-    if (phaseIndex === currentIndex) {
-      if (project.status === 'running') return 'in_progress';
-      if (project.status === 'failed') return 'failed';
-      return 'pending';
-    }
-    return 'pending';
+  // Determine RSG stage completion based on completed phases
+  const getReadyCompleted = (): boolean => {
+    if (!project) return false;
+    return project.completed_phases.includes('planning') &&
+           project.completed_phases.includes('architecture');
   };
 
-  const canRunPhase = (phaseName: string): boolean => {
-    if (!project || runningPhase) return false;
-    if (project.status === 'running') return false;
+  const getSetCompleted = (): boolean => {
+    if (!project) return false;
+    const hasData = !project.phases.includes('data') || project.completed_phases.includes('data');
+    const hasDev = project.completed_phases.includes('development');
+    return hasData && hasDev;
+  };
 
-    const phaseIndex = project.phases.indexOf(phaseName);
-    const currentIndex = project.phases.indexOf(project.current_phase);
+  const getGoCompleted = (): boolean => {
+    if (!project) return false;
+    return project.completed_phases.includes('qa') &&
+           project.completed_phases.includes('documentation');
+  };
 
-    // Can run current phase or any completed phase (re-run)
-    return phaseIndex <= currentIndex;
+  const getCurrentStage = (): string => {
+    if (!project) return 'ready';
+    if (getGoCompleted()) return 'complete';
+    if (getSetCompleted()) return 'go';
+    if (getReadyCompleted()) return 'set';
+    return 'ready';
   };
 
   if (loading) {
@@ -126,9 +170,14 @@ const ProjectDetailPage: React.FC = () => {
           <span className="separator">/</span>
           <span>{project.project_name}</span>
         </div>
-        <button className="button-secondary" onClick={loadProject}>
-          Refresh
-        </button>
+        <div className="header-actions">
+          <button className="button-secondary" onClick={loadProject}>
+            Refresh
+          </button>
+          <button className="button-danger" onClick={handleDeleteProject}>
+            Delete
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -160,10 +209,50 @@ const ProjectDetailPage: React.FC = () => {
             <span className="info-value">{formatDate(project.created_at)}</span>
           </div>
         </div>
+
+        {/* Capabilities Badges */}
+        {project.capabilities && project.capabilities.length > 0 && (
+          <div className="capabilities-section">
+            <span className="info-label">Capabilities</span>
+            <div className="capability-badges">
+              {project.capabilities.map((cap) => (
+                <span key={cap} className="capability-badge">{cap.replace(/_/g, ' ')}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Project Brief */}
+        {project.brief && (
+          <div className="brief-section">
+            <span className="info-label">Project Brief</span>
+            <p className="brief-text">{project.brief}</p>
+          </div>
+        )}
+
         {project.workspace_path && (
           <div className="workspace-path">
             <span className="info-label">Workspace</span>
             <code className="info-value">{project.workspace_path}</code>
+          </div>
+        )}
+
+        {/* External Links */}
+        {(project.app_repo_url || project.app_url) && (
+          <div className="external-links-section">
+            <span className="info-label">Deliverables</span>
+            <div className="external-links">
+              {project.app_repo_url && (
+                <a href={project.app_repo_url} target="_blank" rel="noopener noreferrer" className="external-link">
+                  Code Repository
+                </a>
+              )}
+              {project.app_url && (
+                <a href={project.app_url} target="_blank" rel="noopener noreferrer" className="external-link">
+                  Live Application
+                </a>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -172,9 +261,14 @@ const ProjectDetailPage: React.FC = () => {
       <section className="section">
         <h3>Ready / Set / Go Status</h3>
         <RsgStatus
-          currentPhase={project.current_phase}
-          phases={project.phases}
-          status={project.status}
+          currentStage={getCurrentStage()}
+          readyCompleted={getReadyCompleted()}
+          setCompleted={getSetCompleted()}
+          goCompleted={getGoCompleted()}
+          onStartReady={handleStartReady}
+          onStartSet={handleStartSet}
+          onStartGo={handleStartGo}
+          loading={rsgLoading}
         />
       </section>
 
@@ -183,9 +277,9 @@ const ProjectDetailPage: React.FC = () => {
         <h3>Phases</h3>
         <div className="phase-list">
           {project.phases.map((phase, index) => {
-            const status = getPhaseStatus(phase);
-            const canRun = canRunPhase(phase);
-            const isRunning = runningPhase === phase;
+            const isCompleted = project.completed_phases.includes(phase);
+            const isCurrent = project.current_phase === phase;
+            const status = isCompleted ? 'completed' : isCurrent ? 'in_progress' : 'pending';
 
             return (
               <div key={phase} className={`phase-item phase-${status}`}>
@@ -193,19 +287,8 @@ const ProjectDetailPage: React.FC = () => {
                 <div className="phase-info">
                   <span className="phase-name">{phase}</span>
                   <span className={`phase-status status-${status}`}>
-                    {isRunning ? 'Running...' : status}
+                    {isCompleted ? 'Completed' : isCurrent ? 'Current' : 'Pending'}
                   </span>
-                </div>
-                <div className="phase-actions">
-                  {canRun && (
-                    <button
-                      className="button-small"
-                      onClick={() => handleRunPhase(phase)}
-                      disabled={isRunning}
-                    >
-                      {status === 'completed' ? 'Re-run' : 'Run'}
-                    </button>
-                  )}
                 </div>
               </div>
             );
@@ -218,7 +301,7 @@ const ProjectDetailPage: React.FC = () => {
         <section className="section">
           <RunActivityPanel
             projectId={projectId}
-            isRunning={runningPhase !== null}
+            isRunning={rsgLoading}
           />
         </section>
       )}

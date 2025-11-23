@@ -22,6 +22,13 @@ export interface ProjectSummary {
   completed_phases: string[];
   created_at: string;
   status: string;
+  // RSC Hardening - project intent and capabilities
+  brief?: string | null;
+  capabilities: string[];
+  phases: string[];
+  // External deliverable links
+  app_repo_url?: string | null;
+  app_url?: string | null;
 }
 
 export interface Project extends ProjectSummary {
@@ -37,6 +44,9 @@ export interface CreateProjectPayload {
   description?: string;
   intake_path?: string;
   metadata?: Record<string, unknown>;
+  // RSC Hardening - project intent and capabilities
+  brief?: string;
+  capabilities?: string[];
 }
 
 export interface ProjectTemplate {
@@ -45,6 +55,9 @@ export interface ProjectTemplate {
   description: string;
   project_type: string;
   category: string;
+  // RSC Hardening - capabilities and brief template
+  capabilities: string[];
+  brief_template: string;
 }
 
 export interface ReadyStatus {

@@ -188,7 +188,7 @@ export async function getProjectCheckpoints(projectId: string): Promise<Checkpoi
 }
 
 // Phase execution
-export async function runPhase(projectId: string, phase?: string): Promise<void> {
+export async function runPhase(projectId: string, _phase?: string): Promise<void> {
   await axiosInstance.post(`/projects/${projectId}/advance`);
 }
 
