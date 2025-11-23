@@ -5,16 +5,16 @@
     "month_end": "2025-11-01",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.38,
+        "deployment_frequency": 0.37,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 78.08,
-        "ai_percentage": 1.37,
-        "collaborative_percentage": 20.55
+        "human_percentage": 78.38,
+        "ai_percentage": 1.35,
+        "collaborative_percentage": 20.27
       },
       "ai_review": {}
     },
@@ -26,16 +26,16 @@
     "month_end": "2025-10-02",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.38,
+        "deployment_frequency": 0.37,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 78.08,
-        "ai_percentage": 1.37,
-        "collaborative_percentage": 20.55
+        "human_percentage": 78.38,
+        "ai_percentage": 1.35,
+        "collaborative_percentage": 20.27
       },
       "ai_review": {}
     },
@@ -83,16 +83,16 @@
     "month_end": "2025-09-02",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.38,
+        "deployment_frequency": 0.37,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 78.08,
-        "ai_percentage": 1.37,
-        "collaborative_percentage": 20.55
+        "human_percentage": 78.38,
+        "ai_percentage": 1.35,
+        "collaborative_percentage": 20.27
       },
       "ai_review": {}
     },
@@ -140,16 +140,16 @@
     "month_end": "2025-08-03",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.38,
+        "deployment_frequency": 0.37,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 78.08,
-        "ai_percentage": 1.37,
-        "collaborative_percentage": 20.55
+        "human_percentage": 78.38,
+        "ai_percentage": 1.35,
+        "collaborative_percentage": 20.27
       },
       "ai_review": {}
     },
@@ -197,16 +197,16 @@
     "month_end": "2025-07-04",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.38,
+        "deployment_frequency": 0.37,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 78.08,
-        "ai_percentage": 1.37,
-        "collaborative_percentage": 20.55
+        "human_percentage": 78.38,
+        "ai_percentage": 1.35,
+        "collaborative_percentage": 20.27
       },
       "ai_review": {}
     },
@@ -254,16 +254,16 @@
     "month_end": "2025-06-04",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.38,
+        "deployment_frequency": 0.37,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {},
       "contributions": {
-        "human_percentage": 78.08,
-        "ai_percentage": 1.37,
-        "collaborative_percentage": 20.55
+        "human_percentage": 78.38,
+        "ai_percentage": 1.35,
+        "collaborative_percentage": 20.27
       },
       "ai_review": {}
     },
