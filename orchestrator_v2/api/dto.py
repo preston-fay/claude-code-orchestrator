@@ -28,9 +28,15 @@ class ProjectTemplateDTO(BaseModel):
     """Project template data transfer object."""
     id: str
     name: str
+    title: str = ""  # Display title for Launchpad
     description: str
     project_type: str
     category: str = "general"
+    # V2 fields for Launchpad
+    default_capabilities: list[str] = Field(default_factory=list)
+    suggested_brief: str = ""
+    best_for: str = ""
+    icon: str = "default"
 
 
 class PhaseDTO(BaseModel):

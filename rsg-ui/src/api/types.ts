@@ -48,6 +48,7 @@ export interface CreateProjectPayload {
   app_url?: string;
   intake_path?: string;
   metadata?: Record<string, unknown>;
+  auto_create_repo?: boolean;  // Automatically create GitHub repo
 }
 
 // Artifacts
@@ -124,9 +125,15 @@ export interface ChatResponse {
 export interface ProjectTemplate {
   id: string;
   name: string;
+  title: string;  // Display title for Launchpad
   description: string;
   project_type: string;
   category: string;
+  // V2 fields for Launchpad
+  default_capabilities: string[];
+  suggested_brief: string;
+  best_for: string;
+  icon: string;
 }
 
 export interface ReadyStatus {

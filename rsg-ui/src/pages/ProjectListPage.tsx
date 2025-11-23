@@ -14,6 +14,9 @@ const ProjectListPage: React.FC = () => {
     project_name: '',
     client: 'kearney-default',
     template_id: undefined,
+    brief: '',
+    capabilities: [],
+    auto_create_repo: false,
   });
   const [creating, setCreating] = useState(false);
 
@@ -55,7 +58,14 @@ const ProjectListPage: React.FC = () => {
       const created = await createProject(newProject);
       setProjects([...projects, created]);
       setShowCreateModal(false);
-      setNewProject({ project_name: '', client: 'kearney-default', template_id: undefined });
+      setNewProject({
+        project_name: '',
+        client: 'kearney-default',
+        template_id: undefined,
+        brief: '',
+        capabilities: [],
+        auto_create_repo: false,
+      });
       navigate(`/projects/${created.project_id}`);
     } catch (err) {
       setError('Failed to create project');
@@ -197,7 +207,12 @@ const ProjectListPage: React.FC = () => {
                     <div
                       key={template.id}
                       className={`template-card ${newProject.template_id === template.id ? 'selected' : ''}`}
-                      onClick={() => setNewProject({ ...newProject, template_id: template.id })}
+                      onClick={() => setNewProject({
+                        ...newProject,
+                        template_id: template.id,
+                        capabilities: template.default_capabilities,
+                        brief: template.suggested_brief || newProject.brief,
+                      })}
                     >
                       <div className="template-name">{template.name}</div>
                       <div className="template-description">{template.description}</div>
@@ -231,6 +246,19 @@ const ProjectListPage: React.FC = () => {
                   }
                   placeholder="kearney-default"
                 />
+              </div>
+
+              <div className="form-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newProject.auto_create_repo || false}
+                    onChange={(e) =>
+                      setNewProject({ ...newProject, auto_create_repo: e.target.checked })
+                    }
+                  />
+                  Automatically create a GitHub repo for this project
+                </label>
               </div>
             </div>
 

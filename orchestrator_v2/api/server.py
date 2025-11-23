@@ -34,8 +34,17 @@ from orchestrator_v2.api.dto import (
     set_status_to_dto,
 )
 from orchestrator_v2.config.templates import (
-    TEMPLATES,
+    TEMPLATE_CATALOG,
     get_template_by_id,
+)
+from orchestrator_v2.engine.orchestration_profiles import (
+    get_profile_for_template,
+    get_default_profile,
+)
+from orchestrator_v2.external.github_service import (
+    create_project_repo,
+    is_github_configured,
+    GitHubServiceError,
 )
 from orchestrator_v2.telemetry.events_repository import get_event_repository
 from orchestrator_v2.rsg.service import RsgService, RsgServiceError
@@ -96,6 +105,7 @@ class CreateProjectRequest(BaseModel):
     app_url: str | None = None
     intake_path: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    auto_create_repo: bool = False  # Automatically create GitHub repo
 
 
 class ChatRequest(BaseModel):
@@ -479,11 +489,16 @@ async def list_project_templates():
         ProjectTemplateDTO(
             id=t.id,
             name=t.name,
+            title=t.title,
             description=t.description,
             project_type=t.project_type,
             category=t.category,
+            default_capabilities=t.default_capabilities,
+            suggested_brief=t.suggested_brief,
+            best_for=t.best_for,
+            icon=t.icon,
         )
-        for t in TEMPLATES
+        for t in TEMPLATE_CATALOG
     ]
 
 
@@ -538,6 +553,22 @@ async def create_project(request: CreateProjectRequest):
         # Log error but don't fail project creation
         import logging
         logging.warning(f"Failed to create workspace: {e}")
+
+    # Auto-create GitHub repository if requested
+    if request.auto_create_repo and is_github_configured():
+        try:
+            import logging
+            repo_url = await create_project_repo(
+                project_name=request.project_name,
+                description=request.description or f"RSC project: {request.project_name}",
+                visibility="private",
+                add_scaffold=True,
+            )
+            state.app_repo_url = repo_url
+            logging.info(f"Created GitHub repo for project: {repo_url}")
+        except GitHubServiceError as e:
+            import logging
+            logging.warning(f"Failed to create GitHub repo: {e}")
 
     # Save to persistence
     await project_repo.save(state)
