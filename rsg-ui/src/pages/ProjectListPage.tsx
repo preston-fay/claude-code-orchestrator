@@ -208,6 +208,19 @@ const ProjectListPage: React.FC = () => {
               </div>
 
               <div className="form-group">
+                <label htmlFor="brief">Project Brief (Optional)</label>
+                <textarea
+                  id="brief"
+                  value={newProject.brief || ''}
+                  onChange={(e) =>
+                    setNewProject({ ...newProject, brief: e.target.value })
+                  }
+                  placeholder="Describe what you want to build..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="form-group">
                 <label htmlFor="client">Client</label>
                 <input
                   id="client"

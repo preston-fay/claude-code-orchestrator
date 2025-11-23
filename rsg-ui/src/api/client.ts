@@ -14,6 +14,8 @@ import {
   ProviderTestResult,
   Checkpoint,
   OrchestratorEvent,
+  ArtifactsResponse,
+  ChatResponse,
 } from './types';
 
 // Default configuration
@@ -207,6 +209,25 @@ export async function getProjectEvents(
   const response = await axiosInstance.get<OrchestratorEvent[]>(
     `/projects/${projectId}/events?${params.toString()}`
   );
+  return response.data;
+}
+
+// Artifacts
+export async function getProjectArtifacts(projectId: string): Promise<ArtifactsResponse> {
+  const response = await axiosInstance.get<ArtifactsResponse>(`/projects/${projectId}/artifacts`);
+  return response.data;
+}
+
+// Project Chat/Console
+export async function projectChat(
+  projectId: string,
+  message: string,
+  modelOverride?: string
+): Promise<ChatResponse> {
+  const response = await axiosInstance.post<ChatResponse>(`/projects/${projectId}/chat`, {
+    message,
+    model_override: modelOverride,
+  });
   return response.data;
 }
 

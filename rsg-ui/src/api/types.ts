@@ -22,11 +22,18 @@ export interface ProjectSummary {
   completed_phases: string[];
   created_at: string;
   status: string;
+  // New fields for capability-driven orchestration
+  brief?: string | null;
+  capabilities?: string[];
+  app_repo_url?: string | null;
+  app_url?: string | null;
 }
 
 export interface Project extends ProjectSummary {
   run_id?: string;
   metadata?: Record<string, unknown>;
+  // Derived phases from capabilities
+  phases?: string[];
 }
 
 export interface CreateProjectPayload {
@@ -35,8 +42,46 @@ export interface CreateProjectPayload {
   project_type?: string;
   template_id?: string;
   description?: string;
+  brief?: string;
+  capabilities?: string[];
+  app_repo_url?: string;
+  app_url?: string;
   intake_path?: string;
   metadata?: Record<string, unknown>;
+}
+
+// Artifacts
+export interface Artifact {
+  id: string;
+  name: string;
+  path: string;
+  artifact_type: string;
+  phase: string;
+  size_bytes: number;
+  created_at?: string;
+}
+
+export interface ArtifactsResponse {
+  project_id: string;
+  artifacts_by_phase: Record<string, Artifact[]>;
+  total_count: number;
+}
+
+// Chat/Console
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  model?: string;
+  tokens?: { input: number; output: number };
+  agent?: string;
+  timestamp?: string;
+}
+
+export interface ChatResponse {
+  reply: string;
+  model: string;
+  tokens: { input: number; output: number };
+  agent: string;
 }
 
 export interface ProjectTemplate {

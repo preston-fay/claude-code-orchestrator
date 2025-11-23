@@ -1,18 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
-import { Project, Checkpoint } from '../api/types';
+import { getProject, runPhase, getProjectCheckpoints, getProjectArtifacts } from '../api/client';
+import { Project, Checkpoint, ArtifactsResponse } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
+
+// Default phases for capability-driven projects
+const DEFAULT_PHASES = ['planning', 'architecture', 'data', 'development', 'qa', 'documentation'];
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
+  const [artifacts, setArtifacts] = useState<ArtifactsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [runningPhase, setRunningPhase] = useState<string | null>(null);
+
+  // Get phases - use API response or derive from default
+  const getProjectPhases = (): string[] => {
+    if (project?.phases && project.phases.length > 0) {
+      return project.phases;
+    }
+    // Use default phases based on completed phases
+    return DEFAULT_PHASES;
+  };
 
   useEffect(() => {
     if (projectId) {
@@ -26,12 +39,14 @@ const ProjectDetailPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [projectData, checkpointData] = await Promise.all([
+      const [projectData, checkpointData, artifactsData] = await Promise.all([
         getProject(projectId),
         getProjectCheckpoints(projectId),
+        getProjectArtifacts(projectId).catch(() => null),
       ]);
       setProject(projectData);
       setCheckpoints(checkpointData);
+      setArtifacts(artifactsData);
     } catch (err) {
       setError('Failed to load project details');
       console.error(err);
@@ -74,8 +89,12 @@ const ProjectDetailPage: React.FC = () => {
   const getPhaseStatus = (phaseName: string): 'pending' | 'in_progress' | 'completed' | 'failed' => {
     if (!project) return 'pending';
 
-    const phaseIndex = project.phases.indexOf(phaseName);
-    const currentIndex = project.phases.indexOf(project.current_phase);
+    const phases = getProjectPhases();
+    const phaseIndex = phases.indexOf(phaseName);
+    const currentIndex = phases.indexOf(project.current_phase);
+
+    // Check if in completed phases
+    if (project.completed_phases?.includes(phaseName)) return 'completed';
 
     if (phaseIndex < currentIndex) return 'completed';
     if (phaseIndex === currentIndex) {
@@ -90,8 +109,9 @@ const ProjectDetailPage: React.FC = () => {
     if (!project || runningPhase) return false;
     if (project.status === 'running') return false;
 
-    const phaseIndex = project.phases.indexOf(phaseName);
-    const currentIndex = project.phases.indexOf(project.current_phase);
+    const phases = getProjectPhases();
+    const phaseIndex = phases.indexOf(phaseName);
+    const currentIndex = phases.indexOf(project.current_phase);
 
     // Can run current phase or any completed phase (re-run)
     return phaseIndex <= currentIndex;
@@ -168,12 +188,51 @@ const ProjectDetailPage: React.FC = () => {
         )}
       </div>
 
+      {/* Brief & Capabilities */}
+      {(project.brief || (project.capabilities && project.capabilities.length > 0)) && (
+        <div className="project-info-card">
+          {project.brief && (
+            <div className="brief-section">
+              <span className="info-label">Brief</span>
+              <p className="brief-text">{project.brief}</p>
+            </div>
+          )}
+          {project.capabilities && project.capabilities.length > 0 && (
+            <div className="capabilities-section">
+              <span className="info-label">Capabilities</span>
+              <div className="capability-badges">
+                {project.capabilities.map((cap) => (
+                  <span key={cap} className="capability-badge">{cap}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          {project.app_repo_url && (
+            <div className="external-links">
+              <span className="info-label">External Links</span>
+              <div className="link-list">
+                {project.app_repo_url && (
+                  <a href={project.app_repo_url} target="_blank" rel="noopener noreferrer">
+                    Repository
+                  </a>
+                )}
+                {project.app_url && (
+                  <a href={project.app_url} target="_blank" rel="noopener noreferrer">
+                    App
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* RSG Macro Status */}
       <section className="section">
         <h3>Ready / Set / Go Status</h3>
         <RsgStatus
           currentPhase={project.current_phase}
-          phases={project.phases}
+          phases={getProjectPhases()}
           status={project.status}
         />
       </section>
@@ -182,7 +241,7 @@ const ProjectDetailPage: React.FC = () => {
       <section className="section">
         <h3>Phases</h3>
         <div className="phase-list">
-          {project.phases.map((phase, index) => {
+          {getProjectPhases().map((phase, index) => {
             const status = getPhaseStatus(phase);
             const canRun = canRunPhase(phase);
             const isRunning = runningPhase === phase;
@@ -220,6 +279,31 @@ const ProjectDetailPage: React.FC = () => {
             projectId={projectId}
             isRunning={runningPhase !== null}
           />
+        </section>
+      )}
+
+      {/* Artifacts */}
+      {artifacts && artifacts.total_count > 0 && (
+        <section className="section">
+          <h3>Planning & Architecture Artifacts</h3>
+          <div className="artifacts-panel">
+            {Object.entries(artifacts.artifacts_by_phase).map(([phase, phaseArtifacts]) => (
+              <div key={phase} className="artifact-phase-group">
+                <h4 className="phase-name capitalize">{phase}</h4>
+                <ul className="artifact-list">
+                  {phaseArtifacts.map((artifact) => (
+                    <li key={artifact.id} className="artifact-item">
+                      <span className="artifact-name">{artifact.name}</span>
+                      <span className="artifact-type">{artifact.artifact_type}</span>
+                      <span className="artifact-size">
+                        {(artifact.size_bytes / 1024).toFixed(1)} KB
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
