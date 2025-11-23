@@ -135,6 +135,22 @@ orchestrator intake new
 
 ---
 
+## Production Deployment
+
+RSC is designed for production deployment on AWS:
+
+- **Backend API**: AWS App Runner (auto-scaling container service)
+- **Frontend UI**: AWS Amplify Hosting (static site with CDN)
+
+**📖 Complete deployment guide:** [docs/RSC_DEPLOYMENT_GUIDE.md](docs/RSC_DEPLOYMENT_GUIDE.md)
+
+**Quick URLs after deployment:**
+- Backend: `https://<id>.us-east-1.awsapprunner.com`
+- Frontend: `https://main.<app-id>.amplifyapp.com`
+- Health Check: `GET /health`
+
+---
+
 ## Repository Health
 
 ![Hygiene Trend](docs/hygiene_trend.png)

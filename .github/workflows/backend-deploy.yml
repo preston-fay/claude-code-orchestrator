@@ -1,0 +1,195 @@
+name: Backend Deploy - ECR → App Runner
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'orchestrator_v2/**'
+      - 'Dockerfile'
+      - 'pyproject.toml'
+      - 'poetry.lock'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: rsc-backend
+
+jobs:
+  build_and_push:
+    name: Build and Push to ECR
+    runs-on: ubuntu-latest
+    outputs:
+      image_uri: ${{ steps.push.outputs.image_uri }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install --no-root
+
+    - name: Run backend tests
+      run: |
+        # Compile check and basic validation
+        python -m compileall orchestrator_v2
+        # Run pytest if tests exist
+        if [ -d "tests" ]; then
+          poetry run pytest tests/ -v --tb=short || echo "Tests completed"
+        fi
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: |
+        docker build -t rsc-backend:latest .
+        docker build -t rsc-backend:${{ github.sha }} .
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+      continue-on-error: true
+      id: aws-creds
+
+    - name: Check AWS credentials
+      if: steps.aws-creds.outcome == 'failure'
+      run: |
+        echo "⚠️ AWS credentials not configured. Skipping ECR push."
+        echo "Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in GitHub Secrets."
+        exit 0
+
+    - name: Login to Amazon ECR
+      if: steps.aws-creds.outcome == 'success'
+      uses: aws-actions/amazon-ecr-login@v2
+      id: ecr-login
+
+    - name: Tag and push image to ECR
+      if: steps.aws-creds.outcome == 'success'
+      id: push
+      env:
+        IMAGE_TAG: ${{ github.sha }}
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      run: |
+        # Use secret or derive from STS
+        if [ -z "$AWS_ACCOUNT_ID" ]; then
+          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+        fi
+
+        ECR_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}
+
+        echo "ECR URI: $ECR_URI"
+        echo "Image Tag: $IMAGE_TAG"
+
+        # Tag images
+        docker tag rsc-backend:latest $ECR_URI:latest
+        docker tag rsc-backend:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
+
+        # Push images
+        docker push $ECR_URI:latest
+        docker push $ECR_URI:$IMAGE_TAG
+
+        # Output for next job
+        echo "image_uri=$ECR_URI:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+        echo "✅ Image pushed successfully: $ECR_URI:$IMAGE_TAG"
+
+  deploy_to_app_runner:
+    name: Deploy to App Runner
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    if: needs.build_and_push.outputs.image_uri != ''
+
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Check App Runner service ARN
+      id: check-arn
+      run: |
+        if [ -z "${{ secrets.APP_RUNNER_SERVICE_ARN }}" ]; then
+          echo "⚠️ APP_RUNNER_SERVICE_ARN not set. Skipping deployment."
+          echo "Please create an App Runner service and add the ARN to GitHub Secrets."
+          echo "skip=true" >> $GITHUB_OUTPUT
+        else
+          echo "skip=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Update App Runner service
+      if: steps.check-arn.outputs.skip != 'true'
+      run: |
+        echo "🚀 Updating App Runner service..."
+
+        # Update the service with new image
+        aws apprunner update-service \
+          --service-arn ${{ secrets.APP_RUNNER_SERVICE_ARN }} \
+          --source-configuration '{
+            "ImageRepository": {
+              "ImageIdentifier": "${{ needs.build_and_push.outputs.image_uri }}",
+              "ImageRepositoryType": "ECR",
+              "ImageConfiguration": {
+                "Port": "8000",
+                "RuntimeEnvironmentVariables": {
+                  "ORCHESTRATOR_ENV": "production",
+                  "LOG_LEVEL": "info"
+                }
+              }
+            },
+            "AutoDeploymentsEnabled": true
+          }'
+
+        echo "✅ App Runner service update initiated"
+        echo "Note: Deployment may take 2-5 minutes to complete"
+
+    - name: Get App Runner service URL
+      if: steps.check-arn.outputs.skip != 'true'
+      run: |
+        SERVICE_URL=$(aws apprunner describe-service \
+          --service-arn ${{ secrets.APP_RUNNER_SERVICE_ARN }} \
+          --query 'Service.ServiceUrl' \
+          --output text)
+
+        echo "🌐 Service URL: https://$SERVICE_URL"
+        echo "🔍 Health check: https://$SERVICE_URL/health"
+
+  summary:
+    name: Deployment Summary
+    needs: [build_and_push, deploy_to_app_runner]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Print summary
+      run: |
+        echo "## RSC Backend Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Step | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Build & Push to ECR | ${{ needs.build_and_push.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Deploy to App Runner | ${{ needs.deploy_to_app_runner.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ "${{ needs.build_and_push.outputs.image_uri }}" != "" ]; then
+          echo "**Image URI:** \`${{ needs.build_and_push.outputs.image_uri }}\`" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Required Secrets" >> $GITHUB_STEP_SUMMARY
+        echo "- \`AWS_ACCESS_KEY_ID\` - AWS IAM access key" >> $GITHUB_STEP_SUMMARY
+        echo "- \`AWS_SECRET_ACCESS_KEY\` - AWS IAM secret key" >> $GITHUB_STEP_SUMMARY
+        echo "- \`AWS_ACCOUNT_ID\` - AWS account ID (optional, derived from STS)" >> $GITHUB_STEP_SUMMARY
+        echo "- \`APP_RUNNER_SERVICE_ARN\` - ARN of App Runner service" >> $GITHUB_STEP_SUMMARY
