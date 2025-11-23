@@ -1,8 +1,8 @@
-# Claude Code Orchestrator
+# Ready-Set-Code (RSC)
 
 ![Cleanliness](docs/badges/cleanliness.svg)
 
-A meta-framework for coordinating multiple specialized Claude Code subagents to collaboratively build complex software projects through structured, checkpoint-driven workflows.
+A meta-framework for coordinating multiple specialized AI agents to collaboratively build complex software projects through structured, checkpoint-driven workflows.
 
 ---
 
@@ -12,13 +12,13 @@ A meta-framework for coordinating multiple specialized Claude Code subagents to 
 
 ```bash
 # Method 1: Bootstrap Command (Recommended)
-orchestrator bootstrap analytics --output ~/projects/my-new-project
+rsc bootstrap analytics --output ~/projects/my-new-project
 
 # Method 2: GitHub Template Button
 # Click "Use this template" button above ↗️
 ```
 
-[![Use this template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/kearney/claude-code-orchestrator/generate)
+[![Use this template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/preston-fay/rsc/generate)
 
 **Available project templates:**
 - **`analytics`** - Data analysis, insights, statistical modeling
@@ -32,7 +32,7 @@ orchestrator bootstrap analytics --output ~/projects/my-new-project
 
 ## Features
 
-The orchestrator provides a comprehensive framework for building production-grade software with AI agents:
+The RSC Engine provides a comprehensive framework for building production-grade software with AI agents:
 
 ### Skills Framework
 
@@ -48,7 +48,7 @@ A three-tier knowledge architecture that provides agents with universal best pra
 
 ### Architecture Decision Records (ADRs)
 
-Lightweight documentation of significant technical decisions made during the project lifecycle. ADRs capture context, options considered, decision rationale, and consequences. The orchestrator prompts agents to create ADRs at key decision points.
+Lightweight documentation of significant technical decisions made during the project lifecycle. ADRs capture context, options considered, decision rationale, and consequences. The RSC Engine prompts agents to create ADRs at key decision points.
 
 **📖 Learn more:** [.claude/decisions/README.md](.claude/decisions/README.md)
 

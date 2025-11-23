@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ userId, userEmail, onSettingsClick }) =
     <header className="header">
       <div className="header-left">
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <h1 className="header-title">Kearney Ready-Set-Code</h1>
+          <h1 className="header-title">RSC — Ready-Set-Code Platform</h1>
         </Link>
         <nav className="header-nav">
           <Link

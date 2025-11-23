@@ -159,8 +159,8 @@ def get_engine(project_id: str) -> WorkflowEngine:
 
 # Create FastAPI app
 app = FastAPI(
-    title="Orchestrator v2 API",
-    description="HTTP API for Claude Code Orchestrator v2",
+    title="RSC API",
+    description="Ready-Set-Code (RSC) Engine API – multi-agent orchestration platform",
     version="2.0.0",
 )
 

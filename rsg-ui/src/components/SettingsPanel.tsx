@@ -127,7 +127,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
           <section className="settings-section">
             <h3>API Configuration</h3>
             <p className="settings-description">
-              Configure connection to the Orchestrator backend.
+              Configure connection to the RSC Engine backend.
             </p>
 
             <div className="form-group">
@@ -139,7 +139,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
                 onChange={(e) => setBaseUrl(e.target.value)}
                 placeholder="http://localhost:8000"
               />
-              <small>Orchestrator API endpoint (local or App Runner)</small>
+              <small>RSC API endpoint (local or App Runner)</small>
             </div>
 
             <div className="form-group">

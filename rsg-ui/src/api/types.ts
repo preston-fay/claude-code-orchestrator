@@ -1,4 +1,4 @@
-// API Types for Orchestrator RSG
+// API Types for Ready-Set-Code (RSC)
 
 // Model name types for type-safe model selection
 export type ModelName =
