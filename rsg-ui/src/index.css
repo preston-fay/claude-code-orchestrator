@@ -1880,6 +1880,273 @@ p {
   text-decoration: underline;
 }
 
+/* Project Console */
+.project-console {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-elevated);
+  overflow: hidden;
+}
+
+.console-command-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-grey-800);
+  border-bottom: 1px solid var(--border);
+}
+
+.command-chip {
+  background: #4B2E83;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-family-mono);
+  transition: opacity 0.2s ease;
+}
+
+.command-chip:hover {
+  opacity: 0.85;
+}
+
+.console-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.console-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: var(--spacing-xl);
+}
+
+.console-empty code {
+  background-color: var(--surface);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-mono);
+}
+
+.console-message {
+  max-width: 85%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  word-wrap: break-word;
+}
+
+.console-message-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-muted);
+}
+
+.console-message-content {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* User messages - right aligned, purple bubble */
+.console-message-user {
+  align-self: flex-end;
+  background-color: var(--emphasis);
+  color: var(--color-white);
+}
+
+.console-message-user .console-message-label {
+  color: var(--color-violet-1);
+}
+
+/* Command messages - monospace, charcoal with purple border */
+.console-message-command {
+  align-self: flex-end;
+  background-color: var(--color-grey-800);
+  color: var(--color-white);
+  border-left: 3px solid var(--emphasis);
+}
+
+.console-message-command .console-message-label {
+  color: var(--color-violet-2);
+}
+
+.console-message-command .console-message-content {
+  font-family: var(--font-family-mono);
+  font-size: 0.8125rem;
+}
+
+/* Assistant messages - left aligned */
+.console-message-assistant {
+  align-self: flex-start;
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+/* Help message styling */
+.console-message-help {
+  align-self: flex-start;
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+.console-help {
+  background: #1F1F1F;
+  padding: 12px;
+  border-radius: 6px;
+  line-height: 1.5;
+  color: #E0D9F2;
+}
+
+.console-help pre {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+/* Artifact preview */
+.console-message-artifact-preview {
+  align-self: flex-start;
+  background-color: var(--surface);
+  color: var(--text);
+  max-width: 95%;
+}
+
+.console-artifact-preview {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.console-artifact-preview .preview-header {
+  background-color: var(--color-grey-800);
+  color: var(--color-violet-2);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.75rem;
+  font-family: var(--font-family-mono);
+}
+
+.console-artifact-preview .preview-content {
+  padding: var(--spacing-md);
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.console-artifact-preview pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+}
+
+.console-artifact-preview code {
+  font-family: var(--font-family-mono);
+}
+
+/* Error messages - Kearney style (no red) */
+.console-message-error {
+  align-self: flex-start;
+}
+
+.console-error {
+  background: #2E2E2E;
+  color: #F2F2F2;
+  padding: 8px;
+  border-left: 4px solid #9B87C1;
+  border-radius: 4px;
+}
+
+/* LLM metadata footer */
+.console-meta {
+  font-size: 10px;
+  color: #9C92B7;
+  margin-top: 4px;
+}
+
+/* Clickable artifact references */
+.artifact-ref {
+  color: #A992D4;
+  cursor: pointer;
+  margin: 0 4px;
+}
+
+.artifact-ref:hover {
+  text-decoration: underline;
+}
+
+/* Loading indicator */
+.console-loading {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Input area */
+.console-input-area {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--border);
+  background-color: var(--surface-elevated);
+}
+
+.console-input-area textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  min-height: 40px;
+  max-height: 120px;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.console-input-area textarea:focus {
+  outline: none;
+  border-color: var(--emphasis);
+}
+
+.console-input-area textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.console-send-btn {
+  align-self: flex-end;
+  height: 40px;
+  min-width: 70px;
+}
+
+/* Console helper text */
+.console-helper {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: var(--spacing-sm);
+}
+
+.console-helper code {
+  background-color: var(--surface);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-mono);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .main-content {

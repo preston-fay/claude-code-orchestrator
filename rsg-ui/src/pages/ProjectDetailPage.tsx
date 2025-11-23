@@ -12,6 +12,7 @@ import { Project, Checkpoint, ArtifactsResponse, ArtifactContent, PhaseDiagnosti
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
 import ArtifactViewerModal from '../components/ArtifactViewerModal';
+import ProjectConsole from '../components/ProjectConsole';
 
 // Default phases for capability-driven projects
 const DEFAULT_PHASES = ['planning', 'architecture', 'data', 'development', 'qa', 'documentation'];
@@ -502,6 +503,17 @@ const ProjectDetailPage: React.FC = () => {
           <RunActivityPanel
             projectId={projectId}
             isRunning={runningPhase !== null}
+          />
+        </section>
+      )}
+
+      {/* Project Console */}
+      {projectId && (
+        <section className="section">
+          <h3>Console</h3>
+          <ProjectConsole
+            projectId={projectId}
+            onOpenArtifact={handleOpenArtifact}
           />
         </section>
       )}
