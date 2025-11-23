@@ -4,7 +4,7 @@ runtime: python311
 build:
   commands:
     build:
-      - pip install -r requirements.txt
+      - python3 -m pip install -r requirements.txt
 
 run:
   command: python3 -m uvicorn orchestrator_v2.api.server:app --host 0.0.0.0 --port 8000
