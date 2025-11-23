@@ -159,6 +159,7 @@ class GovernanceResults(BaseModel):
     quality_gates: list[GateResult] = Field(default_factory=list)
     compliance_checks: list[ComplianceResult] = Field(default_factory=list)
     passed: bool = True
+    failed_rules: list[str] = Field(default_factory=list)
 
 
 # -----------------------------------------------------------------------------
@@ -251,6 +252,14 @@ class ProjectState(BaseModel):
     project_name: str
     client: str = "kearney-default"
     project_type: str = "generic"
+
+    # Project brief and capabilities (capability-driven phases)
+    brief: str | None = None
+    capabilities: list[str] = Field(default_factory=list)
+
+    # External links (for deliverable apps built outside RSC)
+    app_repo_url: str | None = None
+    app_url: str | None = None
 
     # Workspace path (absolute path to workspace root)
     workspace_path: str | None = None
@@ -430,3 +439,122 @@ class WorkflowDefinition(BaseModel):
             if phase.name == phase_type:
                 return phase.order
         return -1
+
+
+# -----------------------------------------------------------------------------
+# Capability to Phases Mapping
+# -----------------------------------------------------------------------------
+
+# Map capabilities to the phases they require
+CAPABILITY_PHASE_MAP: dict[str, list[PhaseType]] = {
+    # Data capabilities
+    "data_pipeline": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DATA,
+        PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "data_ingestion": [
+        PhaseType.PLANNING, PhaseType.DATA, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "data_validation": [
+        PhaseType.PLANNING, PhaseType.DATA, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+
+    # Analytics capabilities
+    "analytics_forecasting": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DATA,
+        PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "analytics_dashboard": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DATA,
+        PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "analytics_reporting": [
+        PhaseType.PLANNING, PhaseType.DATA, PhaseType.DEVELOPMENT,
+        PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+
+    # ML capabilities
+    "ml_classification": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DATA,
+        PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "ml_regression": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DATA,
+        PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "ml_clustering": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DATA,
+        PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+
+    # Optimization capabilities
+    "optimization": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DATA,
+        PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "territory_alignment": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DATA,
+        PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+
+    # App building capabilities
+    "app_build": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DEVELOPMENT,
+        PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "backend_api": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DEVELOPMENT,
+        PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+    "frontend_ui": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DEVELOPMENT,
+        PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+
+    # Generic capability
+    "generic": [
+        PhaseType.PLANNING, PhaseType.ARCHITECTURE, PhaseType.DEVELOPMENT,
+        PhaseType.QA, PhaseType.DOCUMENTATION
+    ],
+}
+
+# Canonical phase order for sorting
+PHASE_ORDER = [
+    PhaseType.INTAKE,
+    PhaseType.PLANNING,
+    PhaseType.ARCHITECTURE,
+    PhaseType.CONSENSUS,
+    PhaseType.DATA,
+    PhaseType.SECURITY,
+    PhaseType.DEVELOPMENT,
+    PhaseType.QA,
+    PhaseType.DOCUMENTATION,
+    PhaseType.REVIEW,
+    PhaseType.HYGIENE,
+    PhaseType.COMPLETE,
+]
+
+
+def get_phases_for_capabilities(capabilities: list[str]) -> list[PhaseType]:
+    """Derive the phases for a project based on its capabilities.
+
+    Args:
+        capabilities: List of capability identifiers.
+
+    Returns:
+        Ordered list of phases to execute.
+    """
+    if not capabilities:
+        # Default to generic project phases
+        capabilities = ["generic"]
+
+    # Collect all phases from capabilities
+    phase_set: set[PhaseType] = set()
+    for cap in capabilities:
+        cap_phases = CAPABILITY_PHASE_MAP.get(cap, CAPABILITY_PHASE_MAP["generic"])
+        phase_set.update(cap_phases)
+
+    # Sort by canonical order
+    sorted_phases = [p for p in PHASE_ORDER if p in phase_set]
+
+    return sorted_phases

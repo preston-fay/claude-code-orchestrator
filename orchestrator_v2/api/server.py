@@ -46,6 +46,7 @@ from orchestrator_v2.engine.state_models import (
     GateStatus,
     PhaseType,
     ProjectState,
+    get_phases_for_capabilities,
 )
 from orchestrator_v2.persistence.fs_repository import (
     FileSystemArtifactRepository,
@@ -77,8 +78,44 @@ class CreateProjectRequest(BaseModel):
     project_type: str = "generic"
     template_id: str | None = None
     description: str | None = None
+    brief: str | None = None
+    capabilities: list[str] = Field(default_factory=list)
+    app_repo_url: str | None = None
+    app_url: str | None = None
     intake_path: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ChatRequest(BaseModel):
+    """Request for project chat/console."""
+    message: str
+    model_override: str | None = None
+
+
+class ChatResponse(BaseModel):
+    """Response from project chat."""
+    reply: str
+    model: str
+    tokens: dict[str, int]
+    agent: str = "chat"
+
+
+class ArtifactDTO(BaseModel):
+    """Artifact information."""
+    id: str
+    name: str
+    path: str
+    artifact_type: str
+    phase: str
+    size_bytes: int
+    created_at: datetime | None = None
+
+
+class ArtifactsResponse(BaseModel):
+    """Response containing artifacts grouped by phase."""
+    project_id: str
+    artifacts_by_phase: dict[str, list[ArtifactDTO]]
+    total_count: int
 
 
 class HealthResponse(BaseModel):
@@ -443,6 +480,10 @@ async def create_project(request: CreateProjectRequest):
     # Set additional fields
     state.project_type = project_type
     state.template_id = template_id
+    state.brief = request.brief
+    state.capabilities = request.capabilities if request.capabilities else ["generic"]
+    state.app_repo_url = request.app_repo_url
+    state.app_url = request.app_url
 
     # Create workspace for the project
     try:
@@ -453,6 +494,8 @@ async def create_project(request: CreateProjectRequest):
                 "project_name": request.project_name,
                 "template_id": template_id,
                 "description": request.description,
+                "brief": request.brief,
+                "capabilities": state.capabilities,
             },
         )
         state.workspace_path = str(workspace_config.workspace_root)
@@ -747,6 +790,248 @@ async def get_governance_results(project_id: str, phase: str):
         compliance_results=latest.get("compliance_checks", []),
         warnings=[],
     )
+
+
+# -----------------------------------------------------------------------------
+# Artifacts Endpoint
+# -----------------------------------------------------------------------------
+
+@app.get("/projects/{project_id}/artifacts", response_model=ArtifactsResponse)
+async def get_project_artifacts(project_id: str):
+    """Get artifacts for a project grouped by phase."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    artifacts_by_phase: dict[str, list[ArtifactDTO]] = {}
+    total_count = 0
+
+    # Get artifacts from workspace if available
+    if state.workspace_path:
+        workspace_path = Path(state.workspace_path)
+        artifacts_dir = workspace_path / "artifacts"
+
+        if artifacts_dir.exists():
+            # Scan for artifacts in phase subdirectories
+            for phase_dir in artifacts_dir.iterdir():
+                if phase_dir.is_dir():
+                    phase_name = phase_dir.name
+                    phase_artifacts = []
+
+                    for artifact_file in phase_dir.iterdir():
+                        if artifact_file.is_file():
+                            stat = artifact_file.stat()
+                            phase_artifacts.append(ArtifactDTO(
+                                id=f"{phase_name}_{artifact_file.name}",
+                                name=artifact_file.name,
+                                path=str(artifact_file),
+                                artifact_type=artifact_file.suffix[1:] if artifact_file.suffix else "file",
+                                phase=phase_name,
+                                size_bytes=stat.st_size,
+                                created_at=datetime.fromtimestamp(stat.st_ctime),
+                            ))
+                            total_count += 1
+
+                    if phase_artifacts:
+                        artifacts_by_phase[phase_name] = phase_artifacts
+
+    return ArtifactsResponse(
+        project_id=project_id,
+        artifacts_by_phase=artifacts_by_phase,
+        total_count=total_count,
+    )
+
+
+# -----------------------------------------------------------------------------
+# Project Console/Chat Endpoint
+# -----------------------------------------------------------------------------
+
+@app.post("/projects/{project_id}/chat", response_model=ChatResponse)
+async def project_chat(
+    project_id: str,
+    request: ChatRequest,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Chat with the orchestrator about a project.
+
+    Supports free-form chat and slash commands:
+    - /plan-phase <phase>: Generate/update planning artifacts for a phase
+    - /run-phase <phase>: Execute a specific phase
+    - /feature "<title>" "<description>": Create a feature request
+    """
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    message = request.message.strip()
+    model = request.model_override or user.default_model or "claude-sonnet-4-5-20250514"
+
+    # Check for slash commands
+    if message.startswith("/"):
+        return await _handle_slash_command(project_id, state, message, user, model)
+
+    # Regular chat - build context and call LLM
+    from orchestrator_v2.llm import get_provider_registry
+    from orchestrator_v2.engine.state_models import AgentContext, TaskDefinition
+
+    registry = get_provider_registry()
+
+    # Build system prompt with project context
+    system_prompt = f"""You are an AI assistant for the Ready-Set-Code orchestrator.
+You are helping with project: {state.project_name}
+Client: {state.client}
+Project Type: {state.project_type}
+
+Brief: {state.brief or 'No brief provided'}
+
+Capabilities: {', '.join(state.capabilities) if state.capabilities else 'generic'}
+
+Current Phase: {state.current_phase.value}
+Completed Phases: {', '.join(p.value for p in state.completed_phases) if state.completed_phases else 'None'}
+
+You can help the user understand their project status, answer questions about artifacts,
+and provide guidance on next steps. Be concise and helpful.
+
+Available slash commands:
+- /plan-phase <phase>: Generate planning artifacts
+- /run-phase <phase>: Execute a phase
+- /feature "<title>" "<description>": Create a feature request
+"""
+
+    # Create context for LLM call
+    context = AgentContext(
+        project_state=state,
+        task=TaskDefinition(
+            task_id="chat",
+            description="Project chat",
+        ),
+        user_id=user.user_id,
+        llm_api_key=user.anthropic_api_key,
+        llm_provider=user.default_provider or "anthropic",
+        model=model,
+    )
+
+    try:
+        result = await registry.generate(
+            prompt=f"{system_prompt}\n\nUser: {message}\n\nAssistant:",
+            model=model,
+            context=context,
+            max_tokens=1024,
+        )
+
+        return ChatResponse(
+            reply=result.text,
+            model=model,
+            tokens={
+                "input": result.usage.input_tokens if result.usage else 0,
+                "output": result.usage.output_tokens if result.usage else 0,
+            },
+            agent="chat",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+
+
+async def _handle_slash_command(
+    project_id: str,
+    state: ProjectState,
+    message: str,
+    user: UserProfile,
+    model: str,
+) -> ChatResponse:
+    """Handle slash commands in chat."""
+    parts = message.split(maxsplit=2)
+    command = parts[0].lower()
+
+    if command == "/run-phase":
+        if len(parts) < 2:
+            return ChatResponse(
+                reply="Usage: /run-phase <phase>\nExample: /run-phase planning",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        phase_name = parts[1].lower()
+        try:
+            phase_type = PhaseType(phase_name)
+        except ValueError:
+            valid_phases = ", ".join(p.value for p in PhaseType if p != PhaseType.COMPLETE)
+            return ChatResponse(
+                reply=f"Invalid phase: {phase_name}\nValid phases: {valid_phases}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        # Get or create engine and run phase
+        engine = get_engine(project_id)
+        engine._state = state
+
+        try:
+            phase_state = await engine.run_phase(phase_type, user)
+            await project_repo.save(engine.state)
+
+            return ChatResponse(
+                reply=f"Phase {phase_name} completed successfully.\n"
+                      f"Status: {phase_state.status}\n"
+                      f"Agents: {', '.join(phase_state.agent_ids)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="orchestrator",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to run phase {phase_name}: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    elif command == "/plan-phase":
+        if len(parts) < 2:
+            return ChatResponse(
+                reply="Usage: /plan-phase <phase>\nExample: /plan-phase planning",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        phase_name = parts[1].lower()
+
+        # For now, return a placeholder - real implementation would call architect agent
+        return ChatResponse(
+            reply=f"Planning artifacts for phase '{phase_name}' would be generated here.\n"
+                  f"This will produce PRD.md, architecture.md, and backlog.json based on:\n"
+                  f"- Project brief: {state.brief or 'Not provided'}\n"
+                  f"- Capabilities: {', '.join(state.capabilities) if state.capabilities else 'generic'}",
+            model=model,
+            tokens={"input": 0, "output": 0},
+            agent="architect",
+        )
+
+    elif command == "/feature":
+        return ChatResponse(
+            reply="Feature request creation not yet implemented.\n"
+                  "Usage: /feature \"<title>\" \"<description>\"",
+            model=model,
+            tokens={"input": 0, "output": 0},
+            agent="system",
+        )
+
+    else:
+        return ChatResponse(
+            reply=f"Unknown command: {command}\n\n"
+                  f"Available commands:\n"
+                  f"- /plan-phase <phase>: Generate planning artifacts\n"
+                  f"- /run-phase <phase>: Execute a phase\n"
+                  f"- /feature \"<title>\" \"<description>\": Create feature request",
+            model=model,
+            tokens={"input": 0, "output": 0},
+            agent="system",
+        )
 
 
 @app.delete("/projects/{project_id}")

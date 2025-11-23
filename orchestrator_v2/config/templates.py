@@ -19,9 +19,11 @@ class ProjectTemplate(BaseModel):
     default_intake_path: str | None = None  # Relative to repo root
     default_metadata: dict[str, Any] = {}
     category: str = "general"
+    # Default capabilities for projects created from this template
+    default_capabilities: list[str] = []
 
 
-# Available project templates
+# Available project templates - Generic templates only (no demo-specific)
 TEMPLATES = [
     ProjectTemplate(
         id="blank",
@@ -29,23 +31,63 @@ TEMPLATES = [
         description="Start with an empty project workspace",
         project_type="generic",
         category="general",
+        default_capabilities=["generic"],
     ),
     ProjectTemplate(
-        id="golden_path_analytics",
-        name="Golden Path - Demand Forecasting",
-        description="Analytics project with time-series forecasting template",
-        project_type="analytics_forecasting",
-        default_intake_path="examples/golden_path/intake_analytics_forecasting.yaml",
+        id="analytics_forecasting",
+        name="Analytics - Time Series Forecasting",
+        description="Analytics project with time-series forecasting capabilities",
+        project_type="analytics",
         category="analytics",
+        default_capabilities=["data_pipeline", "analytics_forecasting"],
     ),
-    # Territory Demo - backend endpoints remain for external Territory Optimizer app
     ProjectTemplate(
-        id="territory_poc_midwest",
-        name="Territory Demo (internal)",
-        description="Demo template for Territory Optimizer app - creates workspace for scoring/clustering",
-        project_type="territory_poc",
-        default_intake_path="examples/territory_poc/intake_territory_poc.yaml",
-        category="demo",
+        id="analytics_dashboard",
+        name="Analytics - Dashboard & Reporting",
+        description="Analytics project with dashboard and reporting capabilities",
+        project_type="analytics",
+        category="analytics",
+        default_capabilities=["data_pipeline", "analytics_dashboard", "analytics_reporting"],
+    ),
+    ProjectTemplate(
+        id="ml_classification",
+        name="Machine Learning - Classification",
+        description="ML project for classification tasks",
+        project_type="ml",
+        category="ml",
+        default_capabilities=["data_pipeline", "ml_classification"],
+    ),
+    ProjectTemplate(
+        id="ml_regression",
+        name="Machine Learning - Regression",
+        description="ML project for regression and prediction tasks",
+        project_type="ml",
+        category="ml",
+        default_capabilities=["data_pipeline", "ml_regression"],
+    ),
+    ProjectTemplate(
+        id="optimization",
+        name="Optimization & Operations Research",
+        description="Project for optimization and operations research problems",
+        project_type="optimization",
+        category="optimization",
+        default_capabilities=["data_pipeline", "optimization"],
+    ),
+    ProjectTemplate(
+        id="web_app",
+        name="Web Application",
+        description="Full-stack web application with backend API and frontend UI",
+        project_type="webapp",
+        category="app",
+        default_capabilities=["backend_api", "frontend_ui", "app_build"],
+    ),
+    ProjectTemplate(
+        id="backend_api",
+        name="Backend API",
+        description="RESTful API backend service",
+        project_type="api",
+        category="app",
+        default_capabilities=["backend_api"],
     ),
 ]
 
