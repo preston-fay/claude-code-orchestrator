@@ -1,0 +1,23 @@
+version: 1.0
+runtime: python311
+
+build:
+  commands:
+    pre-build:
+      # Upgrade pip via python module
+      - python -m pip install --upgrade pip
+    build:
+      # Install backend dependencies
+      - python -m pip install -r requirements.txt
+
+run:
+  command: uvicorn orchestrator_v2.main:app --host 0.0.0.0 --port 8000
+  network:
+    port: 8000
+
+health-check:
+  path: /health
+  interval: 10
+  timeout: 5
+  healthy-threshold: 3
+  unhealthy-threshold: 5
