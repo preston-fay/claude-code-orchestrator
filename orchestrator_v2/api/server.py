@@ -49,6 +49,7 @@ from orchestrator_v2.engine.state_models import (
     get_phases_for_capabilities,
 )
 from orchestrator_v2.planning import get_planning_service
+from orchestrator_v2.phases import get_execution_service
 from orchestrator_v2.persistence.fs_repository import (
     FileSystemArtifactRepository,
     FileSystemCheckpointRepository,
@@ -949,7 +950,7 @@ async def _handle_slash_command(
     if command == "/run-phase":
         if len(parts) < 2:
             return ChatResponse(
-                reply="Usage: /run-phase <phase>\nExample: /run-phase planning",
+                reply="Usage: /run-phase <phase>\nExample: /run-phase data",
                 model=model,
                 tokens={"input": 0, "output": 0},
                 agent="system",
@@ -967,21 +968,31 @@ async def _handle_slash_command(
                 agent="system",
             )
 
-        # Get or create engine and run phase
-        engine = get_engine(project_id)
-        engine._state = state
-
+        # Use execution service for phase execution
         try:
-            phase_state = await engine.run_phase(phase_type, user)
-            await project_repo.save(engine.state)
+            execution_service = get_execution_service()
+            result = await execution_service.execute_phase(phase_type, state, user)
+
+            artifacts = result.get("artifacts", [])
+            artifact_names = [Path(p).name for p in artifacts]
+            agents = result.get("agents", [])
+            summary = result.get("summary", "Phase completed")
+
+            # Update state
+            if phase_type not in state.completed_phases:
+                state.completed_phases.append(phase_type)
+            await project_repo.save(state)
 
             return ChatResponse(
-                reply=f"Phase {phase_name} completed successfully.\n"
-                      f"Status: {phase_state.status}\n"
-                      f"Agents: {', '.join(phase_state.agent_ids)}",
+                reply=f"Phase {phase_name} completed successfully.\n\n"
+                      f"Summary: {summary}\n\n"
+                      f"Agents: {', '.join(agents)}\n\n"
+                      f"Artifacts generated:\n"
+                      f"{chr(10).join(f'- {name}' for name in artifact_names) if artifact_names else 'None'}\n\n"
+                      f"View artifacts with: /artifacts phase={phase_name}",
                 model=model,
                 tokens={"input": 0, "output": 0},
-                agent="orchestrator",
+                agent=agents[0] if agents else "orchestrator",
             )
         except Exception as e:
             return ChatResponse(
