@@ -12,9 +12,6 @@ run:
   command: uvicorn orchestrator_v2.main:app --host 0.0.0.0 --port 8000
   network:
     port: 8000
-health-check:
-  path: /health
-  interval: 10
-  timeout: 5
-  healthy-threshold: 3
-  unhealthy-threshold: 5
+  env:
+    - name: PYTHONUNBUFFERED
+      value: "1"
