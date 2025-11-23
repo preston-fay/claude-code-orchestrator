@@ -1,12 +1,17 @@
 # apprunner.yaml — Ready-Set-Code Backend (FastAPI)
+
 version: 1.0
 runtime: python311
 
 build:
   commands:
+    pre-build:
+      # Upgrade pip via python3 module (python is NOT on PATH in this image)
+      - python3 -m pip install --upgrade pip
+
     build:
-      - pip install --upgrade pip
-      - pip install -r requirements.txt
+      # Install backend dependencies
+      - python3 -m pip install -r requirements.txt
 
 run:
   command: uvicorn orchestrator_v2.main:app --host 0.0.0.0 --port 8000
