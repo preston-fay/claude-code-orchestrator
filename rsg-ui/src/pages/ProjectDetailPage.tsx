@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProject, runPhase, getProjectCheckpoints, getProjectArtifacts } from '../api/client';
-import { Project, Checkpoint, ArtifactsResponse } from '../api/types';
+import {
+  getProject,
+  runPhase,
+  getProjectCheckpoints,
+  getProjectArtifacts,
+  getArtifactContent,
+  getPhaseDiagnostics
+} from '../api/client';
+import { Project, Checkpoint, ArtifactsResponse, ArtifactContent, PhaseDiagnostics } from '../api/types';
 import RsgStatus from '../components/RsgStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
+import ArtifactViewerModal from '../components/ArtifactViewerModal';
 
 // Default phases for capability-driven projects
 const DEFAULT_PHASES = ['planning', 'architecture', 'data', 'development', 'qa', 'documentation'];
@@ -18,12 +26,25 @@ const ProjectDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [runningPhase, setRunningPhase] = useState<string | null>(null);
 
+  // Artifact viewer state
+  const [selectedArtifact, setSelectedArtifact] = useState<ArtifactContent | null>(null);
+  const [isArtifactModalOpen, setIsArtifactModalOpen] = useState(false);
+  const [artifactLoadingId, setArtifactLoadingId] = useState<string | null>(null);
+
+  // Diagnostics state
+  const [selectedDiagnosticsPhase, setSelectedDiagnosticsPhase] = useState<string | null>(null);
+  const [phaseDiagnostics, setPhaseDiagnostics] = useState<PhaseDiagnostics | null>(null);
+  const [isDiagnosticsLoading, setIsDiagnosticsLoading] = useState(false);
+  const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null);
+
+  // Collapsed phases in artifacts
+  const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set());
+
   // Get phases - use API response or derive from default
   const getProjectPhases = (): string[] => {
     if (project?.phases && project.phases.length > 0) {
       return project.phases;
     }
-    // Use default phases based on completed phases
     return DEFAULT_PHASES;
   };
 
@@ -62,7 +83,6 @@ const ProjectDetailPage: React.FC = () => {
       setRunningPhase(phaseName);
       setError(null);
       await runPhase(projectId, phaseName);
-      // Reload project to get updated state
       await loadProject();
     } catch (err) {
       setError(`Failed to run phase: ${phaseName}`);
@@ -70,6 +90,52 @@ const ProjectDetailPage: React.FC = () => {
     } finally {
       setRunningPhase(null);
     }
+  };
+
+  const handleOpenArtifact = async (artifactId: string) => {
+    if (!projectId) return;
+
+    try {
+      setArtifactLoadingId(artifactId);
+      const content = await getArtifactContent(projectId, artifactId);
+      setSelectedArtifact(content);
+      setIsArtifactModalOpen(true);
+    } catch (err) {
+      console.error('Failed to open artifact', err);
+      setError('Unable to load artifact content');
+    } finally {
+      setArtifactLoadingId(null);
+    }
+  };
+
+  const handleLoadDiagnostics = async (phase: string) => {
+    if (!projectId) return;
+
+    setSelectedDiagnosticsPhase(phase);
+    setIsDiagnosticsLoading(true);
+    setDiagnosticsError(null);
+
+    try {
+      const diag = await getPhaseDiagnostics(projectId, phase);
+      setPhaseDiagnostics(diag);
+    } catch (err) {
+      console.error('Failed to load diagnostics', err);
+      setDiagnosticsError(`Unable to load diagnostics for phase ${phase}`);
+    } finally {
+      setIsDiagnosticsLoading(false);
+    }
+  };
+
+  const togglePhaseExpanded = (phase: string) => {
+    setExpandedPhases(prev => {
+      const next = new Set(prev);
+      if (next.has(phase)) {
+        next.delete(phase);
+      } else {
+        next.add(phase);
+      }
+      return next;
+    });
   };
 
   const formatDate = (dateStr: string) => {
@@ -93,7 +159,6 @@ const ProjectDetailPage: React.FC = () => {
     const phaseIndex = phases.indexOf(phaseName);
     const currentIndex = phases.indexOf(project.current_phase);
 
-    // Check if in completed phases
     if (project.completed_phases?.includes(phaseName)) return 'completed';
 
     if (phaseIndex < currentIndex) return 'completed';
@@ -113,8 +178,33 @@ const ProjectDetailPage: React.FC = () => {
     const phaseIndex = phases.indexOf(phaseName);
     const currentIndex = phases.indexOf(project.current_phase);
 
-    // Can run current phase or any completed phase (re-run)
     return phaseIndex <= currentIndex;
+  };
+
+  // RSG stage helpers
+  const getRsgStage = (currentPhase: string): string => {
+    const readyPhases = ['planning', 'architecture'];
+    const setPhases = ['data', 'development'];
+    const goPhases = ['qa', 'documentation'];
+
+    if (readyPhases.includes(currentPhase)) return 'ready';
+    if (setPhases.includes(currentPhase)) return 'set';
+    if (goPhases.includes(currentPhase)) return 'go';
+    return 'ready';
+  };
+
+  const isRsgStageCompleted = (stage: 'ready' | 'set' | 'go'): boolean => {
+    if (!project?.completed_phases) return false;
+
+    const stagePhases = {
+      ready: ['planning', 'architecture'],
+      set: ['data', 'development'],
+      go: ['qa', 'documentation'],
+    };
+
+    return stagePhases[stage].every(phase =>
+      project.completed_phases?.includes(phase)
+    );
   };
 
   if (loading) {
@@ -231,13 +321,14 @@ const ProjectDetailPage: React.FC = () => {
       <section className="section">
         <h3>Ready / Set / Go Status</h3>
         <RsgStatus
-          currentPhase={project.current_phase}
-          phases={getProjectPhases()}
-          status={project.status}
+          currentStage={getRsgStage(project.current_phase)}
+          readyCompleted={isRsgStageCompleted('ready')}
+          setCompleted={isRsgStageCompleted('set')}
+          goCompleted={isRsgStageCompleted('go')}
         />
       </section>
 
-      {/* Phase List */}
+      {/* Phase List with Diagnostics */}
       <section className="section">
         <h3>Phases</h3>
         <div className="phase-list">
@@ -256,6 +347,14 @@ const ProjectDetailPage: React.FC = () => {
                   </span>
                 </div>
                 <div className="phase-actions">
+                  {status === 'completed' && (
+                    <button
+                      className="link-button phase-link"
+                      onClick={() => handleLoadDiagnostics(phase)}
+                    >
+                      Diagnostics
+                    </button>
+                  )}
                   {canRun && (
                     <button
                       className="button-small"
@@ -272,6 +371,115 @@ const ProjectDetailPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Phase Diagnostics Panel */}
+      <section className="section">
+        <div className="diagnostics-panel">
+          <h3>Phase Diagnostics</h3>
+
+          {!selectedDiagnosticsPhase && (
+            <div className="diagnostics-empty">
+              Select a completed phase above and click <span className="pill">Diagnostics</span> to see execution details.
+            </div>
+          )}
+
+          {selectedDiagnosticsPhase && isDiagnosticsLoading && (
+            <div className="diagnostics-empty">
+              Loading diagnostics for {selectedDiagnosticsPhase}...
+            </div>
+          )}
+
+          {diagnosticsError && (
+            <div className="section-alert">
+              {diagnosticsError}
+            </div>
+          )}
+
+          {selectedDiagnosticsPhase && phaseDiagnostics && !isDiagnosticsLoading && !diagnosticsError && (
+            <div className="diagnostics-grid">
+              <div className="diagnostics-card">
+                <h4>Agents</h4>
+                {phaseDiagnostics.agents?.length ? (
+                  <ul className="diagnostics-list">
+                    {phaseDiagnostics.agents.map((agent, i) => (
+                      <li key={i}>{agent}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="diagnostics-empty">No agent data</p>
+                )}
+              </div>
+
+              <div className="diagnostics-card">
+                <h4>Skills</h4>
+                {phaseDiagnostics.skills?.length ? (
+                  <ul className="diagnostics-list">
+                    {phaseDiagnostics.skills.map((skill, i) => (
+                      <li key={i}>{skill}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="diagnostics-empty">No skills invoked</p>
+                )}
+              </div>
+
+              <div className="diagnostics-card">
+                <h4>Artifacts</h4>
+                {phaseDiagnostics.artifacts?.length ? (
+                  <ul className="diagnostics-list">
+                    {phaseDiagnostics.artifacts.map((artifact, i) => (
+                      <li key={i}>{artifact}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="diagnostics-empty">No artifacts</p>
+                )}
+              </div>
+
+              <div className="diagnostics-card">
+                <h4>Token Usage</h4>
+                {phaseDiagnostics.token_usage && Object.keys(phaseDiagnostics.token_usage).length > 0 ? (
+                  <ul className="diagnostics-list">
+                    {phaseDiagnostics.token_usage.input !== undefined && (
+                      <li>Input: <span className="diagnostics-value">{phaseDiagnostics.token_usage.input}</span></li>
+                    )}
+                    {phaseDiagnostics.token_usage.output !== undefined && (
+                      <li>Output: <span className="diagnostics-value">{phaseDiagnostics.token_usage.output}</span></li>
+                    )}
+                    {phaseDiagnostics.token_usage.total !== undefined && (
+                      <li>Total: <span className="diagnostics-value">{phaseDiagnostics.token_usage.total}</span></li>
+                    )}
+                  </ul>
+                ) : (
+                  <p className="diagnostics-empty">No token data</p>
+                )}
+              </div>
+
+              <div className="diagnostics-card">
+                <h4>Governance</h4>
+                {phaseDiagnostics.governance ? (
+                  <div className="diagnostics-value">
+                    {phaseDiagnostics.governance.passed !== undefined
+                      ? (phaseDiagnostics.governance.passed ? 'Passed' : 'Failed')
+                      : 'Unknown'}
+                  </div>
+                ) : (
+                  <p className="diagnostics-empty">No governance data</p>
+                )}
+              </div>
+
+              {phaseDiagnostics.timestamp && (
+                <div className="diagnostics-card">
+                  <h4>Timestamp</h4>
+                  <div className="diagnostics-value">
+                    {formatDate(phaseDiagnostics.timestamp)}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Run Activity */}
       {projectId && (
         <section className="section">
@@ -283,29 +491,50 @@ const ProjectDetailPage: React.FC = () => {
       )}
 
       {/* Artifacts */}
-      {artifacts && artifacts.total_count > 0 && (
-        <section className="section">
-          <h3>Planning & Architecture Artifacts</h3>
-          <div className="artifacts-panel">
-            {Object.entries(artifacts.artifacts_by_phase).map(([phase, phaseArtifacts]) => (
-              <div key={phase} className="artifact-phase-group">
-                <h4 className="phase-name capitalize">{phase}</h4>
-                <ul className="artifact-list">
-                  {phaseArtifacts.map((artifact) => (
-                    <li key={artifact.id} className="artifact-item">
-                      <span className="artifact-name">{artifact.name}</span>
-                      <span className="artifact-type">{artifact.artifact_type}</span>
-                      <span className="artifact-size">
-                        {(artifact.size_bytes / 1024).toFixed(1)} KB
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+      <section className="section">
+        <div className="artifacts-panel">
+          <h3>Artifacts</h3>
+
+          {!artifacts || artifacts.total_count === 0 ? (
+            <div className="diagnostics-empty">
+              No artifacts yet. Run a phase or use the console to generate outputs.
+            </div>
+          ) : (
+            Object.entries(artifacts.artifacts_by_phase).map(([phase, phaseArtifacts]) => (
+              <div key={phase} className="artifacts-phase-group">
+                <button
+                  className="artifacts-phase-header"
+                  onClick={() => togglePhaseExpanded(phase)}
+                >
+                  <span>{phase}</span>
+                  <span className="artifacts-phase-count">({phaseArtifacts.length})</span>
+                  <span className="expand-icon">{expandedPhases.has(phase) ? '▼' : '▶'}</span>
+                </button>
+
+                {expandedPhases.has(phase) && (
+                  <div className="artifacts-list">
+                    {phaseArtifacts.map((artifact) => (
+                      <div key={artifact.id} className="artifact-row">
+                        <div className="artifact-info">
+                          <span className="artifact-name">{artifact.name}</span>
+                          <span className="artifact-type">{artifact.artifact_type}</span>
+                        </div>
+                        <button
+                          className="view-artifact-btn"
+                          onClick={() => handleOpenArtifact(artifact.id)}
+                          disabled={artifactLoadingId === artifact.id}
+                        >
+                          {artifactLoadingId === artifact.id ? 'Loading...' : 'View'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            ))
+          )}
+        </div>
+      </section>
 
       {/* Checkpoints */}
       <section className="section">
@@ -343,6 +572,14 @@ const ProjectDetailPage: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Artifact Viewer Modal */}
+      {isArtifactModalOpen && selectedArtifact && (
+        <ArtifactViewerModal
+          artifact={selectedArtifact}
+          onClose={() => setIsArtifactModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

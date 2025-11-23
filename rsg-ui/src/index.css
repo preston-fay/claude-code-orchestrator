@@ -1782,6 +1782,104 @@ p {
   border-top: 1px solid var(--border);
 }
 
+/* Diagnostics Grid */
+.diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* Section Alert (for diagnostics errors) */
+.section-alert {
+  padding: var(--spacing-md);
+  background-color: var(--error-tint);
+  border-left: 4px solid var(--error);
+  border-radius: var(--radius-md);
+  color: var(--color-charcoal);
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Pill badge (inline indicator) */
+.pill {
+  display: inline-block;
+  padding: 2px var(--spacing-sm);
+  background-color: var(--color-violet-1);
+  color: var(--emphasis);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Expand icon for collapsible sections */
+.expand-icon {
+  margin-left: auto;
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+/* Phase link button */
+.phase-link {
+  font-size: 0.75rem;
+  margin-right: var(--spacing-sm);
+}
+
+/* Brief and Capabilities sections */
+.brief-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.brief-text {
+  font-size: 0.875rem;
+  color: var(--text);
+  margin: var(--spacing-sm) 0 0;
+  line-height: 1.5;
+}
+
+.capabilities-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.capability-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.capability-badge {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-violet-1);
+  color: var(--emphasis);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* External Links section */
+.external-links {
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border);
+}
+
+.link-list {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.link-list a {
+  color: var(--emphasis);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.link-list a:hover {
+  text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .main-content {
