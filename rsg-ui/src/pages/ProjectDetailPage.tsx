@@ -236,9 +236,25 @@ const ProjectDetailPage: React.FC = () => {
           <span className="separator">/</span>
           <span>{project.project_name}</span>
         </div>
-        <button className="button-secondary" onClick={loadProject}>
-          Refresh
-        </button>
+        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+          {project.capabilities?.includes('app_build') && (
+            <button
+              className="button-secondary"
+              onClick={() => navigate(`/projects/${projectId}/app-build`)}
+            >
+              App Build
+            </button>
+          )}
+          <button
+            className="button-secondary"
+            onClick={() => navigate(`/projects/${projectId}/features`)}
+          >
+            Features
+          </button>
+          <button className="button-secondary" onClick={loadProject}>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error && (

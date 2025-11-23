@@ -351,3 +351,58 @@ export async function getTerritoryKpis(
   });
   return response.data;
 }
+
+// App Builder Endpoints
+import type { AppBuildStatus, AppBuildResult, Feature, CreateFeaturePayload, FeatureResult, FeaturesListResponse } from './types';
+
+export async function getAppBuildStatus(projectId: string): Promise<AppBuildStatus> {
+  const response = await axiosInstance.get<AppBuildStatus>(`/app-builder/${projectId}/status`);
+  return response.data;
+}
+
+export async function planAppBuild(projectId: string): Promise<AppBuildResult> {
+  const response = await axiosInstance.post<AppBuildResult>(`/app-builder/${projectId}/plan`);
+  return response.data;
+}
+
+export async function runAppScaffold(projectId: string): Promise<AppBuildResult> {
+  const response = await axiosInstance.post<AppBuildResult>(`/app-builder/${projectId}/scaffold`);
+  return response.data;
+}
+
+export async function getAppBuildArtifacts(projectId: string): Promise<{ project_id: string; artifacts: Array<{ id: string; name: string; path: string; artifact_type: string; created_at: string | null }>; total_count: number }> {
+  const response = await axiosInstance.get(`/app-builder/${projectId}/artifacts`);
+  return response.data;
+}
+
+// Feature Engine Endpoints
+
+export async function listFeatures(projectId: string): Promise<FeaturesListResponse> {
+  const response = await axiosInstance.get<FeaturesListResponse>(`/projects/${projectId}/features`);
+  return response.data;
+}
+
+export async function getFeature(projectId: string, featureId: string): Promise<Feature> {
+  const response = await axiosInstance.get<Feature>(`/projects/${projectId}/features/${featureId}`);
+  return response.data;
+}
+
+export async function createFeature(projectId: string, payload: CreateFeaturePayload): Promise<Feature> {
+  const response = await axiosInstance.post<Feature>(`/projects/${projectId}/features`, payload);
+  return response.data;
+}
+
+export async function planFeature(projectId: string, featureId: string): Promise<FeatureResult> {
+  const response = await axiosInstance.post<FeatureResult>(`/projects/${projectId}/features/${featureId}/plan`);
+  return response.data;
+}
+
+export async function buildFeature(projectId: string, featureId: string): Promise<FeatureResult> {
+  const response = await axiosInstance.post<FeatureResult>(`/projects/${projectId}/features/${featureId}/build`);
+  return response.data;
+}
+
+export async function getFeatureArtifacts(projectId: string, featureId: string): Promise<{ feature_id: string; artifacts: Array<{ id: string; name: string; path: string; artifact_type: string; created_at: string | null }>; total_count: number }> {
+  const response = await axiosInstance.get(`/projects/${projectId}/features/${featureId}/artifacts`);
+  return response.data;
+}

@@ -256,3 +256,70 @@ export interface OrchestratorEvent {
   message: string;
   data: Record<string, unknown>;
 }
+
+// App Builder types
+export interface AppBuildStatus {
+  project_id: string;
+  status: 'not_started' | 'planning' | 'scaffolding' | 'completed' | 'failed';
+  last_error: string | null;
+  last_run_id: string | null;
+  last_updated_at: string | null;
+  artifact_count: number;
+  target_stack: string | null;
+}
+
+export interface AppBuildResult {
+  status: string;
+  artifacts: Array<{
+    id: string;
+    name: string;
+    path: string;
+    artifact_type: string;
+    created_at?: string;
+  }>;
+  summary: string;
+  token_usage: Record<string, number>;
+  next_steps?: string[];
+}
+
+// Feature types
+export interface Feature {
+  feature_id: string;
+  title: string;
+  description: string;
+  status: 'submitted' | 'planned' | 'building' | 'completed' | 'failed';
+  created_at: string;
+  updated_at: string;
+  artifact_count: number;
+  plan_summary: string | null;
+  build_summary: string | null;
+  priority: string;
+  tags: string[];
+}
+
+export interface CreateFeaturePayload {
+  title: string;
+  description?: string;
+  priority?: string;
+  tags?: string[];
+}
+
+export interface FeatureResult {
+  feature_id: string;
+  status: string;
+  artifacts: Array<{
+    id: string;
+    name: string;
+    path: string;
+    artifact_type: string;
+    created_at?: string;
+  }>;
+  summary: string;
+  token_usage: Record<string, number>;
+}
+
+export interface FeaturesListResponse {
+  project_id: string;
+  features: Feature[];
+  total_count: number;
+}

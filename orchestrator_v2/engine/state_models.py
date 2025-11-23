@@ -292,6 +292,9 @@ class ProjectState(BaseModel):
     rsg_stage: RsgStage = RsgStage.NOT_STARTED
     rsg_progress: RsgProgress = Field(default_factory=RsgProgress)
 
+    # App build state (for app_build capability)
+    app_build: Any | None = None  # AppBuildState - imported as Any to avoid circular imports
+
 
 # -----------------------------------------------------------------------------
 # Configuration Models

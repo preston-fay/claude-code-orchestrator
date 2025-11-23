@@ -50,6 +50,16 @@ from orchestrator_v2.engine.state_models import (
 )
 from orchestrator_v2.planning import get_planning_service
 from orchestrator_v2.phases import get_execution_service
+from orchestrator_v2.app_builder import (
+    get_app_builder_service,
+    AppBuildStatus,
+    AppBuildState,
+)
+from orchestrator_v2.feature_engine import (
+    get_feature_service,
+    get_feature_repository,
+    FeatureStatus,
+)
 from orchestrator_v2.persistence.fs_repository import (
     FileSystemArtifactRepository,
     FileSystemCheckpointRepository,
@@ -1104,6 +1114,16 @@ async def _handle_slash_command(
 - `/plan-phase <phase>` - Generate planning artifacts
 - `/run-phase <phase>` - Execute a specific phase
 
+**App Builder:**
+- `/app-plan` - Generate app PRD, architecture, user flows
+- `/app-scaffold` - Generate app structure and starter code
+
+**Features:**
+- `/new-feature "<title>" [description]` - Create a feature request
+- `/plan-feature <feature-id>` - Generate feature spec and design
+- `/build-feature <feature-id>` - Generate code and tests
+- `/list-features` - List all features
+
 **Artifacts:**
 - `/artifacts phase=<phase>` - List artifacts for a phase
 - `/open <artifact_id>` - View artifact content
@@ -1586,6 +1606,312 @@ Focus on:
                 agent="system",
             )
 
+    # /app-plan - Generate app build plan
+    elif command == "/app-plan":
+        if not state.workspace_path:
+            return ChatResponse(
+                reply="Project has no workspace configured.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        # Check if project has app_build capability
+        if "app_build" not in (state.capabilities or []):
+            return ChatResponse(
+                reply="This project doesn't have the `app_build` capability.\n"
+                      "Add it to the project or use a web_app template.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        try:
+            app_builder = get_app_builder_service()
+            result = await app_builder.plan_app_build(
+                project_state=state,
+                workspace=Path(state.workspace_path),
+                user=user,
+            )
+
+            # Save state
+            await project_repo.save(state)
+
+            artifacts = result.get("artifacts", [])
+            artifact_names = [a.get("name", "unknown") for a in artifacts]
+
+            return ChatResponse(
+                reply=f"App build plan generated successfully!\n\n"
+                      f"**Artifacts created:**\n"
+                      f"{chr(10).join(f'- {name}' for name in artifact_names)}\n\n"
+                      f"View with: `/artifacts phase=app_build`\n\n"
+                      f"Next: Run `/app-scaffold` to generate starter code.",
+                model=model,
+                tokens=result.get("token_usage", {}),
+                agent="architect",
+            )
+        except Exception as e:
+            await project_repo.save(state)
+            return ChatResponse(
+                reply=f"App plan generation failed: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /app-scaffold - Generate app scaffold
+    elif command == "/app-scaffold":
+        if not state.workspace_path:
+            return ChatResponse(
+                reply="Project has no workspace configured.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        # Check if project has app_build capability
+        if "app_build" not in (state.capabilities or []):
+            return ChatResponse(
+                reply="This project doesn't have the `app_build` capability.\n"
+                      "Add it to the project or use a web_app template.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        try:
+            app_builder = get_app_builder_service()
+            result = await app_builder.run_app_scaffold(
+                project_state=state,
+                workspace=Path(state.workspace_path),
+                user=user,
+            )
+
+            # Save state
+            await project_repo.save(state)
+
+            artifacts = result.get("artifacts", [])
+            artifact_names = [a.get("name", "unknown") for a in artifacts]
+            next_steps = result.get("next_steps", [])
+
+            reply = f"App scaffold generated successfully!\n\n"
+            reply += f"**Artifacts created:**\n"
+            reply += f"{chr(10).join(f'- {name}' for name in artifact_names)}\n\n"
+
+            if next_steps:
+                reply += f"**Next steps:**\n"
+                reply += f"{chr(10).join(f'{i+1}. {step}' for i, step in enumerate(next_steps))}\n\n"
+
+            reply += f"View artifacts with: `/artifacts phase=app_build`"
+
+            return ChatResponse(
+                reply=reply,
+                model=model,
+                tokens=result.get("token_usage", {}),
+                agent="developer",
+            )
+        except Exception as e:
+            await project_repo.save(state)
+            return ChatResponse(
+                reply=f"App scaffold generation failed: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /new-feature "<title>" [description] - Create a feature
+    elif command == "/new-feature":
+        import re as regex
+        # Parse title from quotes
+        title_match = regex.search(r'"([^"]+)"', message)
+        if not title_match:
+            return ChatResponse(
+                reply='Usage: /new-feature "Feature Title" [optional description]\n'
+                      'Example: /new-feature "User Authentication" Implement login and registration',
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        title = title_match.group(1)
+        # Get description (everything after the quoted title)
+        desc_start = message.find('"', message.find('"') + 1) + 1
+        description = message[desc_start:].strip() if desc_start > 0 else ""
+
+        try:
+            feature_service = get_feature_service()
+            feature = await feature_service.create_feature(
+                project_id=project_id,
+                title=title,
+                description=description,
+            )
+
+            return ChatResponse(
+                reply=f"Feature created successfully!\n\n"
+                      f"**ID:** {feature.feature_id}\n"
+                      f"**Title:** {feature.title}\n"
+                      f"**Status:** {feature.status.value}\n\n"
+                      f"Next steps:\n"
+                      f"- `/plan-feature {feature.feature_id}` - Generate spec and design\n"
+                      f"- `/build-feature {feature.feature_id}` - Generate code",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="feature_manager",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to create feature: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /list-features - List all features
+    elif command == "/list-features":
+        try:
+            feature_repo = get_feature_repository()
+            features = await feature_repo.list_features(project_id)
+
+            if not features:
+                return ChatResponse(
+                    reply='No features yet. Create one with `/new-feature "Title" description`',
+                    model=model,
+                    tokens={"input": 0, "output": 0},
+                    agent="feature_manager",
+                )
+
+            lines = ["**Project Features:**\n"]
+            for f in features:
+                lines.append(f"- **{f.feature_id}**: {f.title} [{f.status.value}]")
+
+            lines.append("\nUse `/plan-feature <id>` or `/build-feature <id>` to work on a feature.")
+
+            return ChatResponse(
+                reply="\n".join(lines),
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="feature_manager",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to list features: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /plan-feature <feature-id> - Plan a feature
+    elif command == "/plan-feature":
+        if len(parts) < 2:
+            return ChatResponse(
+                reply="Usage: /plan-feature <feature-id>\nExample: /plan-feature F-001",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        feature_id = parts[1].upper()
+        if not state.workspace_path:
+            return ChatResponse(
+                reply="Project has no workspace configured.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        try:
+            feature_service = get_feature_service()
+            result = await feature_service.plan_feature(
+                project_id=project_id,
+                feature_id=feature_id,
+                project_state=state,
+                workspace=Path(state.workspace_path),
+                user=user,
+            )
+
+            artifacts = result.get("artifacts", [])
+            artifact_names = [a.get("name", "unknown") for a in artifacts]
+
+            return ChatResponse(
+                reply=f"Feature {feature_id} planned successfully!\n\n"
+                      f"**Summary:** {result.get('summary', '')}\n\n"
+                      f"**Artifacts:**\n{chr(10).join(f'- {name}' for name in artifact_names)}\n\n"
+                      f"Next: `/build-feature {feature_id}` to generate code.",
+                model=model,
+                tokens=result.get("token_usage", {}),
+                agent="architect",
+            )
+        except ValueError as e:
+            return ChatResponse(
+                reply=str(e),
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to plan feature: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /build-feature <feature-id> - Build a feature
+    elif command == "/build-feature":
+        if len(parts) < 2:
+            return ChatResponse(
+                reply="Usage: /build-feature <feature-id>\nExample: /build-feature F-001",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        feature_id = parts[1].upper()
+        if not state.workspace_path:
+            return ChatResponse(
+                reply="Project has no workspace configured.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        try:
+            feature_service = get_feature_service()
+            result = await feature_service.build_feature(
+                project_id=project_id,
+                feature_id=feature_id,
+                project_state=state,
+                workspace=Path(state.workspace_path),
+                user=user,
+            )
+
+            artifacts = result.get("artifacts", [])
+            artifact_names = [a.get("name", "unknown") for a in artifacts]
+
+            return ChatResponse(
+                reply=f"Feature {feature_id} built successfully!\n\n"
+                      f"**Summary:** {result.get('summary', '')}\n\n"
+                      f"**Generated files:**\n{chr(10).join(f'- {name}' for name in artifact_names)}\n\n"
+                      f"Review artifacts in `artifacts/features/{feature_id}/`",
+                model=model,
+                tokens=result.get("token_usage", {}),
+                agent="developer",
+            )
+        except ValueError as e:
+            return ChatResponse(
+                reply=str(e),
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to build feature: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
     # Unknown command
     else:
         return ChatResponse(
@@ -1708,6 +2034,412 @@ async def get_rsg_overview(project_id: str):
 
     overview = await rsg_service.get_overview(project_id)
     return rsg_overview_to_dto(overview)
+
+
+# -----------------------------------------------------------------------------
+# App Builder Endpoints
+# -----------------------------------------------------------------------------
+
+class AppBuildPlanRequestDTO(BaseModel):
+    """Request to plan an app build."""
+    brief_override: str | None = None
+    capabilities_override: list[str] | None = None
+
+
+class AppScaffoldRequestDTO(BaseModel):
+    """Request to run app scaffolding."""
+    target_stack: str | None = None
+    include_tests: bool = True
+    include_docs: bool = True
+
+
+class AppBuildStatusDTO(BaseModel):
+    """App build status response."""
+    project_id: str
+    status: str
+    last_error: str | None
+    last_run_id: str | None
+    last_updated_at: datetime | None
+    artifact_count: int
+    target_stack: str | None
+
+
+class AppBuildArtifactDTO(BaseModel):
+    """App build artifact info."""
+    id: str
+    name: str
+    path: str
+    artifact_type: str
+    created_at: datetime | None
+
+
+class AppBuildResultDTO(BaseModel):
+    """Result of an app build operation."""
+    status: str
+    artifacts: list[dict[str, Any]]
+    summary: str
+    token_usage: dict[str, Any] = Field(default_factory=dict)
+    next_steps: list[str] = Field(default_factory=list)
+
+
+@app.post("/app-builder/{project_id}/plan", response_model=AppBuildResultDTO)
+async def plan_app_build(
+    project_id: str,
+    request: AppBuildPlanRequestDTO | None = None,
+    user=Depends(get_current_user)
+):
+    """Plan an app build - generate PRD, architecture, user flows."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    # Get workspace path
+    workspace = Path(state.workspace_path) if state.workspace_path else None
+    if not workspace:
+        raise HTTPException(status_code=400, detail="Project has no workspace")
+
+    # Run app build planning
+    app_builder = get_app_builder_service()
+    try:
+        result = await app_builder.plan_app_build(
+            project_state=state,
+            workspace=workspace,
+            user=user,
+            brief_override=request.brief_override if request else None,
+            capabilities_override=request.capabilities_override if request else None,
+        )
+
+        # Save updated state
+        await project_repo.save(state)
+
+        return AppBuildResultDTO(**result)
+
+    except Exception as e:
+        # Save state even on failure (to persist error)
+        await project_repo.save(state)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/app-builder/{project_id}/scaffold", response_model=AppBuildResultDTO)
+async def run_app_scaffold(
+    project_id: str,
+    request: AppScaffoldRequestDTO | None = None,
+    user=Depends(get_current_user)
+):
+    """Run app scaffolding - generate structure and starter code."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    # Get workspace path
+    workspace = Path(state.workspace_path) if state.workspace_path else None
+    if not workspace:
+        raise HTTPException(status_code=400, detail="Project has no workspace")
+
+    # Run scaffolding
+    app_builder = get_app_builder_service()
+    try:
+        result = await app_builder.run_app_scaffold(
+            project_state=state,
+            workspace=workspace,
+            user=user,
+            target_stack=request.target_stack if request else None,
+            include_tests=request.include_tests if request else True,
+            include_docs=request.include_docs if request else True,
+        )
+
+        # Save updated state
+        await project_repo.save(state)
+
+        return AppBuildResultDTO(**result)
+
+    except Exception as e:
+        await project_repo.save(state)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/app-builder/{project_id}/status", response_model=AppBuildStatusDTO)
+async def get_app_build_status(project_id: str):
+    """Get app build status for a project."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    app_build = state.app_build
+    if app_build is None:
+        # Return default state
+        return AppBuildStatusDTO(
+            project_id=project_id,
+            status=AppBuildStatus.NOT_STARTED.value,
+            last_error=None,
+            last_run_id=None,
+            last_updated_at=None,
+            artifact_count=0,
+            target_stack=None,
+        )
+
+    return AppBuildStatusDTO(
+        project_id=project_id,
+        status=app_build.status.value if hasattr(app_build.status, 'value') else str(app_build.status),
+        last_error=app_build.last_error,
+        last_run_id=app_build.last_run_id,
+        last_updated_at=app_build.last_updated_at,
+        artifact_count=len(app_build.artifacts),
+        target_stack=app_build.target_stack,
+    )
+
+
+@app.get("/app-builder/{project_id}/artifacts")
+async def get_app_build_artifacts(project_id: str):
+    """Get artifacts from app build phase."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    app_build = state.app_build
+    if app_build is None or not app_build.artifacts:
+        return {"project_id": project_id, "artifacts": [], "total_count": 0}
+
+    artifacts = [
+        AppBuildArtifactDTO(
+            id=a.id,
+            name=a.name,
+            path=a.path,
+            artifact_type=a.artifact_type,
+            created_at=a.created_at,
+        ).model_dump()
+        for a in app_build.artifacts
+    ]
+
+    return {"project_id": project_id, "artifacts": artifacts, "total_count": len(artifacts)}
+
+
+# -----------------------------------------------------------------------------
+# Feature Engine Endpoints
+# -----------------------------------------------------------------------------
+
+class CreateFeatureDTO(BaseModel):
+    """Request to create a feature."""
+    title: str
+    description: str = ""
+    priority: str = "medium"
+    tags: list[str] = Field(default_factory=list)
+
+
+class FeatureDTO(BaseModel):
+    """Feature data for API responses."""
+    feature_id: str
+    title: str
+    description: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    artifact_count: int
+    plan_summary: str | None
+    build_summary: str | None
+    priority: str
+    tags: list[str]
+
+
+class FeatureResultDTO(BaseModel):
+    """Result of a feature operation."""
+    feature_id: str
+    status: str
+    artifacts: list[dict[str, Any]]
+    summary: str
+    token_usage: dict[str, Any] = Field(default_factory=dict)
+
+
+@app.post("/projects/{project_id}/features", response_model=FeatureDTO)
+async def create_feature(
+    project_id: str,
+    request: CreateFeatureDTO,
+    user=Depends(get_current_user)
+):
+    """Create a new feature request."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    feature_service = get_feature_service()
+    feature = await feature_service.create_feature(
+        project_id=project_id,
+        title=request.title,
+        description=request.description,
+        priority=request.priority,
+        tags=request.tags,
+    )
+
+    return FeatureDTO(
+        feature_id=feature.feature_id,
+        title=feature.title,
+        description=feature.description,
+        status=feature.status.value,
+        created_at=feature.created_at,
+        updated_at=feature.updated_at,
+        artifact_count=len(feature.artifacts),
+        plan_summary=feature.plan_summary,
+        build_summary=feature.build_summary,
+        priority=feature.priority,
+        tags=feature.tags,
+    )
+
+
+@app.get("/projects/{project_id}/features")
+async def list_features(project_id: str):
+    """List all features for a project."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    feature_repo = get_feature_repository()
+    features = await feature_repo.list_features(project_id)
+
+    feature_dtos = [
+        FeatureDTO(
+            feature_id=f.feature_id,
+            title=f.title,
+            description=f.description,
+            status=f.status.value,
+            created_at=f.created_at,
+            updated_at=f.updated_at,
+            artifact_count=len(f.artifacts),
+            plan_summary=f.plan_summary,
+            build_summary=f.build_summary,
+            priority=f.priority,
+            tags=f.tags,
+        ).model_dump()
+        for f in features
+    ]
+
+    return {"project_id": project_id, "features": feature_dtos, "total_count": len(features)}
+
+
+@app.get("/projects/{project_id}/features/{feature_id}", response_model=FeatureDTO)
+async def get_feature(project_id: str, feature_id: str):
+    """Get a specific feature."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    feature_repo = get_feature_repository()
+    feature = await feature_repo.get_feature(project_id, feature_id)
+
+    if not feature:
+        raise HTTPException(status_code=404, detail=f"Feature not found: {feature_id}")
+
+    return FeatureDTO(
+        feature_id=feature.feature_id,
+        title=feature.title,
+        description=feature.description,
+        status=feature.status.value,
+        created_at=feature.created_at,
+        updated_at=feature.updated_at,
+        artifact_count=len(feature.artifacts),
+        plan_summary=feature.plan_summary,
+        build_summary=feature.build_summary,
+        priority=feature.priority,
+        tags=feature.tags,
+    )
+
+
+@app.post("/projects/{project_id}/features/{feature_id}/plan", response_model=FeatureResultDTO)
+async def plan_feature(
+    project_id: str,
+    feature_id: str,
+    user=Depends(get_current_user)
+):
+    """Plan a feature - generate spec and design."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    workspace = Path(state.workspace_path) if state.workspace_path else None
+    if not workspace:
+        raise HTTPException(status_code=400, detail="Project has no workspace")
+
+    feature_service = get_feature_service()
+    try:
+        result = await feature_service.plan_feature(
+            project_id=project_id,
+            feature_id=feature_id,
+            project_state=state,
+            workspace=workspace,
+            user=user,
+        )
+        return FeatureResultDTO(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/projects/{project_id}/features/{feature_id}/build", response_model=FeatureResultDTO)
+async def build_feature(
+    project_id: str,
+    feature_id: str,
+    user=Depends(get_current_user)
+):
+    """Build a feature - generate code and tests."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    workspace = Path(state.workspace_path) if state.workspace_path else None
+    if not workspace:
+        raise HTTPException(status_code=400, detail="Project has no workspace")
+
+    feature_service = get_feature_service()
+    try:
+        result = await feature_service.build_feature(
+            project_id=project_id,
+            feature_id=feature_id,
+            project_state=state,
+            workspace=workspace,
+            user=user,
+        )
+        return FeatureResultDTO(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/projects/{project_id}/features/{feature_id}/artifacts")
+async def get_feature_artifacts(project_id: str, feature_id: str):
+    """Get artifacts for a feature."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    feature_repo = get_feature_repository()
+    feature = await feature_repo.get_feature(project_id, feature_id)
+
+    if not feature:
+        raise HTTPException(status_code=404, detail=f"Feature not found: {feature_id}")
+
+    artifacts = [
+        {
+            "id": a.id,
+            "name": a.name,
+            "path": a.path,
+            "artifact_type": a.artifact_type,
+            "created_at": a.created_at,
+        }
+        for a in feature.artifacts
+    ]
+
+    return {"feature_id": feature_id, "artifacts": artifacts, "total_count": len(artifacts)}
 
 
 # -----------------------------------------------------------------------------
