@@ -67,6 +67,43 @@ export interface ArtifactsResponse {
   total_count: number;
 }
 
+// Full artifact content with metadata
+export interface ArtifactContent {
+  id: string;
+  name: string;
+  phase: string;
+  path: string;
+  artifact_type: string;
+  content: string;
+  metadata: {
+    created_at?: string;
+    agent?: string;
+    skill?: string;
+    size_bytes?: number;
+    hash?: string;
+    [key: string]: unknown;
+  };
+}
+
+// Phase diagnostics
+export interface PhaseDiagnostics {
+  phase: string;
+  agents: string[];
+  skills: string[];
+  artifacts: string[];
+  governance: {
+    passed?: boolean;
+    [key: string]: unknown;
+  };
+  token_usage: {
+    input?: number;
+    output?: number;
+    total?: number;
+  };
+  timestamp?: string;
+  errors: string[];
+}
+
 // Chat/Console
 export interface ChatMessage {
   role: 'user' | 'assistant';

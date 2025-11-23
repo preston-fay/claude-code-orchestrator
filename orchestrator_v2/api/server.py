@@ -120,6 +120,29 @@ class ArtifactsResponse(BaseModel):
     total_count: int
 
 
+class ArtifactContentResponse(BaseModel):
+    """Response with full artifact content and metadata."""
+    id: str
+    name: str
+    phase: str
+    path: str
+    artifact_type: str
+    content: str
+    metadata: dict[str, Any]
+
+
+class DiagnosticsDTO(BaseModel):
+    """Phase diagnostics data."""
+    phase: str
+    agents: list[str] = Field(default_factory=list)
+    skills: list[str] = Field(default_factory=list)
+    artifacts: list[str] = Field(default_factory=list)
+    governance: dict[str, Any] = Field(default_factory=dict)
+    token_usage: dict[str, int] = Field(default_factory=dict)
+    timestamp: str | None = None
+    errors: list[str] = Field(default_factory=list)
+
+
 class HealthResponse(BaseModel):
     """Health check response."""
     status: str = "healthy"
@@ -845,6 +868,129 @@ async def get_project_artifacts(project_id: str):
     )
 
 
+@app.get("/projects/{project_id}/artifacts/{artifact_id}", response_model=ArtifactContentResponse)
+async def get_artifact_content(project_id: str, artifact_id: str):
+    """Get single artifact with full content and metadata."""
+    import hashlib
+
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    if not state.workspace_path:
+        raise HTTPException(status_code=404, detail="Project has no workspace")
+
+    # Parse artifact_id (format: phase_filename)
+    parts = artifact_id.split("_", 1)
+    if len(parts) != 2:
+        raise HTTPException(status_code=400, detail=f"Invalid artifact ID format: {artifact_id}")
+
+    phase_name, filename = parts
+    artifact_path = Path(state.workspace_path) / "artifacts" / phase_name / filename
+
+    if not artifact_path.exists():
+        raise HTTPException(status_code=404, detail=f"Artifact not found: {artifact_id}")
+
+    # Read content
+    try:
+        content = artifact_path.read_text(encoding="utf-8")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read artifact: {str(e)}")
+
+    # Get file stats
+    stat = artifact_path.stat()
+
+    # Determine artifact type
+    suffix = artifact_path.suffix.lower()
+    type_map = {
+        ".md": "markdown",
+        ".json": "json",
+        ".py": "code",
+        ".ts": "code",
+        ".js": "code",
+        ".yaml": "yaml",
+        ".yml": "yaml",
+        ".txt": "text",
+    }
+    artifact_type = type_map.get(suffix, "text")
+
+    # Load metadata from index if available
+    index_path = Path(state.workspace_path) / "artifacts" / phase_name / "_index.json"
+    metadata = {
+        "created_at": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+        "size_bytes": stat.st_size,
+        "hash": hashlib.sha256(content.encode()).hexdigest(),
+    }
+
+    if index_path.exists():
+        try:
+            import json
+            index_data = json.loads(index_path.read_text())
+            if filename in index_data:
+                metadata.update(index_data[filename])
+        except Exception:
+            pass
+
+    return ArtifactContentResponse(
+        id=artifact_id,
+        name=filename,
+        phase=phase_name,
+        path=str(artifact_path),
+        artifact_type=artifact_type,
+        content=content,
+        metadata=metadata,
+    )
+
+
+@app.get("/projects/{project_id}/diagnostics/{phase}", response_model=DiagnosticsDTO)
+async def get_phase_diagnostics(project_id: str, phase: str):
+    """Get diagnostics for a specific phase."""
+    try:
+        state = await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    # Validate phase
+    try:
+        phase_type = PhaseType(phase)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid phase: {phase}")
+
+    # Load diagnostics from file
+    if state.workspace_path:
+        diagnostics_path = Path(state.workspace_path) / ".diagnostics" / f"{phase}.json"
+
+        if diagnostics_path.exists():
+            try:
+                import json
+                data = json.loads(diagnostics_path.read_text())
+                return DiagnosticsDTO(
+                    phase=phase,
+                    agents=data.get("agents", []),
+                    skills=data.get("skills", []),
+                    artifacts=data.get("artifacts", []),
+                    governance=data.get("governance", {}),
+                    token_usage=data.get("token_usage", {}),
+                    timestamp=data.get("timestamp"),
+                    errors=data.get("errors", []),
+                )
+            except Exception:
+                pass
+
+    # Return empty diagnostics if not found
+    return DiagnosticsDTO(
+        phase=phase,
+        agents=[],
+        skills=[],
+        artifacts=[],
+        governance={},
+        token_usage={},
+        timestamp=None,
+        errors=[],
+    )
+
+
 # -----------------------------------------------------------------------------
 # Project Console/Chat Endpoint
 # -----------------------------------------------------------------------------
@@ -944,10 +1090,365 @@ async def _handle_slash_command(
     model: str,
 ) -> ChatResponse:
     """Handle slash commands in chat."""
+    import json
+    import re
+
     parts = message.split(maxsplit=2)
     command = parts[0].lower()
 
-    if command == "/run-phase":
+    # /help - Show all available commands
+    if command == "/help":
+        help_text = """**RSC Console Commands**
+
+**Phase Execution:**
+- `/plan-phase <phase>` - Generate planning artifacts
+- `/run-phase <phase>` - Execute a specific phase
+
+**Artifacts:**
+- `/artifacts phase=<phase>` - List artifacts for a phase
+- `/open <artifact_id>` - View artifact content
+
+**Analysis:**
+- `/next-actions` - Get recommended next steps
+- `/summarize-prd` - Get executive summary of PRD
+- `/diagnose-phase <phase>` - View phase diagnostics
+
+**Other:**
+- `/help` - Show this help message
+
+**Valid phases:** planning, architecture, data, development, qa, documentation"""
+
+        return ChatResponse(
+            reply=help_text,
+            model=model,
+            tokens={"input": 0, "output": 0},
+            agent="console",
+        )
+
+    # /artifacts phase=<phase> - List artifacts for a phase
+    elif command == "/artifacts":
+        # Parse phase=<phase> argument
+        phase_match = re.search(r'phase=(\w+)', message)
+        if not phase_match:
+            return ChatResponse(
+                reply="Usage: /artifacts phase=<phase>\nExample: /artifacts phase=planning",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        phase_name = phase_match.group(1).lower()
+
+        if not state.workspace_path:
+            return ChatResponse(
+                reply="Project has no workspace configured.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        artifacts_dir = Path(state.workspace_path) / "artifacts" / phase_name
+        if not artifacts_dir.exists():
+            return ChatResponse(
+                reply=f"No artifacts found for phase: {phase_name}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="console",
+            )
+
+        # List artifacts
+        artifact_list = []
+        for f in sorted(artifacts_dir.iterdir()):
+            if f.is_file() and not f.name.startswith("_"):
+                stat = f.stat()
+                artifact_list.append(f"- **{f.name}** ({stat.st_size} bytes) - ID: `{phase_name}_{f.name}`")
+
+        if not artifact_list:
+            return ChatResponse(
+                reply=f"No artifacts found for phase: {phase_name}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="console",
+            )
+
+        reply = f"**Artifacts for {phase_name} phase:**\n\n" + "\n".join(artifact_list)
+        reply += "\n\nUse `/open <artifact_id>` to view content."
+
+        return ChatResponse(
+            reply=reply,
+            model=model,
+            tokens={"input": 0, "output": 0},
+            agent="console",
+        )
+
+    # /open <artifact_id> - View artifact content
+    elif command == "/open":
+        if len(parts) < 2:
+            return ChatResponse(
+                reply="Usage: /open <artifact_id>\nExample: /open planning_PRD.md",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        artifact_id = parts[1]
+
+        # Parse artifact_id (format: phase_filename)
+        id_parts = artifact_id.split("_", 1)
+        if len(id_parts) != 2:
+            return ChatResponse(
+                reply=f"Invalid artifact ID format: {artifact_id}\nExpected format: phase_filename",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        phase_name, filename = id_parts
+
+        if not state.workspace_path:
+            return ChatResponse(
+                reply="Project has no workspace configured.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        artifact_path = Path(state.workspace_path) / "artifacts" / phase_name / filename
+        if not artifact_path.exists():
+            return ChatResponse(
+                reply=f"Artifact not found: {artifact_id}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        try:
+            content = artifact_path.read_text(encoding="utf-8")
+            stat = artifact_path.stat()
+
+            # Truncate if too long
+            max_preview = 3000
+            truncated = len(content) > max_preview
+            preview = content[:max_preview] + ("\n\n... (truncated)" if truncated else "")
+
+            reply = f"**{filename}** ({phase_name} phase)\n"
+            reply += f"Size: {stat.st_size} bytes\n\n"
+            reply += "```\n" + preview + "\n```"
+
+            return ChatResponse(
+                reply=reply,
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="console",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to read artifact: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /diagnose-phase <phase> - View phase diagnostics
+    elif command == "/diagnose-phase":
+        if len(parts) < 2:
+            return ChatResponse(
+                reply="Usage: /diagnose-phase <phase>\nExample: /diagnose-phase data",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        phase_name = parts[1].lower()
+
+        if not state.workspace_path:
+            return ChatResponse(
+                reply="Project has no workspace configured.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        # Load diagnostics
+        diagnostics_path = Path(state.workspace_path) / ".diagnostics" / f"{phase_name}.json"
+
+        if not diagnostics_path.exists():
+            return ChatResponse(
+                reply=f"No diagnostics found for phase: {phase_name}\nRun the phase first with `/run-phase {phase_name}`",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="console",
+            )
+
+        try:
+            data = json.loads(diagnostics_path.read_text())
+
+            reply = f"**Diagnostics for {phase_name} phase:**\n\n"
+            reply += f"**Agents:** {', '.join(data.get('agents', [])) or 'None'}\n"
+            reply += f"**Skills:** {', '.join(data.get('skills', [])) or 'None'}\n"
+            reply += f"**Artifacts:** {', '.join(data.get('artifacts', [])) or 'None'}\n\n"
+
+            token_usage = data.get('token_usage', {})
+            if token_usage:
+                reply += f"**Token Usage:**\n"
+                reply += f"- Input: {token_usage.get('input', 0)}\n"
+                reply += f"- Output: {token_usage.get('output', 0)}\n"
+                reply += f"- Total: {token_usage.get('total', 0)}\n\n"
+
+            governance = data.get('governance', {})
+            if governance:
+                reply += f"**Governance:** {'Passed' if governance.get('passed', True) else 'Failed'}\n"
+
+            if data.get('timestamp'):
+                reply += f"\n**Timestamp:** {data['timestamp']}"
+
+            return ChatResponse(
+                reply=reply,
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="console",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to read diagnostics: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /next-actions - Get recommended next steps
+    elif command == "/next-actions":
+        from orchestrator_v2.llm import get_provider_registry
+        from orchestrator_v2.engine.state_models import AgentContext, TaskDefinition
+
+        registry = get_provider_registry()
+
+        # Build context for LLM
+        completed = [p.value for p in state.completed_phases]
+        current = state.current_phase.value
+        capabilities = state.capabilities or ["generic"]
+
+        prompt = f"""Based on the following project state, recommend 3-5 concrete next actions:
+
+Project: {state.project_name}
+Brief: {state.brief or 'No brief provided'}
+Capabilities: {', '.join(capabilities)}
+Current Phase: {current}
+Completed Phases: {', '.join(completed) if completed else 'None'}
+
+Provide actionable recommendations in markdown format. Focus on:
+1. What phase to run next
+2. What artifacts to review
+3. Any potential issues to address
+
+Be concise and specific."""
+
+        context = AgentContext(
+            project_state=state,
+            task=TaskDefinition(task_id="next-actions", description="Generate next actions"),
+            user_id=user.user_id,
+            llm_api_key=user.llm_api_key,
+            llm_provider=user.llm_provider or "anthropic",
+            model=model,
+        )
+
+        try:
+            result = await registry.generate(
+                prompt=prompt,
+                model=model,
+                context=context,
+                max_tokens=1024,
+            )
+
+            return ChatResponse(
+                reply=f"**Recommended Next Actions:**\n\n{result.text}",
+                model=model,
+                tokens={
+                    "input": result.usage.input_tokens if result.usage else 0,
+                    "output": result.usage.output_tokens if result.usage else 0,
+                },
+                agent="advisor",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to generate recommendations: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /summarize-prd - Get executive summary of PRD
+    elif command == "/summarize-prd":
+        if not state.workspace_path:
+            return ChatResponse(
+                reply="Project has no workspace configured.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        prd_path = Path(state.workspace_path) / "artifacts" / "planning" / "PRD.md"
+        if not prd_path.exists():
+            return ChatResponse(
+                reply="PRD not found. Run `/plan-phase planning` first.",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+        try:
+            prd_content = prd_path.read_text(encoding="utf-8")
+
+            from orchestrator_v2.llm import get_provider_registry
+            from orchestrator_v2.engine.state_models import AgentContext, TaskDefinition
+
+            registry = get_provider_registry()
+
+            prompt = f"""Create a concise executive summary (3-5 bullet points) of this PRD:
+
+{prd_content[:8000]}
+
+Focus on:
+- Project purpose
+- Key features
+- Technical approach
+- Success criteria"""
+
+            context = AgentContext(
+                project_state=state,
+                task=TaskDefinition(task_id="summarize-prd", description="Summarize PRD"),
+                user_id=user.user_id,
+                llm_api_key=user.llm_api_key,
+                llm_provider=user.llm_provider or "anthropic",
+                model=model,
+            )
+
+            result = await registry.generate(
+                prompt=prompt,
+                model=model,
+                context=context,
+                max_tokens=512,
+            )
+
+            return ChatResponse(
+                reply=f"**PRD Executive Summary:**\n\n{result.text}",
+                model=model,
+                tokens={
+                    "input": result.usage.input_tokens if result.usage else 0,
+                    "output": result.usage.output_tokens if result.usage else 0,
+                },
+                agent="analyst",
+            )
+        except Exception as e:
+            return ChatResponse(
+                reply=f"Failed to summarize PRD: {str(e)}",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
+
+    # /run-phase <phase> - Execute a phase
+    elif command == "/run-phase":
         if len(parts) < 2:
             return ChatResponse(
                 reply="Usage: /run-phase <phase>\nExample: /run-phase data",
@@ -983,6 +1484,24 @@ async def _handle_slash_command(
                 state.completed_phases.append(phase_type)
             await project_repo.save(state)
 
+            # Save diagnostics
+            if state.workspace_path:
+                diagnostics_dir = Path(state.workspace_path) / ".diagnostics"
+                diagnostics_dir.mkdir(parents=True, exist_ok=True)
+                diagnostics_path = diagnostics_dir / f"{phase_name}.json"
+
+                diagnostics_data = {
+                    "phase": phase_name,
+                    "agents": agents,
+                    "skills": result.get("skills", []),
+                    "artifacts": artifact_names,
+                    "governance": {"passed": True},
+                    "token_usage": result.get("token_usage", {}),
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "errors": [],
+                }
+                diagnostics_path.write_text(json.dumps(diagnostics_data, indent=2))
+
             return ChatResponse(
                 reply=f"Phase {phase_name} completed successfully.\n\n"
                       f"Summary: {summary}\n\n"
@@ -1002,6 +1521,7 @@ async def _handle_slash_command(
                 agent="system",
             )
 
+    # /plan-phase <phase> - Generate planning artifacts
     elif command == "/plan-phase":
         if len(parts) < 2:
             return ChatResponse(
@@ -1021,6 +1541,24 @@ async def _handle_slash_command(
 
                 artifacts = result.get("artifacts", [])
                 artifact_names = [Path(p).name for p in artifacts]
+
+                # Save diagnostics
+                if state.workspace_path:
+                    diagnostics_dir = Path(state.workspace_path) / ".diagnostics"
+                    diagnostics_dir.mkdir(parents=True, exist_ok=True)
+                    diagnostics_path = diagnostics_dir / "planning.json"
+
+                    diagnostics_data = {
+                        "phase": "planning",
+                        "agents": result.get("agents", []),
+                        "skills": [],
+                        "artifacts": artifact_names,
+                        "governance": {"passed": True},
+                        "token_usage": result.get("token_usage", {}),
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "errors": [],
+                    }
+                    diagnostics_path.write_text(json.dumps(diagnostics_data, indent=2))
 
                 return ChatResponse(
                     reply=f"Planning pipeline completed successfully!\n\n"
@@ -1048,22 +1586,10 @@ async def _handle_slash_command(
                 agent="system",
             )
 
-    elif command == "/feature":
-        return ChatResponse(
-            reply="Feature request creation not yet implemented.\n"
-                  "Usage: /feature \"<title>\" \"<description>\"",
-            model=model,
-            tokens={"input": 0, "output": 0},
-            agent="system",
-        )
-
+    # Unknown command
     else:
         return ChatResponse(
-            reply=f"Unknown command: {command}\n\n"
-                  f"Available commands:\n"
-                  f"- /plan-phase <phase>: Generate planning artifacts\n"
-                  f"- /run-phase <phase>: Execute a phase\n"
-                  f"- /feature \"<title>\" \"<description>\": Create feature request",
+            reply=f"Unknown command: {command}\n\nType `/help` for a list of available commands.",
             model=model,
             tokens={"input": 0, "output": 0},
             agent="system",

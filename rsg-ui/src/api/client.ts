@@ -15,6 +15,8 @@ import {
   Checkpoint,
   OrchestratorEvent,
   ArtifactsResponse,
+  ArtifactContent,
+  PhaseDiagnostics,
   ChatResponse,
 } from './types';
 
@@ -215,6 +217,27 @@ export async function getProjectEvents(
 // Artifacts
 export async function getProjectArtifacts(projectId: string): Promise<ArtifactsResponse> {
   const response = await axiosInstance.get<ArtifactsResponse>(`/projects/${projectId}/artifacts`);
+  return response.data;
+}
+
+export async function getArtifactContent(
+  projectId: string,
+  artifactId: string
+): Promise<ArtifactContent> {
+  const response = await axiosInstance.get<ArtifactContent>(
+    `/projects/${projectId}/artifacts/${artifactId}`
+  );
+  return response.data;
+}
+
+// Phase Diagnostics
+export async function getPhaseDiagnostics(
+  projectId: string,
+  phase: string
+): Promise<PhaseDiagnostics> {
+  const response = await axiosInstance.get<PhaseDiagnostics>(
+    `/projects/${projectId}/diagnostics/${phase}`
+  );
   return response.data;
 }
 
