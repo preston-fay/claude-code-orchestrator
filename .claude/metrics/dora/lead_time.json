@@ -1,7 +1,7 @@
 {
   "metric": "lead_time_for_changes",
-  "period": "2025-08-24/2025-11-22",
-  "collection_timestamp": "2025-11-22T16:24:30.348044",
+  "period": "2025-08-25/2025-11-23",
+  "collection_timestamp": "2025-11-23T09:17:21.395679",
   "measurements": [
     {
       "commit_sha": "9412422c6f544e7cc3a8145c791411c5fcc60398",
