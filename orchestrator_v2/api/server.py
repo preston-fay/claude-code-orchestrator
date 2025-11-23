@@ -48,6 +48,7 @@ from orchestrator_v2.engine.state_models import (
     ProjectState,
     get_phases_for_capabilities,
 )
+from orchestrator_v2.planning import get_planning_service
 from orchestrator_v2.persistence.fs_repository import (
     FileSystemArtifactRepository,
     FileSystemCheckpointRepository,
@@ -1001,16 +1002,40 @@ async def _handle_slash_command(
 
         phase_name = parts[1].lower()
 
-        # For now, return a placeholder - real implementation would call architect agent
-        return ChatResponse(
-            reply=f"Planning artifacts for phase '{phase_name}' would be generated here.\n"
-                  f"This will produce PRD.md, architecture.md, and backlog.json based on:\n"
-                  f"- Project brief: {state.brief or 'Not provided'}\n"
-                  f"- Capabilities: {', '.join(state.capabilities) if state.capabilities else 'generic'}",
-            model=model,
-            tokens={"input": 0, "output": 0},
-            agent="architect",
-        )
+        if phase_name == "planning":
+            # Run the actual planning pipeline
+            try:
+                planning_service = get_planning_service()
+                result = await planning_service.run_planning_pipeline(state, user)
+
+                artifacts = result.get("artifacts", [])
+                artifact_names = [Path(p).name for p in artifacts]
+
+                return ChatResponse(
+                    reply=f"Planning pipeline completed successfully!\n\n"
+                          f"Agents: {', '.join(result.get('agents', []))}\n\n"
+                          f"Artifacts generated:\n"
+                          f"{chr(10).join(f'- {name}' for name in artifact_names)}\n\n"
+                          f"View artifacts with: /artifacts phase=planning",
+                    model=model,
+                    tokens={"input": 0, "output": 0},
+                    agent="documentarian",
+                )
+            except Exception as e:
+                return ChatResponse(
+                    reply=f"Planning pipeline failed: {str(e)}",
+                    model=model,
+                    tokens={"input": 0, "output": 0},
+                    agent="system",
+                )
+        else:
+            return ChatResponse(
+                reply=f"Phase '{phase_name}' planning not yet implemented.\n"
+                      f"Currently supported: planning",
+                model=model,
+                tokens={"input": 0, "output": 0},
+                agent="system",
+            )
 
     elif command == "/feature":
         return ChatResponse(
