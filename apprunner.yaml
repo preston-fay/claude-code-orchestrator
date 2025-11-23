@@ -1,13 +1,6 @@
 version: 1.0
 runtime: python311
 
-build:
-  commands:
-    build:
-      # Use the minimal dependency set for App Runner
-      - python3 -m pip install --upgrade pip
-      - python3 -m pip install -r requirements-app-runner.txt
-
 run:
   command: python3 -m uvicorn orchestrator_v2.api.server:app --host 0.0.0.0 --port 8000
   network:
