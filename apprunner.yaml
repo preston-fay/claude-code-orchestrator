@@ -1,13 +1,16 @@
-# apprunner.yaml — Ready-Set-Code Backend (FastAPI)
 version: 1.0
 runtime: python311
+
 build:
   commands:
     pre-build:
-      - pip install --upgrade pip
+      # Upgrade pip via python module
+      - python -m pip install --upgrade pip
     build:
-      - pip install -r requirements.txt
-      - pip install -e .
+      # Install backend dependencies
+      - python -m pip install -r requirements.txt
+      - python -m pip install -e .
+
 run:
   command: uvicorn orchestrator_v2.main:app --host 0.0.0.0 --port 8000
   network:
