@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-26/2025-11-24",
-  "collection_timestamp": "2025-11-24T09:22:21.377359",
+  "collection_timestamp": "2025-11-24T18:31:55.398983",
   "commits": [
+    {
+      "sha": "d1e1a640710e363dffd7fc59de10ee342a3480b4",
+      "author": "preston-fay",
+      "date": "2025-11-24 13:31:07 -0500",
+      "message": "Modify amplify.yml for new appRoot and cleanup",
+      "contributor_type": "human",
+      "lines_added": 1,
+      "lines_deleted": 9,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "b5f4a08e3715ae592f10715d398b42467e1611c1",
+      "author": "github-actions[bot]",
+      "date": "2025-11-24 09:23:27 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 184,
+      "lines_deleted": 173,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
     {
       "sha": "063c91cb732b0a39adaeb10f9a13fc4398d7de88",
       "author": "github-actions[bot]",
@@ -893,19 +915,19 @@
     }
   ],
   "summary": {
-    "total_commits": 75,
-    "human_commits": 59,
+    "total_commits": 77,
+    "human_commits": 61,
     "ai_commits": 1,
     "collaborative_commits": 15,
-    "human_percentage": 78.67,
-    "ai_percentage": 1.33,
-    "collaborative_percentage": 20.0,
-    "human_lines_added": 41116,
+    "human_percentage": 79.22,
+    "ai_percentage": 1.3,
+    "collaborative_percentage": 19.48,
+    "human_lines_added": 41301,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 86328,
-    "total_lines_added": 170330,
-    "human_lines_percentage": 24.14,
-    "ai_lines_percentage": 25.18,
-    "collaborative_lines_percentage": 50.68
+    "total_lines_added": 170515,
+    "human_lines_percentage": 24.22,
+    "ai_lines_percentage": 25.15,
+    "collaborative_lines_percentage": 50.63
   }
 }

@@ -1,7 +1,7 @@
 {
   "metric": "change_failure_rate",
   "period": "2025-08-26/2025-11-24",
-  "collection_timestamp": "2025-11-24T09:22:18.376016",
+  "collection_timestamp": "2025-11-24T18:31:59.912306",
   "summary": {
     "total_deployments": 2,
     "failed_deployments": 0,
