@@ -1,8 +1,45 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-26/2025-11-24",
-  "collection_timestamp": "2025-11-24T18:49:39.717115",
+  "collection_timestamp": "2025-11-24T19:48:16.890144",
   "commits": [
+    {
+      "sha": "2ac9a1fc172797f94a605b2ccdeac6e3f42c5a78",
+      "author": "Preston Fay",
+      "date": "2025-11-24 14:47:11 -0500",
+      "message": "fix(rsg-ui): add vite env types and disable TS on ProjectDetailPage",
+      "contributor_type": "collaborative",
+      "lines_added": 11,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "8de9a49acd50a0120ede1197958f603897cef423",
+      "author": "github-actions[bot]",
+      "date": "2025-11-24 18:50:49 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 133,
+      "lines_deleted": 111,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
+    {
+      "sha": "8907b50afe20607e1c74193610dc649eee5e3e1e",
+      "author": "preston-fay",
+      "date": "2025-11-24 13:50:09 -0500",
+      "message": "Add vite-env.d.ts to TypeScript include paths",
+      "contributor_type": "human",
+      "lines_added": 1,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
     {
       "sha": "f775b65ab19719338855a46baea630e8b896567a",
       "author": "preston-fay",
@@ -59,6 +96,21 @@
       "ai_indicators": []
     },
     {
+      "sha": "2a2efe65ba6b30ded5a7730d9cacf7a84f7c5030",
+      "author": "Preston Fay",
+      "date": "2025-11-24 12:30:23 -0500",
+      "message": "fix: bulletproof health and root endpoints for App Runner",
+      "contributor_type": "collaborative",
+      "lines_added": 17,
+      "lines_deleted": 6,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
       "sha": "b5f4a08e3715ae592f10715d398b42467e1611c1",
       "author": "github-actions[bot]",
       "date": "2025-11-24 09:23:27 +0000",
@@ -70,6 +122,182 @@
       "ai_indicators": []
     },
     {
+      "sha": "01718e1976900162d516b76bd48777f1401b338e",
+      "author": "Preston Fay",
+      "date": "2025-11-23 18:03:05 -0500",
+      "message": "feat: Docker + ECR deployment pipeline for App Runner",
+      "contributor_type": "collaborative",
+      "lines_added": 63,
+      "lines_deleted": 29,
+      "files_changed": 3,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "f64209aa7676405049c5a64b05b851be9c48fc03",
+      "author": "Preston Fay",
+      "date": "2025-11-23 17:51:42 -0500",
+      "message": "chore: remove apprunner.yaml for clean App Runner config",
+      "contributor_type": "collaborative",
+      "lines_added": 0,
+      "lines_deleted": 7,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "1c36d2b6a2745dd92577715a836f517fb2e0b6be",
+      "author": "Preston Fay",
+      "date": "2025-11-23 17:34:37 -0500",
+      "message": "fix(apprunner): minimal config for managed python311 runtime",
+      "contributor_type": "collaborative",
+      "lines_added": 0,
+      "lines_deleted": 5,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "cf5e1a80b4afe0ef0e2e0dd799d8807afe9fa98d",
+      "author": "Preston Fay",
+      "date": "2025-11-23 17:21:08 -0500",
+      "message": "fix(apprunner): use python3 -m pip for build command",
+      "contributor_type": "collaborative",
+      "lines_added": 1,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "d657a51d00a97ea5146e0b6a01e3e896009c8ecc",
+      "author": "Preston Fay",
+      "date": "2025-11-23 17:19:54 -0500",
+      "message": "fix(apprunner): add explicit pip install for managed runtime",
+      "contributor_type": "collaborative",
+      "lines_added": 5,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "1b609d5d7013b2a61a672dae746bcf0066a91468",
+      "author": "Preston Fay",
+      "date": "2025-11-23 17:15:53 -0500",
+      "message": "fix(apprunner): rely on managed runtime requirements.txt and uvicorn entrypoint",
+      "contributor_type": "human",
+      "lines_added": 9,
+      "lines_deleted": 49,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "ba1ef5a8664d4f412b1d0979fbf5abaa7ba5ec16",
+      "author": "Preston Fay",
+      "date": "2025-11-23 10:23:03 -0600",
+      "message": "fix(deploy): use orchestrator_v2.api.server:app as entry point",
+      "contributor_type": "collaborative",
+      "lines_added": 1,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "970a90379454ee507417752fef020603a82a86f9",
+      "author": "Preston Fay",
+      "date": "2025-11-23 10:02:23 -0600",
+      "message": "fix(deploy): use python3 -m uvicorn instead of bare uvicorn",
+      "contributor_type": "collaborative",
+      "lines_added": 1,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "11edb48dc8c8166a1b4c0f28f027cc5d0c57d3ac",
+      "author": "Preston Fay",
+      "date": "2025-11-23 09:52:14 -0600",
+      "message": "fix(app-runner): use slim dependency set and minimal apprunner.yaml for successful App Runner build",
+      "contributor_type": "collaborative",
+      "lines_added": 10,
+      "lines_deleted": 8,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "76b4f67318e08ff1e2db56a7c35a77e60180ece9",
+      "author": "Preston Fay",
+      "date": "2025-11-23 09:30:27 -0600",
+      "message": "fix(deploy): use python3 instead of python in App Runner build",
+      "contributor_type": "collaborative",
+      "lines_added": 7,
+      "lines_deleted": 2,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "2dcfd4ab9e0f103348decc97e71ccf633c33cb36",
+      "author": "Preston Fay",
+      "date": "2025-11-23 08:54:09 -0600",
+      "message": "chore: simplify apprunner.yaml to minimal valid config",
+      "contributor_type": "collaborative",
+      "lines_added": 3,
+      "lines_deleted": 9,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "753245fc320d6b646a054b269cef64564436ee3d",
+      "author": "Preston Fay",
+      "date": "2025-11-23 08:30:46 -0600",
+      "message": "chore: fix App Runner build to use python -m pip",
+      "contributor_type": "collaborative",
+      "lines_added": 7,
+      "lines_deleted": 4,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
       "sha": "063c91cb732b0a39adaeb10f9a13fc4398d7de88",
       "author": "github-actions[bot]",
       "date": "2025-11-23 09:18:25 +0000",
@@ -79,6 +307,126 @@
       "lines_deleted": 173,
       "files_changed": 8,
       "ai_indicators": []
+    },
+    {
+      "sha": "57b9d01b7f94bdae6fc990416c202d6574ce81d2",
+      "author": "Preston Fay",
+      "date": "2025-11-22 21:58:22 -0600",
+      "message": "fix(deploy): remove invalid health-check from apprunner.yaml",
+      "contributor_type": "collaborative",
+      "lines_added": 3,
+      "lines_deleted": 6,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "6c4b1c71cb63a9a890b61168a896c137a71ec918",
+      "author": "Preston Fay",
+      "date": "2025-11-22 21:52:56 -0600",
+      "message": "fix(deploy): add pip install -e . for local package",
+      "contributor_type": "collaborative",
+      "lines_added": 1,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "a3855dec972e842e7cefb1e6353c07f5b25ab668",
+      "author": "Preston Fay",
+      "date": "2025-11-22 21:42:53 -0600",
+      "message": "chore(deploy): add App Runner config and requirements.txt",
+      "contributor_type": "collaborative",
+      "lines_added": 61,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "8f3fc89f61100ae9d30b22da76891d48015dccb2",
+      "author": "Preston Fay",
+      "date": "2025-11-22 17:12:19 -0600",
+      "message": "refactor(rsc-ui): make New Project templates fully generic and API-driven",
+      "contributor_type": "collaborative",
+      "lines_added": 22,
+      "lines_deleted": 25,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "234ad1333f4cc2b497d5e5bd2c236e5fc9077776",
+      "author": "Preston Fay",
+      "date": "2025-11-22 17:05:21 -0600",
+      "message": "refactor(rsc): remove demo templates from New Project flow; make templates generic-only",
+      "contributor_type": "collaborative",
+      "lines_added": 114,
+      "lines_deleted": 13,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "1dc5406d9419b7f1153873e3ac200be461f89d87",
+      "author": "Preston Fay",
+      "date": "2025-11-22 16:45:40 -0600",
+      "message": "fix(engine): resolve 500 on project advance and fix governance integration",
+      "contributor_type": "collaborative",
+      "lines_added": 7,
+      "lines_deleted": 6,
+      "files_changed": 4,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "3b53792ed82e7d7467c84415e53acb48918ab4d1",
+      "author": "Preston Fay",
+      "date": "2025-11-22 16:32:43 -0600",
+      "message": "fix(governance): restore from_phase parameter for backward compatibility",
+      "contributor_type": "collaborative",
+      "lines_added": 5,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "9522d1b15ee9de2a165a6c2bd996433a35acc109",
+      "author": "Preston Fay",
+      "date": "2025-11-22 12:17:33 -0600",
+      "message": "fix(ui): resolve ProjectDetailPage crash from undefined phases",
+      "contributor_type": "collaborative",
+      "lines_added": 41,
+      "lines_deleted": 8,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
     },
     {
       "sha": "cc24a59160c88673372c867890ba7681dcbce2ba",
@@ -959,19 +1307,19 @@
     }
   ],
   "summary": {
-    "total_commits": 81,
-    "human_commits": 65,
+    "total_commits": 105,
+    "human_commits": 68,
     "ai_commits": 1,
-    "collaborative_commits": 15,
-    "human_percentage": 80.25,
-    "ai_percentage": 1.23,
-    "collaborative_percentage": 18.52,
-    "human_lines_added": 41611,
+    "collaborative_commits": 36,
+    "human_percentage": 64.76,
+    "ai_percentage": 0.95,
+    "collaborative_percentage": 34.29,
+    "human_lines_added": 41754,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 86328,
-    "total_lines_added": 170825,
-    "human_lines_percentage": 24.36,
-    "ai_lines_percentage": 25.11,
-    "collaborative_lines_percentage": 50.54
+    "collaborative_lines_added": 86708,
+    "total_lines_added": 171348,
+    "human_lines_percentage": 24.37,
+    "ai_lines_percentage": 25.03,
+    "collaborative_lines_percentage": 50.6
   }
 }
