@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-26/2025-11-24",
-  "collection_timestamp": "2025-11-24T18:31:55.398983",
+  "collection_timestamp": "2025-11-24T18:36:40.161264",
   "commits": [
+    {
+      "sha": "20be6834ba44157b3bc92cd9ee880e15ee8ac93a",
+      "author": "preston-fay",
+      "date": "2025-11-24 13:35:49 -0500",
+      "message": "Change npm ci to npm install in amplify.yml",
+      "contributor_type": "human",
+      "lines_added": 1,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "a5ad02f166fa2fd53fb86163cea1c18356e625c7",
+      "author": "github-actions[bot]",
+      "date": "2025-11-24 18:33:02 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 166,
+      "lines_deleted": 144,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
     {
       "sha": "d1e1a640710e363dffd7fc59de10ee342a3480b4",
       "author": "preston-fay",
@@ -915,19 +937,19 @@
     }
   ],
   "summary": {
-    "total_commits": 77,
-    "human_commits": 61,
+    "total_commits": 79,
+    "human_commits": 63,
     "ai_commits": 1,
     "collaborative_commits": 15,
-    "human_percentage": 79.22,
-    "ai_percentage": 1.3,
-    "collaborative_percentage": 19.48,
-    "human_lines_added": 41301,
+    "human_percentage": 79.75,
+    "ai_percentage": 1.27,
+    "collaborative_percentage": 18.99,
+    "human_lines_added": 41468,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 86328,
-    "total_lines_added": 170515,
-    "human_lines_percentage": 24.22,
-    "ai_lines_percentage": 25.15,
-    "collaborative_lines_percentage": 50.63
+    "total_lines_added": 170682,
+    "human_lines_percentage": 24.3,
+    "ai_lines_percentage": 25.13,
+    "collaborative_lines_percentage": 50.58
   }
 }
