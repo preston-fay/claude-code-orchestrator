@@ -17,9 +17,22 @@ import {
 } from './types';
 
 // Default configuration
-const DEFAULT_BASE_URL = import.meta.env.VITE_ORCHESTRATOR_API_URL || 'http://localhost:8000';
+const FALLBACK_API_URL = 'https://kup99hcmh5.us-east-2.awsapprunner.com';
+
+const DEFAULT_BASE_URL =
+  import.meta.env.VITE_ORCHESTRATOR_API_URL?.trim() || FALLBACK_API_URL;
+
 const DEFAULT_USER_ID = import.meta.env.VITE_DEFAULT_USER_ID || 'dev-user';
 const DEFAULT_USER_EMAIL = import.meta.env.VITE_DEFAULT_USER_EMAIL || 'dev@example.com';
+
+// Warn if environment variable is missing
+if (!import.meta.env.VITE_ORCHESTRATOR_API_URL) {
+  console.warn(
+    '[RSC] VITE_ORCHESTRATOR_API_URL is missing at build time. ' +
+      'Using fallback API URL:',
+    FALLBACK_API_URL
+  );
+}
 
 // Storage keys
 const STORAGE_KEYS = {
