@@ -1,8 +1,225 @@
 {
   "metric": "contribution_attribution",
-  "period": "2025-08-25/2025-11-23",
-  "collection_timestamp": "2025-11-23T09:17:21.021558",
+  "period": "2025-08-26/2025-11-24",
+  "collection_timestamp": "2025-11-24T22:25:36.669111",
   "commits": [
+    {
+      "sha": "2be894b49b73fd043e6de9acb2f85889afa1f24a",
+      "author": "Preston Fay",
+      "date": "2025-11-22 16:45:40 -0600",
+      "message": "fix(engine): resolve 500 on project advance and fix governance integration",
+      "contributor_type": "collaborative",
+      "lines_added": 6,
+      "lines_deleted": 6,
+      "files_changed": 3,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "1629964b1bd6bd213daf312135a59e67aa6892c7",
+      "author": "Preston Fay",
+      "date": "2025-11-22 16:32:43 -0600",
+      "message": "fix(governance): restore from_phase parameter for backward compatibility",
+      "contributor_type": "collaborative",
+      "lines_added": 12,
+      "lines_deleted": 23,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "1366eb931df4ff98ce766749578082a5a3bb0327",
+      "author": "Claude",
+      "date": "2025-11-24 21:44:06 +0000",
+      "message": "feat(rsc): Generate real artifacts for PLANNING and ARCHITECTURE phases",
+      "contributor_type": "human",
+      "lines_added": 231,
+      "lines_deleted": 1,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "fe6220c474aadbd4681834125dccfb6a1f5ada8f",
+      "author": "Claude",
+      "date": "2025-11-23 14:43:32 +0000",
+      "message": "chore(app-runner): fix apprunner.yaml for managed python runtime",
+      "contributor_type": "human",
+      "lines_added": 49,
+      "lines_deleted": 11,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "513a0a59252ba528dba4aec37882fb58b983041c",
+      "author": "Claude",
+      "date": "2025-11-23 14:21:30 +0000",
+      "message": "chore: fix App Runner build to use python -m pip",
+      "contributor_type": "human",
+      "lines_added": 23,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "0e3546df20e59ef759719162270c74c44175168f",
+      "author": "github-actions[bot]",
+      "date": "2025-11-23 09:18:25 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 184,
+      "lines_deleted": 173,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
+    {
+      "sha": "74a8204ce38c8e94ad58326c1a92a4daa1664e32",
+      "author": "Claude",
+      "date": "2025-11-23 03:07:31 +0000",
+      "message": "feat(rsc): Sprint 7 production deployment infrastructure",
+      "contributor_type": "human",
+      "lines_added": 781,
+      "lines_deleted": 0,
+      "files_changed": 5,
+      "ai_indicators": []
+    },
+    {
+      "sha": "52c330a5229ee82a8a18d0726226626da73e87cf",
+      "author": "Claude",
+      "date": "2025-11-23 02:50:39 +0000",
+      "message": "feat(rsc): Sprint 6 Launchpad, templates V2, orchestration profiles, repo creation, dashboard",
+      "contributor_type": "human",
+      "lines_added": 2634,
+      "lines_deleted": 40,
+      "files_changed": 15,
+      "ai_indicators": []
+    },
+    {
+      "sha": "efc9e9d67aab6e2748a37e88c3ac8b43dd99495c",
+      "author": "Claude",
+      "date": "2025-11-23 02:31:43 +0000",
+      "message": "feat(rsc-ui): add ProjectConsole with UX enhancements",
+      "contributor_type": "human",
+      "lines_added": 569,
+      "lines_deleted": 0,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "da40d7f0f5db684c8e10b0de77cc9c6ba4759d9d",
+      "author": "Claude",
+      "date": "2025-11-23 02:24:16 +0000",
+      "message": "feat(rsc): implement App Builder V2 with Feature Engine",
+      "contributor_type": "human",
+      "lines_added": 3036,
+      "lines_deleted": 3,
+      "files_changed": 16,
+      "ai_indicators": []
+    },
+    {
+      "sha": "9f48445695ff1c47477db1d125f21b81d3a18443",
+      "author": "Claude",
+      "date": "2025-11-23 02:03:36 +0000",
+      "message": "chore: add node_modules to gitignore",
+      "contributor_type": "human",
+      "lines_added": 6,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "08815e3fd7121ff876f440d402b2b29d07eacec3",
+      "author": "Claude",
+      "date": "2025-11-23 02:02:28 +0000",
+      "message": "feat(rsc-ui): integrate artifact viewer and phase diagnostics into ProjectDetailPage",
+      "contributor_type": "human",
+      "lines_added": 5301,
+      "lines_deleted": 33,
+      "files_changed": 6,
+      "ai_indicators": []
+    },
+    {
+      "sha": "6acd35fba507867e3a4aaa36730964e6fcc783ed",
+      "author": "Claude",
+      "date": "2025-11-23 01:48:59 +0000",
+      "message": "feat(rsc): artifact viewer, console commands, and phase diagnostics",
+      "contributor_type": "human",
+      "lines_added": 1516,
+      "lines_deleted": 15,
+      "files_changed": 7,
+      "ai_indicators": []
+    },
+    {
+      "sha": "98b6e385461d6cf153240b18235b6a504647e7f7",
+      "author": "Claude",
+      "date": "2025-11-23 01:38:14 +0000",
+      "message": "feat(rsc): implement phase execution service for all phases",
+      "contributor_type": "human",
+      "lines_added": 740,
+      "lines_deleted": 11,
+      "files_changed": 4,
+      "ai_indicators": []
+    },
+    {
+      "sha": "58a833b2ca40c5e7e827826e51c6f03293ca6239",
+      "author": "Claude",
+      "date": "2025-11-23 01:30:04 +0000",
+      "message": "feat(rsc): implement planning pipeline with multi-agent consensus",
+      "contributor_type": "human",
+      "lines_added": 721,
+      "lines_deleted": 10,
+      "files_changed": 4,
+      "ai_indicators": []
+    },
+    {
+      "sha": "6203c77f10ff4b45f5a0a8c6d19d4d1ebef29edf",
+      "author": "Claude",
+      "date": "2025-11-23 01:22:53 +0000",
+      "message": "chore(rsc): rename UI, docs, and branding to Ready-Set-Code (RSC)",
+      "contributor_type": "human",
+      "lines_added": 13,
+      "lines_deleted": 13,
+      "files_changed": 6,
+      "ai_indicators": []
+    },
+    {
+      "sha": "c53358ad0d3a359696bb21050a812d6c57614cbb",
+      "author": "Claude",
+      "date": "2025-11-23 01:15:17 +0000",
+      "message": "docs: add RSC user guide and orchestration status documentation",
+      "contributor_type": "human",
+      "lines_added": 293,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "7ec155d1097ca25c84924c5bf1e950c03eef2e10",
+      "author": "Claude",
+      "date": "2025-11-23 01:14:09 +0000",
+      "message": "feat: harden RSC UI with capabilities, artifacts, and brief support",
+      "contributor_type": "human",
+      "lines_added": 172,
+      "lines_deleted": 9,
+      "files_changed": 4,
+      "ai_indicators": []
+    },
+    {
+      "sha": "a5055bc9de2aa09b6ce817bdfcc0040a29560911",
+      "author": "Claude",
+      "date": "2025-11-23 01:12:13 +0000",
+      "message": "feat: harden RSC engine and add generic orchestration capabilities",
+      "contributor_type": "human",
+      "lines_added": 492,
+      "lines_deleted": 21,
+      "files_changed": 4,
+      "ai_indicators": []
+    },
     {
       "sha": "cc24a59160c88673372c867890ba7681dcbce2ba",
       "author": "github-actions[bot]",
@@ -882,19 +1099,19 @@
     }
   ],
   "summary": {
-    "total_commits": 74,
-    "human_commits": 58,
+    "total_commits": 93,
+    "human_commits": 75,
     "ai_commits": 1,
-    "collaborative_commits": 15,
-    "human_percentage": 78.38,
-    "ai_percentage": 1.35,
-    "collaborative_percentage": 20.27,
-    "human_lines_added": 40932,
+    "collaborative_commits": 17,
+    "human_percentage": 80.65,
+    "ai_percentage": 1.08,
+    "collaborative_percentage": 18.28,
+    "human_lines_added": 57693,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 86328,
-    "total_lines_added": 170146,
-    "human_lines_percentage": 24.06,
-    "ai_lines_percentage": 25.21,
-    "collaborative_lines_percentage": 50.74
+    "collaborative_lines_added": 86346,
+    "total_lines_added": 186925,
+    "human_lines_percentage": 30.86,
+    "ai_lines_percentage": 22.94,
+    "collaborative_lines_percentage": 46.19
   }
 }
