@@ -1,6 +1,6 @@
 version: 1
 applications:
-  - appRoot: apps/web
+  - appRoot: rsg-ui
     frontend:
       phases:
         preBuild:
@@ -9,9 +9,6 @@ applications:
         build:
           commands:
             - npm run build
-            # Copy cleanliness badge to public assets
-            - mkdir -p public
-            - cp ../../docs/badges/cleanliness.svg public/ || true
       artifacts:
         baseDirectory: dist
         files:
@@ -19,8 +16,3 @@ applications:
       cache:
         paths:
           - node_modules/**/*
-    backend:
-      phases:
-        build:
-          commands:
-            - echo "Backend build complete"
