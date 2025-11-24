@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-26/2025-11-24",
-  "collection_timestamp": "2025-11-24T19:52:15.430148",
+  "collection_timestamp": "2025-11-24T20:01:36.281231",
   "commits": [
+    {
+      "sha": "2a30c7b7b8141c4780cedd1a3d629d3d0fb05440",
+      "author": "Preston Fay",
+      "date": "2025-11-24 15:00:20 -0500",
+      "message": "fix: add Amplify frontend URL to CORS allowed origins",
+      "contributor_type": "human",
+      "lines_added": 2,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "1d38bbf930446efbc496f73437d063885258f38c",
+      "author": "github-actions[bot]",
+      "date": "2025-11-24 19:53:18 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 139,
+      "lines_deleted": 113,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
     {
       "sha": "03e240ca366a6dca00d88623d2df53cde33d0057",
       "author": "Preston Fay",
@@ -1333,19 +1355,19 @@
     }
   ],
   "summary": {
-    "total_commits": 107,
-    "human_commits": 69,
+    "total_commits": 109,
+    "human_commits": 71,
     "ai_commits": 1,
     "collaborative_commits": 37,
-    "human_percentage": 64.49,
-    "ai_percentage": 0.93,
-    "collaborative_percentage": 34.58,
-    "human_lines_added": 42215,
+    "human_percentage": 65.14,
+    "ai_percentage": 0.92,
+    "collaborative_percentage": 33.94,
+    "human_lines_added": 42356,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 86709,
-    "total_lines_added": 171810,
-    "human_lines_percentage": 24.57,
-    "ai_lines_percentage": 24.96,
-    "collaborative_lines_percentage": 50.47
+    "total_lines_added": 171951,
+    "human_lines_percentage": 24.63,
+    "ai_lines_percentage": 24.94,
+    "collaborative_lines_percentage": 50.43
   }
 }
