@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-26/2025-11-24",
-  "collection_timestamp": "2025-11-24T18:36:40.161264",
+  "collection_timestamp": "2025-11-24T18:49:39.717115",
   "commits": [
+    {
+      "sha": "f775b65ab19719338855a46baea630e8b896567a",
+      "author": "preston-fay",
+      "date": "2025-11-24 13:48:51 -0500",
+      "message": "Add TypeScript definitions for Vite environment",
+      "contributor_type": "human",
+      "lines_added": 10,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "c4ca3fa6828b50b6fca6bb368d89a538610e14be",
+      "author": "github-actions[bot]",
+      "date": "2025-11-24 18:37:53 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 133,
+      "lines_deleted": 111,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
     {
       "sha": "20be6834ba44157b3bc92cd9ee880e15ee8ac93a",
       "author": "preston-fay",
@@ -937,19 +959,19 @@
     }
   ],
   "summary": {
-    "total_commits": 79,
-    "human_commits": 63,
+    "total_commits": 81,
+    "human_commits": 65,
     "ai_commits": 1,
     "collaborative_commits": 15,
-    "human_percentage": 79.75,
-    "ai_percentage": 1.27,
-    "collaborative_percentage": 18.99,
-    "human_lines_added": 41468,
+    "human_percentage": 80.25,
+    "ai_percentage": 1.23,
+    "collaborative_percentage": 18.52,
+    "human_lines_added": 41611,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 86328,
-    "total_lines_added": 170682,
-    "human_lines_percentage": 24.3,
-    "ai_lines_percentage": 25.13,
-    "collaborative_lines_percentage": 50.58
+    "total_lines_added": 170825,
+    "human_lines_percentage": 24.36,
+    "ai_lines_percentage": 25.11,
+    "collaborative_lines_percentage": 50.54
   }
 }
