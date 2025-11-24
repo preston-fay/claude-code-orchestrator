@@ -67,7 +67,11 @@ class PhaseExecutionService:
         )
 
         # Route to appropriate phase handler
-        if phase == PhaseType.DATA:
+        if phase == PhaseType.PLANNING:
+            return await self._execute_planning_phase(project_state, context)
+        elif phase == PhaseType.ARCHITECTURE:
+            return await self._execute_architecture_phase(project_state, context)
+        elif phase == PhaseType.DATA:
             return await self._execute_data_phase(project_state, context)
         elif phase == PhaseType.DEVELOPMENT:
             return await self._execute_development_phase(project_state, context)
@@ -80,6 +84,207 @@ class PhaseExecutionService:
                 "artifacts": [],
                 "summary": f"Phase {phase.value} execution not yet implemented",
                 "agents": [],
+            }
+
+    async def _execute_planning_phase(
+        self,
+        project_state: ProjectState,
+        context: AgentContext,
+    ) -> dict[str, Any]:
+        """Execute PLANNING phase - generate PRD and requirements."""
+        logger.info("Executing PLANNING phase")
+
+        brief = project_state.brief or "No brief provided"
+        template_id = project_state.template_id or "unknown"
+        capabilities = ", ".join(project_state.capabilities or ["generic"])
+
+        prompt = f"""You are a senior product architect. Generate a comprehensive Product Requirements Document (PRD) for this project.
+
+PROJECT: {project_state.project_name}
+TEMPLATE: {template_id}
+BRIEF: {brief}
+CAPABILITIES: {capabilities}
+
+Generate a JSON response with these keys:
+
+1. "prd": Markdown PRD document with:
+   - Executive Summary
+   - Problem Statement
+   - Goals & Success Metrics
+   - User Stories (3-5 key stories)
+   - Functional Requirements (organized by capability)
+   - Non-Functional Requirements (performance, security, scalability)
+   - Out of Scope (what we're NOT building)
+   - Timeline & Milestones
+
+2. "requirements": Markdown requirements document with:
+   - Detailed technical requirements
+   - Data requirements (if applicable)
+   - Integration requirements
+   - Infrastructure requirements
+
+3. "features": JSON array of feature objects with:
+   - name: Feature name
+   - description: Brief description
+   - priority: "high" | "medium" | "low"
+   - complexity: "high" | "medium" | "low"
+
+Output ONLY valid JSON with these three keys."""
+
+        try:
+            result = await self.registry.generate(
+                prompt=prompt,
+                model=context.model,
+                context=context,
+                max_tokens=4000,
+            )
+
+            text = result.text.strip()
+            if text.startswith("```"):
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:]
+                text = text.strip()
+
+            output = json.loads(text)
+
+            # Save artifacts
+            artifacts_dir = self._get_artifacts_dir(project_state, "planning")
+            saved_paths = []
+
+            # Save PRD
+            prd_path = artifacts_dir / "PRD.md"
+            prd_content = output.get("prd", "")
+            if isinstance(prd_content, dict):
+                prd_content = json.dumps(prd_content, indent=2)
+            prd_path.write_text(f"# Product Requirements Document\n\n{prd_content}")
+            saved_paths.append(str(prd_path))
+
+            # Save requirements
+            req_path = artifacts_dir / "requirements.md"
+            req_content = output.get("requirements", "")
+            if isinstance(req_content, dict):
+                req_content = json.dumps(req_content, indent=2)
+            req_path.write_text(f"# Technical Requirements\n\n{req_content}")
+            saved_paths.append(str(req_path))
+
+            # Save features list
+            features_path = artifacts_dir / "features.json"
+            features_content = output.get("features", [])
+            features_path.write_text(json.dumps(features_content, indent=2))
+            saved_paths.append(str(features_path))
+
+            return {
+                "artifacts": saved_paths,
+                "summary": f"Planning phase completed. Generated PRD and {len(saved_paths)} artifacts.",
+                "agents": ["architect"],
+            }
+
+        except Exception as e:
+            logger.error(f"Planning phase failed: {e}")
+            return {
+                "artifacts": [],
+                "summary": f"Planning phase failed: {str(e)}",
+                "agents": ["architect"],
+            }
+
+    async def _execute_architecture_phase(
+        self,
+        project_state: ProjectState,
+        context: AgentContext,
+    ) -> dict[str, Any]:
+        """Execute ARCHITECTURE phase - generate system design."""
+        logger.info("Executing ARCHITECTURE phase")
+
+        brief = project_state.brief or "No brief provided"
+        capabilities = ", ".join(project_state.capabilities or ["generic"])
+
+        prompt = f"""You are a solutions architect. Generate architecture documentation for this project.
+
+PROJECT: {project_state.project_name}
+BRIEF: {brief}
+CAPABILITIES: {capabilities}
+
+Generate a JSON response with these keys:
+
+1. "architecture": Markdown architecture document with:
+   - System Overview
+   - Architecture Diagram (textual description)
+   - Component Breakdown
+   - Data Flow
+   - Technology Stack
+   - Security Architecture
+   - Deployment Architecture
+
+2. "data_model": Markdown data model document with:
+   - Entity Relationship Diagram (textual)
+   - Entity Definitions
+   - Relationships
+   - Data Validation Rules
+
+3. "adrs": JSON array of Architecture Decision Records with:
+   - title: Decision title
+   - context: Why this decision matters
+   - decision: What was decided
+   - consequences: Trade-offs and implications
+
+Output ONLY valid JSON with these three keys."""
+
+        try:
+            result = await self.registry.generate(
+                prompt=prompt,
+                model=context.model,
+                context=context,
+                max_tokens=4000,
+            )
+
+            text = result.text.strip()
+            if text.startswith("```"):
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:]
+                text = text.strip()
+
+            output = json.loads(text)
+
+            # Save artifacts
+            artifacts_dir = self._get_artifacts_dir(project_state, "architecture")
+            saved_paths = []
+
+            # Save architecture doc
+            arch_path = artifacts_dir / "architecture.md"
+            arch_content = output.get("architecture", "")
+            if isinstance(arch_content, dict):
+                arch_content = json.dumps(arch_content, indent=2)
+            arch_path.write_text(f"# System Architecture\n\n{arch_content}")
+            saved_paths.append(str(arch_path))
+
+            # Save data model
+            dm_path = artifacts_dir / "data_model.md"
+            dm_content = output.get("data_model", "")
+            if isinstance(dm_content, dict):
+                dm_content = json.dumps(dm_content, indent=2)
+            dm_path.write_text(f"# Data Model\n\n{dm_content}")
+            saved_paths.append(str(dm_path))
+
+            # Save ADRs
+            adrs_path = artifacts_dir / "adrs.json"
+            adrs_content = output.get("adrs", [])
+            adrs_path.write_text(json.dumps(adrs_content, indent=2))
+            saved_paths.append(str(adrs_path))
+
+            return {
+                "artifacts": saved_paths,
+                "summary": f"Architecture phase completed. Generated {len(saved_paths)} artifacts.",
+                "agents": ["architect"],
+            }
+
+        except Exception as e:
+            logger.error(f"Architecture phase failed: {e}")
+            return {
+                "artifacts": [],
+                "summary": f"Architecture phase failed: {str(e)}",
+                "agents": ["architect"],
             }
 
     async def _execute_data_phase(

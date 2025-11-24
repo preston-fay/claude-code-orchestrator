@@ -20,6 +20,7 @@ from orchestrator_v2.engine.model_selection import (
     select_model_for_agent,
     estimate_tokens_for_agent,
 )
+from orchestrator_v2.phases.execution_service import PhaseExecutionService
 from orchestrator_v2.telemetry.budget_enforcer import (
     BudgetEnforcer,
     BudgetExceededError as BudgetError,
@@ -102,6 +103,7 @@ class WorkflowEngine:
         self._governance_engine = governance_engine or GovernanceEngine()
         self._token_tracker = token_tracker or TokenTracker()
         self._agents = agents or {}
+        self._phase_execution_service = PhaseExecutionService()
         self._state: ProjectState | None = None
         self._workspace: WorkspaceConfig | None = workspace
         self._repo_adapter: RepoAdapter | None = None
@@ -330,6 +332,29 @@ class WorkflowEngine:
                     )
 
             logger.info(f"Phase {phase.value} agents completed successfully")
+
+            # Generate artifacts using PhaseExecutionService
+            if user:
+                try:
+                    logger.info(f"Generating artifacts for phase {phase.value}")
+                    artifact_result = await self._phase_execution_service.execute_phase(
+                        phase=phase,
+                        project_state=self.state,
+                        user=user,
+                    )
+
+                    # Store artifacts in phase state
+                    if artifact_result.get("artifacts"):
+                        for artifact_path in artifact_result["artifacts"]:
+                            phase_state.artifacts[artifact_path] = ArtifactInfo(
+                                path=artifact_path,
+                                agent_id="phase_executor",
+                                created_at=datetime.utcnow(),
+                            )
+
+                    logger.info(f"Generated {len(artifact_result.get('artifacts', []))} artifacts")
+                except Exception as e:
+                    logger.warning(f"Artifact generation failed for {phase.value}: {e}")
 
             # Evaluate governance gates
             governance_results = await self.evaluate_governance(phase)
