@@ -144,13 +144,24 @@ app.add_middleware(
 )
 
 
-@app.get("/health", response_model=HealthResponse)
+@app.get("/", include_in_schema=False)
+async def root():
+    """Root endpoint - simple alive check."""
+    return {
+        "status": "ok",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": "2.0.0",
+    }
+
+
+@app.get("/health", include_in_schema=False)
 async def health_check():
-    """Health check endpoint."""
-    return HealthResponse(
-        status="healthy",
-        timestamp=datetime.utcnow().isoformat(),
-    )
+    """Health check endpoint - bulletproof for App Runner."""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": "2.0.0",
+    }
 
 
 # -----------------------------------------------------------------------------
@@ -585,13 +596,14 @@ async def advance_project(project_id: str):
     await project_repo.save(engine.state)
 
     # Save checkpoint
+    from orchestrator_v2.engine.state_models import GovernanceResults
     checkpoint = await engine._checkpoint_manager.save_checkpoint(
         phase=phase_state.phase,
         checkpoint_type=CheckpointType.POST,
         state=engine.state,
         agent_states=engine.state.agent_states,
-        artifacts={},
-        governance=engine.state.phase_states.get(phase_state.phase.value, phase_state).artifacts if hasattr(phase_state, 'artifacts') else {},
+        artifacts=phase_state.artifacts if hasattr(phase_state, 'artifacts') else {},
+        governance=GovernanceResults(),
     )
     await checkpoint_repo.save(checkpoint)
 

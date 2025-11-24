@@ -82,11 +82,23 @@ const ProjectListPage: React.FC = () => {
   const getProjectTypeBadge = (type: string) => {
     switch (type) {
       case 'analytics_forecasting':
+      case 'analytics_bi':
         return 'Analytics';
-      case 'territory_poc':
-        return 'Territory';
+      case 'ml_classification':
+      case 'ml_regression':
+        return 'ML';
+      case 'optimization':
+        return 'Optimization';
+      case 'application':
+        return 'App';
+      case 'service_api':
+        return 'API';
+      case 'data_engineering':
+        return 'Data';
+      case 'generic':
+        return 'General';
       default:
-        return type;
+        return type.replace(/_/g, ' ');
     }
   };
 
@@ -112,11 +124,10 @@ const ProjectListPage: React.FC = () => {
         <div className="empty-state">
           <p>No projects found.</p>
           <p>Create your first project to get started with Ready/Set/Go.</p>
-          <div className="golden-path-hint">
+          <div className="quick-start-hint">
             <h4>Quick Start</h4>
             <p>Click "New Project" and select a template to begin.</p>
-            <p className="hint-text">Or run the Golden Path demo:</p>
-            <code>python scripts/dev/run_golden_path_demo.py</code>
+            <p className="hint-text">Choose from Analytics, ML, Optimization, and more.</p>
           </div>
         </div>
       ) : (
@@ -140,9 +151,6 @@ const ProjectListPage: React.FC = () => {
               >
                 <td className="project-name">
                   {project.project_name}
-                  {project.project_name.startsWith('Golden Path') && (
-                    <span className="badge badge-demo">Demo</span>
-                  )}
                 </td>
                 <td>
                   <span className="project-type-tag">

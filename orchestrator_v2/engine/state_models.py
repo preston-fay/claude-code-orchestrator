@@ -159,6 +159,7 @@ class GovernanceResults(BaseModel):
     quality_gates: list[GateResult] = Field(default_factory=list)
     compliance_checks: list[ComplianceResult] = Field(default_factory=list)
     passed: bool = True
+    failed_rules: list[str] = Field(default_factory=list)
 
 
 # -----------------------------------------------------------------------------
