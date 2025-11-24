@@ -127,7 +127,7 @@ app = FastAPI(
     version="2.0.0",
 )
 
-# Configure CORS for development
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -137,6 +137,7 @@ app.add_middleware(
         "http://127.0.0.1:3001",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://main.d259fxta7kvoeo.amplifyapp.com",  # Amplify frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
