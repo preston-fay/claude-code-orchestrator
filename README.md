@@ -112,6 +112,96 @@ Automated code review using Claude API that analyzes pull requests for security 
 - Configure review depth (STANDARD, THOROUGH, SECURITY_FOCUSED)
 - Set file size limits and review scope
 
+### 🔄 Orchestrator Runs API & UI
+
+Programmatic access to orchestrator workflow execution through a REST API and React-based dashboard. Create, monitor, and manage multi-phase orchestrator runs via HTTP endpoints or interactive web UI.
+
+**Key Features:**
+- 🌐 **REST API**: 5 endpoints for run management (`/runs`, `/runs/{id}/next`, `/runs/{id}/artifacts`, `/runs/{id}/metrics`)
+- 🎨 **Web Dashboard**: React pages for visualizing runs, phases, artifacts, and metrics
+- 📊 **Real-Time Monitoring**: Track phase progress, token usage, costs, and governance scores
+- 🔌 **Integration-Ready**: TypeScript client for seamless frontend integration
+- 📝 **Type-Safe**: Pydantic DTOs ensuring request/response validation
+
+**Quick Start:**
+```bash
+# Start the backend API server
+.venv/bin/python scripts/dev/run_api_server.py
+# API: http://localhost:8000
+# Docs: http://localhost:8000/docs
+
+# Start the frontend UI (in separate terminal)
+cd rsg-ui && npm run dev
+# UI: http://localhost:5173/orchestrator/runs
+```
+
+**API Workflow:**
+```bash
+# 1. Create a new run
+curl -X POST http://localhost:8000/runs \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user123" \
+  -H "X-User-Email: user@example.com" \
+  -d '{
+    "profile": "analytics_forecast_app",
+    "intake": "Build demand forecasting app",
+    "project_name": "Q4 Forecast"
+  }'
+
+# 2. Advance to next phase
+curl -X POST http://localhost:8000/runs/{run_id}/next \
+  -H "X-User-Id: user123" \
+  -H "X-User-Email: user@example.com"
+
+# 3. Get run status and phase details
+curl http://localhost:8000/runs/{run_id} \
+  -H "X-User-Id: user123" \
+  -H "X-User-Email: user@example.com"
+
+# 4. List generated artifacts
+curl http://localhost:8000/runs/{run_id}/artifacts \
+  -H "X-User-Id: user123" \
+  -H "X-User-Email: user@example.com"
+
+# 5. Get metrics (tokens, costs, governance)
+curl http://localhost:8000/runs/{run_id}/metrics \
+  -H "X-User-Id: user123" \
+  -H "X-User-Email: user@example.com"
+```
+
+**UI Features:**
+- **Runs List View** (`/orchestrator/runs`) - View all runs with status, create new runs via modal
+- **Run Detail View** (`/orchestrator/runs/{run_id}`) - Tabbed interface:
+  - **Phases Tab**: Phase status, duration, artifacts count, advance button
+  - **Artifacts Tab**: Browse generated files grouped by phase
+  - **Metrics Tab**: Token usage, costs, governance scores, performance data
+
+**Full API Reference:** [docs/API_MINIMUM.md](docs/API_MINIMUM.md)
+
+**TypeScript Client:**
+```typescript
+import { createRun, getRun, advanceRun } from './api/orchestrator';
+
+// Create run
+const run = await createRun({
+  profile: 'analytics_forecast_app',
+  intake: 'Build forecasting app',
+  project_name: 'Q4 Forecast'
+});
+
+// Monitor progress
+const details = await getRun(run.run_id);
+console.log(`Current phase: ${details.current_phase}`);
+
+// Advance workflow
+const result = await advanceRun(run.run_id);
+console.log(`Advanced to: ${result.current_phase}`);
+```
+
+**📖 Learn more:**
+- [API Reference](docs/API_MINIMUM.md) - Complete REST API documentation
+- [Implementation Details](artifacts/self_hardening/IMPLEMENTATION.md) - Architecture and design decisions
+
 ---
 
 ## Getting Started

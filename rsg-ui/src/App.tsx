@@ -4,6 +4,8 @@ import Header from './components/Header';
 import SettingsPanel from './components/SettingsPanel';
 import ProjectListPage from './pages/ProjectListPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
+import OrchestratorRunsPage from './pages/OrchestratorRunsPage';
+import OrchestratorRunDetailPage from './pages/OrchestratorRunDetailPage';
 import { getApiConfig } from './api/client';
 
 function App() {
@@ -31,6 +33,8 @@ function App() {
         <Routes>
           <Route path="/" element={<ProjectListPage />} />
           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+          <Route path="/orchestrator/runs" element={<OrchestratorRunsPage />} />
+          <Route path="/orchestrator/runs/:runId" element={<OrchestratorRunDetailPage />} />
         </Routes>
       </main>
 
