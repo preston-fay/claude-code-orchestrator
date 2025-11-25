@@ -26,7 +26,7 @@ from orchestrator_v2.api.dto.runs import (
     ArtifactsResponse,
     MetricsSummary,
 )
-from orchestrator_v2.engine.state_models import ProjectState, PhaseType, PhaseState, PhaseStatus
+from orchestrator_v2.engine.state_models import ProjectState, PhaseType, PhaseState
 from orchestrator_v2.user.models import UserProfile
 
 
@@ -86,7 +86,7 @@ def sample_project_state(temp_workspace):
     # Add planning phase state
     planning_state = PhaseState(
         phase=PhaseType.PLANNING,
-        status=PhaseStatus.IN_PROGRESS,
+        status="running",
         started_at=datetime.utcnow(),
     )
     planning_state.artifacts = ["PRD.md", "requirements.txt"]
