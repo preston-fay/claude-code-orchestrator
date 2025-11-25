@@ -40,15 +40,15 @@ async def get_current_user(
         )
 
     user_repo = FileSystemUserRepository()
-    try:
-        user = await user_repo.get_user(x_user_id)
-    except KeyError:
+    user = await user_repo.get_by_id(x_user_id)
+    if user is None:
         # Create default user if not exists
         user = UserProfile(
             user_id=x_user_id,
             email=x_user_email,
             name=x_user_email.split("@")[0],
         )
+        await user_repo.save(user)
 
     return user
 

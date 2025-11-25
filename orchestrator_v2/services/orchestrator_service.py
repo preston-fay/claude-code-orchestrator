@@ -74,6 +74,7 @@ class OrchestratorService:
         # Create project state
         state = ProjectState(
             project_id=run_id,
+            run_id=run_id,
             project_name=project_name,
             client="default",
             user_id=user.user_id,
@@ -87,10 +88,9 @@ class OrchestratorService:
             state.metadata["intake"] = intake
 
         # Create workspace
-        workspace_config = await self._workspace_manager.create_workspace(
+        workspace_config = self._workspace_manager.create_workspace(
             project_id=run_id,
-            project_name=project_name,
-            metadata={"profile": profile, "intake": intake},
+            metadata={"profile": profile, "intake": intake, "project_name": project_name},
         )
         state.workspace_path = str(workspace_config.workspace_root)
 
