@@ -1,7 +1,7 @@
 {
   "metric": "deployment_frequency",
-  "period": "2025-08-26/2025-11-24",
-  "collection_timestamp": "2025-11-24T22:39:32.239603",
+  "period": "2025-08-27/2025-11-25",
+  "collection_timestamp": "2025-11-25T09:21:16.780926",
   "deployments": [
     {
       "version": "v1.0.0",
