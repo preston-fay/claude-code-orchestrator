@@ -123,30 +123,32 @@ class OrchestratorService:
 
         # Build phase information
         phases = []
-        for phase_name, phase_state in state.phases.items():
+        for phase_name, phase_state in state.phase_states.items():
             phase_info = PhaseInfo(
                 phase=phase_name,
-                status=phase_state.status.value if phase_state.status else "pending",
+                status=phase_state.status if isinstance(phase_state.status, str) else phase_state.status.value if phase_state.status else "pending",
                 started_at=phase_state.started_at,
                 completed_at=phase_state.completed_at,
                 duration_seconds=self._calculate_duration(
                     phase_state.started_at,
                     phase_state.completed_at,
                 ),
-                agent_ids=list(phase_state.agent_states.keys()),
+                agent_ids=phase_state.agent_ids if hasattr(phase_state, 'agent_ids') else [],
                 artifacts_count=len(phase_state.artifacts),
             )
             phases.append(phase_info)
 
         # Calculate status
         status = "running"
-        if state.current_phase == PhaseType.DOCUMENTATION and \
-           state.phases.get("documentation", PhaseState()).status.value == "completed":
-            status = "completed"
+        doc_phase = state.phase_states.get("documentation")
+        if state.current_phase == PhaseType.DOCUMENTATION and doc_phase:
+            doc_status = doc_phase.status if isinstance(doc_phase.status, str) else doc_phase.status.value if doc_phase.status else "pending"
+            if doc_status == "completed":
+                status = "completed"
 
         completed_at = None
         if status == "completed":
-            last_phase = state.phases.get("documentation")
+            last_phase = state.phase_states.get("documentation")
             if last_phase:
                 completed_at = last_phase.completed_at
 
@@ -284,16 +286,21 @@ class OrchestratorService:
         artifacts_total = 0
         errors_count = 0
 
-        for phase_name, phase_state in state.phases.items():
+        for phase_name, phase_state in state.phase_states.items():
             # Calculate phase token usage
             phase_tokens = {"input": 0, "output": 0}
             agents_executed = []
 
-            for agent_id, agent_state in phase_state.agent_states.items():
-                agents_executed.append(agent_id)
-                if agent_state.token_usage:
-                    phase_tokens["input"] += agent_state.token_usage.input_tokens
-                    phase_tokens["output"] += agent_state.token_usage.output_tokens
+            # Handle both dict of agent_states and list of agent_ids
+            agent_states_dict = getattr(phase_state, 'agent_states', {})
+            if agent_states_dict:
+                for agent_id, agent_state in agent_states_dict.items():
+                    agents_executed.append(agent_id)
+                    if agent_state.token_usage:
+                        phase_tokens["input"] += agent_state.token_usage.input_tokens
+                        phase_tokens["output"] += agent_state.token_usage.output_tokens
+            elif hasattr(phase_state, 'agent_ids'):
+                agents_executed = phase_state.agent_ids
 
             total_tokens["input"] += phase_tokens["input"]
             total_tokens["output"] += phase_tokens["output"]
@@ -352,14 +359,14 @@ class OrchestratorService:
 
     def _calculate_total_duration(self, state: ProjectState) -> float | None:
         """Calculate total run duration."""
-        if not state.phases:
+        if not state.phase_states:
             return None
 
         # Find earliest start and latest completion
         earliest_start = None
         latest_completion = None
 
-        for phase_state in state.phases.values():
+        for phase_state in state.phase_states.values():
             if phase_state.started_at:
                 if not earliest_start or phase_state.started_at < earliest_start:
                     earliest_start = phase_state.started_at
