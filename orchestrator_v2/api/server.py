@@ -67,6 +67,7 @@ from orchestrator_v2.user.models import (
     UserProfileUpdate,
     to_public_profile,
 )
+from orchestrator_v2.api.routes import runs
 
 
 # Request/Response models
@@ -143,6 +144,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(runs.router)
 
 
 @app.get("/", include_in_schema=False)
