@@ -1,0 +1,16 @@
+{
+  "metric": "ai_review_impact",
+  "period": "2025-08-27/2025-11-25",
+  "collection_timestamp": "2025-11-25T20:15:12.268008",
+  "reviews": [],
+  "summary": {
+    "total_prs_analyzed": 5,
+    "prs_with_ai_reviews": 0,
+    "review_coverage": 0,
+    "total_ai_comments": 0,
+    "total_issues_found": 0,
+    "avg_suggestions_per_pr": 0,
+    "avg_acceptance_rate": 0,
+    "avg_response_time_hours": 0
+  }
+}

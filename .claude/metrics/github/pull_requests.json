@@ -1,0 +1,83 @@
+{
+  "metric": "pr_cycle_time",
+  "period": "2025-08-27/2025-11-25",
+  "collection_timestamp": "2025-11-25T20:15:14.472454",
+  "pull_requests": [
+    {
+      "pr_number": 6,
+      "title": "Self-hardening: orchestrator runs API + UI wiring",
+      "opened_at": "2025-11-25T18:49:45+00:00",
+      "merged_at": "2025-11-25T20:14:41+00:00",
+      "closed_at": "2025-11-25T20:14:41+00:00",
+      "cycle_time_hours": 1.42,
+      "commits": 6,
+      "files_changed": 20,
+      "additions": 5671,
+      "deletions": 0,
+      "author": "preston-fay",
+      "state": "merged"
+    },
+    {
+      "pr_number": 5,
+      "title": "Self-hardening: backend fixes (governance, 500s, artifacts)",
+      "opened_at": "2025-11-25T18:03:33+00:00",
+      "merged_at": "2025-11-25T20:14:16+00:00",
+      "closed_at": "2025-11-25T20:14:16+00:00",
+      "cycle_time_hours": 2.18,
+      "commits": 1,
+      "files_changed": 2,
+      "additions": 739,
+      "deletions": 0,
+      "author": "preston-fay",
+      "state": "merged"
+    },
+    {
+      "pr_number": 4,
+      "title": "Claude/orchestrator documentation 01 ennuu4x stkk2dm cw a6n8ps",
+      "opened_at": "2025-11-22T16:23:31+00:00",
+      "merged_at": "2025-11-22T16:23:43+00:00",
+      "closed_at": "2025-11-22T16:23:44+00:00",
+      "cycle_time_hours": 0.0,
+      "commits": 39,
+      "files_changed": 164,
+      "additions": 31555,
+      "deletions": 2,
+      "author": "preston-fay",
+      "state": "merged"
+    },
+    {
+      "pr_number": 3,
+      "title": "RSC Core Cleanup: LLM Model Configuration Update",
+      "opened_at": "2025-11-22T15:48:41+00:00",
+      "merged_at": "2025-11-22T16:23:45+00:00",
+      "closed_at": "2025-11-22T16:23:45+00:00",
+      "cycle_time_hours": 0.58,
+      "commits": 37,
+      "files_changed": 162,
+      "additions": 31518,
+      "deletions": 2,
+      "author": "preston-fay",
+      "state": "merged"
+    },
+    {
+      "pr_number": 1,
+      "title": "feat: add complete methodology framework for project replication",
+      "opened_at": "2025-10-27T02:30:11+00:00",
+      "merged_at": "2025-10-27T02:31:32+00:00",
+      "closed_at": "2025-10-27T02:31:32+00:00",
+      "cycle_time_hours": 0.02,
+      "commits": 2,
+      "files_changed": 39,
+      "additions": 17680,
+      "deletions": 2,
+      "author": "preston-fay",
+      "state": "merged"
+    }
+  ],
+  "summary": {
+    "total_prs": 5,
+    "merged_prs": 5,
+    "median_cycle_time_hours": 0.58,
+    "merge_rate": 100.0
+  }
+}

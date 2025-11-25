@@ -1,0 +1,60 @@
+{
+  "metric": "feature_velocity",
+  "period": "2025-08-27/2025-11-25",
+  "collection_timestamp": "2025-11-25T20:15:19.140551",
+  "sprints": [
+    {
+      "week_id": "2025-W47",
+      "start_date": "2025-11-24",
+      "features": 1,
+      "bugs": 3,
+      "chores": 13,
+      "total_commits": 37
+    },
+    {
+      "week_id": "2025-W46",
+      "start_date": "2025-11-17",
+      "features": 17,
+      "bugs": 0,
+      "chores": 10,
+      "total_commits": 53
+    },
+    {
+      "week_id": "2025-W45",
+      "start_date": "2025-11-10",
+      "features": 0,
+      "bugs": 0,
+      "chores": 7,
+      "total_commits": 7
+    },
+    {
+      "week_id": "2025-W44",
+      "start_date": "2025-11-03",
+      "features": 2,
+      "bugs": 0,
+      "chores": 2,
+      "total_commits": 4
+    },
+    {
+      "week_id": "2025-W43",
+      "start_date": "2025-10-27",
+      "features": 3,
+      "bugs": 2,
+      "chores": 0,
+      "total_commits": 10
+    },
+    {
+      "week_id": "2025-W41",
+      "start_date": "2025-10-13",
+      "features": 1,
+      "bugs": 0,
+      "chores": 1,
+      "total_commits": 8
+    }
+  ],
+  "summary": {
+    "total_weeks": 6,
+    "avg_features_per_week": 4.0,
+    "avg_bugs_per_week": 0.83
+  }
+}

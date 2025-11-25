@@ -5,18 +5,27 @@
     "month_end": "2025-11-01",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.35,
+        "deployment_frequency": 0.34,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
-      "github": {},
-      "contributions": {
-        "human_percentage": 66.07,
-        "ai_percentage": 0.89,
-        "collaborative_percentage": 33.04
+      "github": {
+        "pr_cycle_time_hours": 0.58,
+        "merge_rate": 100.0,
+        "conflict_rate": 0,
+        "features_per_week": 4.0
       },
-      "ai_review": {}
+      "contributions": {
+        "human_percentage": 66.67,
+        "ai_percentage": 0.88,
+        "collaborative_percentage": 32.46
+      },
+      "ai_review": {
+        "review_coverage": 0,
+        "avg_suggestions_per_pr": 0,
+        "avg_acceptance_rate": 0
+      }
     },
     "trends": {}
   },
@@ -26,18 +35,27 @@
     "month_end": "2025-10-02",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.35,
+        "deployment_frequency": 0.34,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
-      "github": {},
-      "contributions": {
-        "human_percentage": 66.07,
-        "ai_percentage": 0.89,
-        "collaborative_percentage": 33.04
+      "github": {
+        "pr_cycle_time_hours": 0.58,
+        "merge_rate": 100.0,
+        "conflict_rate": 0,
+        "features_per_week": 4.0
       },
-      "ai_review": {}
+      "contributions": {
+        "human_percentage": 66.67,
+        "ai_percentage": 0.88,
+        "collaborative_percentage": 32.46
+      },
+      "ai_review": {
+        "review_coverage": 0,
+        "avg_suggestions_per_pr": 0,
+        "avg_acceptance_rate": 0
+      }
     },
     "trends": {
       "dora.deployment_frequency": {
@@ -60,6 +78,26 @@
         "direction": "stable",
         "is_anomaly": false
       },
+      "github.pr_cycle_time_hours": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.merge_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.conflict_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.features_per_week": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
       "contributions.human_percentage": {
         "change_percentage": 0.0,
         "direction": "stable",
@@ -71,6 +109,21 @@
         "is_anomaly": false
       },
       "contributions.collaborative_percentage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.review_coverage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_suggestions_per_pr": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_acceptance_rate": {
         "change_percentage": 0.0,
         "direction": "stable",
         "is_anomaly": false
@@ -83,18 +136,27 @@
     "month_end": "2025-09-02",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.35,
+        "deployment_frequency": 0.34,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
-      "github": {},
-      "contributions": {
-        "human_percentage": 66.07,
-        "ai_percentage": 0.89,
-        "collaborative_percentage": 33.04
+      "github": {
+        "pr_cycle_time_hours": 0.58,
+        "merge_rate": 100.0,
+        "conflict_rate": 0,
+        "features_per_week": 4.0
       },
-      "ai_review": {}
+      "contributions": {
+        "human_percentage": 66.67,
+        "ai_percentage": 0.88,
+        "collaborative_percentage": 32.46
+      },
+      "ai_review": {
+        "review_coverage": 0,
+        "avg_suggestions_per_pr": 0,
+        "avg_acceptance_rate": 0
+      }
     },
     "trends": {
       "dora.deployment_frequency": {
@@ -117,6 +179,26 @@
         "direction": "stable",
         "is_anomaly": false
       },
+      "github.pr_cycle_time_hours": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.merge_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.conflict_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.features_per_week": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
       "contributions.human_percentage": {
         "change_percentage": 0.0,
         "direction": "stable",
@@ -128,6 +210,21 @@
         "is_anomaly": false
       },
       "contributions.collaborative_percentage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.review_coverage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_suggestions_per_pr": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_acceptance_rate": {
         "change_percentage": 0.0,
         "direction": "stable",
         "is_anomaly": false
@@ -140,18 +237,27 @@
     "month_end": "2025-08-03",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.35,
+        "deployment_frequency": 0.34,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
-      "github": {},
-      "contributions": {
-        "human_percentage": 66.07,
-        "ai_percentage": 0.89,
-        "collaborative_percentage": 33.04
+      "github": {
+        "pr_cycle_time_hours": 0.58,
+        "merge_rate": 100.0,
+        "conflict_rate": 0,
+        "features_per_week": 4.0
       },
-      "ai_review": {}
+      "contributions": {
+        "human_percentage": 66.67,
+        "ai_percentage": 0.88,
+        "collaborative_percentage": 32.46
+      },
+      "ai_review": {
+        "review_coverage": 0,
+        "avg_suggestions_per_pr": 0,
+        "avg_acceptance_rate": 0
+      }
     },
     "trends": {
       "dora.deployment_frequency": {
@@ -174,6 +280,26 @@
         "direction": "stable",
         "is_anomaly": false
       },
+      "github.pr_cycle_time_hours": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.merge_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.conflict_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.features_per_week": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
       "contributions.human_percentage": {
         "change_percentage": 0.0,
         "direction": "stable",
@@ -185,6 +311,21 @@
         "is_anomaly": false
       },
       "contributions.collaborative_percentage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.review_coverage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_suggestions_per_pr": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_acceptance_rate": {
         "change_percentage": 0.0,
         "direction": "stable",
         "is_anomaly": false
@@ -197,18 +338,27 @@
     "month_end": "2025-07-04",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.35,
+        "deployment_frequency": 0.34,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
-      "github": {},
-      "contributions": {
-        "human_percentage": 66.07,
-        "ai_percentage": 0.89,
-        "collaborative_percentage": 33.04
+      "github": {
+        "pr_cycle_time_hours": 0.58,
+        "merge_rate": 100.0,
+        "conflict_rate": 0,
+        "features_per_week": 4.0
       },
-      "ai_review": {}
+      "contributions": {
+        "human_percentage": 66.67,
+        "ai_percentage": 0.88,
+        "collaborative_percentage": 32.46
+      },
+      "ai_review": {
+        "review_coverage": 0,
+        "avg_suggestions_per_pr": 0,
+        "avg_acceptance_rate": 0
+      }
     },
     "trends": {
       "dora.deployment_frequency": {
@@ -231,6 +381,26 @@
         "direction": "stable",
         "is_anomaly": false
       },
+      "github.pr_cycle_time_hours": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.merge_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.conflict_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.features_per_week": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
       "contributions.human_percentage": {
         "change_percentage": 0.0,
         "direction": "stable",
@@ -242,6 +412,21 @@
         "is_anomaly": false
       },
       "contributions.collaborative_percentage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.review_coverage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_suggestions_per_pr": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_acceptance_rate": {
         "change_percentage": 0.0,
         "direction": "stable",
         "is_anomaly": false
@@ -254,18 +439,27 @@
     "month_end": "2025-06-04",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.35,
+        "deployment_frequency": 0.34,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
-      "github": {},
-      "contributions": {
-        "human_percentage": 66.07,
-        "ai_percentage": 0.89,
-        "collaborative_percentage": 33.04
+      "github": {
+        "pr_cycle_time_hours": 0.58,
+        "merge_rate": 100.0,
+        "conflict_rate": 0,
+        "features_per_week": 4.0
       },
-      "ai_review": {}
+      "contributions": {
+        "human_percentage": 66.67,
+        "ai_percentage": 0.88,
+        "collaborative_percentage": 32.46
+      },
+      "ai_review": {
+        "review_coverage": 0,
+        "avg_suggestions_per_pr": 0,
+        "avg_acceptance_rate": 0
+      }
     },
     "trends": {
       "dora.deployment_frequency": {
@@ -288,6 +482,26 @@
         "direction": "stable",
         "is_anomaly": false
       },
+      "github.pr_cycle_time_hours": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.merge_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.conflict_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.features_per_week": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
       "contributions.human_percentage": {
         "change_percentage": 0.0,
         "direction": "stable",
@@ -299,6 +513,21 @@
         "is_anomaly": false
       },
       "contributions.collaborative_percentage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.review_coverage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_suggestions_per_pr": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_acceptance_rate": {
         "change_percentage": 0.0,
         "direction": "stable",
         "is_anomaly": false
