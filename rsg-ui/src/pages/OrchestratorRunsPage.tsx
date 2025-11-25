@@ -7,13 +7,13 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createRun, formatDuration, getPhaseDisplayName, getPhaseStatusColor } from '../api/orchestrator';
+import { createRun, getPhaseDisplayName } from '../api/orchestrator';
 import type { RunSummary, CreateRunRequest } from '../api/orchestrator';
 
 const OrchestratorRunsPage: React.FC = () => {
   const navigate = useNavigate();
   const [runs, setRuns] = useState<RunSummary[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRun, setNewRun] = useState<CreateRunRequest>({
