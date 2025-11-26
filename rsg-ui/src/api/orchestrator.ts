@@ -109,6 +109,20 @@ export interface AdvanceRunResponse {
   message: string;
 }
 
+export interface ListRunsParams {
+  status?: string;
+  profile?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ListRunsResponse {
+  runs: RunSummary[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 // ---------------------------------------------------------------------------
 // Axios Instance Configuration
 // ---------------------------------------------------------------------------
@@ -184,6 +198,39 @@ export function getApiConfig() {
 // ---------------------------------------------------------------------------
 // Orchestrator Runs API Functions
 // ---------------------------------------------------------------------------
+
+/**
+ * List orchestrator runs with filtering and pagination
+ *
+ * GET /runs
+ *
+ * @param params - Optional filters (status, profile, limit, offset)
+ * @returns ListRunsResponse with array of runs and pagination info
+ *
+ * @example
+ * // List all runs
+ * const response = await listRuns({});
+ *
+ * // Filter by status
+ * const completed = await listRuns({ status: 'completed' });
+ *
+ * // Filter and paginate
+ * const page2 = await listRuns({ status: 'running', limit: 10, offset: 10 });
+ */
+export async function listRuns(params: ListRunsParams = {}): Promise<ListRunsResponse> {
+  const queryParams = new URLSearchParams();
+
+  if (params.status) queryParams.append('status', params.status);
+  if (params.profile) queryParams.append('profile', params.profile);
+  if (params.limit !== undefined) queryParams.append('limit', params.limit.toString());
+  if (params.offset !== undefined) queryParams.append('offset', params.offset.toString());
+
+  const queryString = queryParams.toString();
+  const url = queryString ? `/runs?${queryString}` : '/runs';
+
+  const response = await axiosInstance.get<ListRunsResponse>(url);
+  return response.data;
+}
 
 /**
  * Create a new orchestrator run
