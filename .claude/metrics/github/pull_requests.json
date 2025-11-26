@@ -1,8 +1,36 @@
 {
   "metric": "pr_cycle_time",
   "period": "2025-08-28/2025-11-26",
-  "collection_timestamp": "2025-11-26T15:22:55.583809",
+  "collection_timestamp": "2025-11-26T16:43:38.214850",
   "pull_requests": [
+    {
+      "pr_number": 11,
+      "title": "fix(api): correct PhaseState attribute in metrics endpoint",
+      "opened_at": "2025-11-26T16:15:04+00:00",
+      "merged_at": "2025-11-26T16:43:07+00:00",
+      "closed_at": "2025-11-26T16:43:07+00:00",
+      "cycle_time_hours": 0.47,
+      "commits": 1,
+      "files_changed": 1,
+      "additions": 2,
+      "deletions": 1,
+      "author": "preston-fay",
+      "state": "merged"
+    },
+    {
+      "pr_number": 10,
+      "title": "fix(api): correct state loading and token tracking for POST /runs/{id}/next",
+      "opened_at": "2025-11-26T16:02:58+00:00",
+      "merged_at": "2025-11-26T16:42:45+00:00",
+      "closed_at": "2025-11-26T16:42:45+00:00",
+      "cycle_time_hours": 0.66,
+      "commits": 1,
+      "files_changed": 2,
+      "additions": 4,
+      "deletions": 11,
+      "author": "preston-fay",
+      "state": "merged"
+    },
     {
       "pr_number": 9,
       "title": "feat(ui): Phase 2B - Orchestrator Runs List with Filtering & Pagination",
@@ -117,9 +145,9 @@
     }
   ],
   "summary": {
-    "total_prs": 8,
-    "merged_prs": 8,
-    "median_cycle_time_hours": 1.42,
+    "total_prs": 10,
+    "merged_prs": 10,
+    "median_cycle_time_hours": 0.66,
     "merge_rate": 100.0
   }
 }

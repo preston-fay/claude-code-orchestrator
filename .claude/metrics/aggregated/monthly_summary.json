@@ -5,21 +5,21 @@
     "month_end": "2025-11-01",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.34,
+        "deployment_frequency": 0.33,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 1.42,
+        "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.94,
-        "ai_percentage": 0.83,
-        "collaborative_percentage": 32.23
+        "human_percentage": 66.13,
+        "ai_percentage": 0.81,
+        "collaborative_percentage": 33.06
       },
       "ai_review": {
         "review_coverage": 0,
@@ -35,21 +35,21 @@
     "month_end": "2025-10-02",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.34,
+        "deployment_frequency": 0.33,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 1.42,
+        "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.94,
-        "ai_percentage": 0.83,
-        "collaborative_percentage": 32.23
+        "human_percentage": 66.13,
+        "ai_percentage": 0.81,
+        "collaborative_percentage": 33.06
       },
       "ai_review": {
         "review_coverage": 0,
@@ -136,21 +136,21 @@
     "month_end": "2025-09-02",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.34,
+        "deployment_frequency": 0.33,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 1.42,
+        "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.94,
-        "ai_percentage": 0.83,
-        "collaborative_percentage": 32.23
+        "human_percentage": 66.13,
+        "ai_percentage": 0.81,
+        "collaborative_percentage": 33.06
       },
       "ai_review": {
         "review_coverage": 0,
@@ -237,21 +237,21 @@
     "month_end": "2025-08-03",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.34,
+        "deployment_frequency": 0.33,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 1.42,
+        "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.94,
-        "ai_percentage": 0.83,
-        "collaborative_percentage": 32.23
+        "human_percentage": 66.13,
+        "ai_percentage": 0.81,
+        "collaborative_percentage": 33.06
       },
       "ai_review": {
         "review_coverage": 0,
@@ -338,21 +338,21 @@
     "month_end": "2025-07-04",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.34,
+        "deployment_frequency": 0.33,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 1.42,
+        "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.94,
-        "ai_percentage": 0.83,
-        "collaborative_percentage": 32.23
+        "human_percentage": 66.13,
+        "ai_percentage": 0.81,
+        "collaborative_percentage": 33.06
       },
       "ai_review": {
         "review_coverage": 0,
@@ -439,21 +439,21 @@
     "month_end": "2025-06-04",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.34,
+        "deployment_frequency": 0.33,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 1.42,
+        "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.94,
-        "ai_percentage": 0.83,
-        "collaborative_percentage": 32.23
+        "human_percentage": 66.13,
+        "ai_percentage": 0.81,
+        "collaborative_percentage": 33.06
       },
       "ai_review": {
         "review_coverage": 0,

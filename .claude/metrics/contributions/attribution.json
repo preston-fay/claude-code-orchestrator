@@ -1,8 +1,49 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-28/2025-11-26",
-  "collection_timestamp": "2025-11-26T15:22:45.180449",
+  "collection_timestamp": "2025-11-26T16:43:29.484999",
   "commits": [
+    {
+      "sha": "297fbb11cb5f527d9aa556690468d2162b2e0067",
+      "author": "Preston Fay",
+      "date": "2025-11-26 11:02:30 -0500",
+      "message": "fix(api): correct state loading and token tracking for POST /runs/{id}/next",
+      "contributor_type": "collaborative",
+      "lines_added": 4,
+      "lines_deleted": 11,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "b407cf6952176fe3c3397499e2664b1531cd12ca",
+      "author": "github-actions[bot]",
+      "date": "2025-11-26 15:23:52 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 177,
+      "lines_deleted": 123,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "706cdfca43b66ac7ba04bc0c207a456a57441be4",
+      "author": "Preston Fay",
+      "date": "2025-11-26 10:17:34 -0500",
+      "message": "feat(ui): implement Phase 2B orchestrator runs list with filtering & pagination",
+      "contributor_type": "collaborative",
+      "lines_added": 593,
+      "lines_deleted": 44,
+      "files_changed": 3,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
     {
       "sha": "f6b2a11b262c61d6f1258823f883f9e119f81cb6",
       "author": "github-actions[bot]",
@@ -1495,19 +1536,19 @@
     }
   ],
   "summary": {
-    "total_commits": 121,
-    "human_commits": 81,
+    "total_commits": 124,
+    "human_commits": 82,
     "ai_commits": 1,
-    "collaborative_commits": 39,
-    "human_percentage": 66.94,
-    "ai_percentage": 0.83,
-    "collaborative_percentage": 32.23,
-    "human_lines_added": 50858,
+    "collaborative_commits": 41,
+    "human_percentage": 66.13,
+    "ai_percentage": 0.81,
+    "collaborative_percentage": 33.06,
+    "human_lines_added": 51035,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 87238,
-    "total_lines_added": 180982,
-    "human_lines_percentage": 28.1,
-    "ai_lines_percentage": 23.7,
-    "collaborative_lines_percentage": 48.2
+    "collaborative_lines_added": 87835,
+    "total_lines_added": 181756,
+    "human_lines_percentage": 28.08,
+    "ai_lines_percentage": 23.6,
+    "collaborative_lines_percentage": 48.33
   }
 }
