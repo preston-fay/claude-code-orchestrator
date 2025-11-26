@@ -113,3 +113,11 @@ class AdvanceRunResponse(BaseModel):
     current_phase: str
     status: str
     message: str
+
+
+class ListRunsResponse(BaseModel):
+    """Response for list runs endpoint."""
+    runs: list[RunSummary] = Field(default_factory=list)
+    total: int = 0
+    limit: int = 50
+    offset: int = 0
