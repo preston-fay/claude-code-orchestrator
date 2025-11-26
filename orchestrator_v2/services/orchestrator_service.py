@@ -393,7 +393,8 @@ class OrchestratorService:
             artifacts_count = len(phase_state.artifacts)
             artifacts_total += artifacts_count
 
-            if phase_state.error:
+            # Check for error using the correct attribute name
+            if phase_state.error_message:
                 errors_count += 1
 
             phase_metrics = PhaseMetrics(
