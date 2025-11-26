@@ -1,8 +1,36 @@
 {
   "metric": "pr_cycle_time",
   "period": "2025-08-28/2025-11-26",
-  "collection_timestamp": "2025-11-26T09:21:07.750805",
+  "collection_timestamp": "2025-11-26T15:22:55.583809",
   "pull_requests": [
+    {
+      "pr_number": 9,
+      "title": "feat(ui): Phase 2B - Orchestrator Runs List with Filtering & Pagination",
+      "opened_at": "2025-11-26T15:18:41+00:00",
+      "merged_at": "2025-11-26T15:22:25+00:00",
+      "closed_at": "2025-11-26T15:22:25+00:00",
+      "cycle_time_hours": 0.06,
+      "commits": 1,
+      "files_changed": 3,
+      "additions": 593,
+      "deletions": 44,
+      "author": "preston-fay",
+      "state": "merged"
+    },
+    {
+      "pr_number": 8,
+      "title": "feat(api): Phase 2 backend GET /runs endpoint",
+      "opened_at": "2025-11-26T02:59:43+00:00",
+      "merged_at": "2025-11-26T15:21:58+00:00",
+      "closed_at": "2025-11-26T15:21:58+00:00",
+      "cycle_time_hours": 12.37,
+      "commits": 1,
+      "files_changed": 5,
+      "additions": 523,
+      "deletions": 1,
+      "author": "preston-fay",
+      "state": "merged"
+    },
     {
       "pr_number": 7,
       "title": "Self-hardening: fix runs API initialization issues",
@@ -89,8 +117,8 @@
     }
   ],
   "summary": {
-    "total_prs": 6,
-    "merged_prs": 6,
+    "total_prs": 8,
+    "merged_prs": 8,
     "median_cycle_time_hours": 1.42,
     "merge_rate": 100.0
   }

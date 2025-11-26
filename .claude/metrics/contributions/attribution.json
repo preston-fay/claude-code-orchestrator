@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-28/2025-11-26",
-  "collection_timestamp": "2025-11-26T09:20:59.761141",
+  "collection_timestamp": "2025-11-26T15:22:45.180449",
   "commits": [
+    {
+      "sha": "f6b2a11b262c61d6f1258823f883f9e119f81cb6",
+      "author": "github-actions[bot]",
+      "date": "2025-11-26 09:21:58 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 128,
+      "lines_deleted": 117,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "123bfbde7ea251205297db170d0fe8adc78129d8",
+      "author": "Preston Fay",
+      "date": "2025-11-25 21:59:13 -0500",
+      "message": "feat(api): Phase 2 backend GET /runs endpoint",
+      "contributor_type": "collaborative",
+      "lines_added": 523,
+      "lines_deleted": 1,
+      "files_changed": 5,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
     {
       "sha": "4ef55f4d895e053b2f76951d8d95a6e8d5045fdd",
       "author": "github-actions[bot]",
@@ -1469,19 +1495,19 @@
     }
   ],
   "summary": {
-    "total_commits": 119,
-    "human_commits": 80,
+    "total_commits": 121,
+    "human_commits": 81,
     "ai_commits": 1,
-    "collaborative_commits": 38,
-    "human_percentage": 67.23,
-    "ai_percentage": 0.84,
-    "collaborative_percentage": 31.93,
-    "human_lines_added": 50730,
+    "collaborative_commits": 39,
+    "human_percentage": 66.94,
+    "ai_percentage": 0.83,
+    "collaborative_percentage": 32.23,
+    "human_lines_added": 50858,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 86715,
-    "total_lines_added": 180331,
-    "human_lines_percentage": 28.13,
-    "ai_lines_percentage": 23.78,
-    "collaborative_lines_percentage": 48.09
+    "collaborative_lines_added": 87238,
+    "total_lines_added": 180982,
+    "human_lines_percentage": 28.1,
+    "ai_lines_percentage": 23.7,
+    "collaborative_lines_percentage": 48.2
   }
 }
