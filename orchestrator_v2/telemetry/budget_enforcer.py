@@ -187,16 +187,9 @@ class BudgetEnforcer:
         # Save updated profile
         await self._user_repo.save(user)
 
-        # Record in token tracker if available
-        if self._token_tracker:
-            await self._token_tracker.record_usage(
-                user_id=user.user_id,
-                project_id=project_id,
-                agent_role=agent_role,
-                model=model,
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-            )
+        # TODO: Record in token tracker when protocol is fully implemented
+        # if self._token_tracker:
+        #     await self._token_tracker.record_usage(...)
 
         logger.info(
             f"Token usage recorded: user={user.user_id}, "

@@ -267,7 +267,7 @@ class OrchestratorService:
         # Get or create engine for this run
         if run_id not in self._engines:
             engine = WorkflowEngine()
-            engine.load_state(state)
+            engine._state = state
             self._engines[run_id] = engine
         else:
             engine = self._engines[run_id]
