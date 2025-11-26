@@ -11,15 +11,15 @@
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 0.58,
+        "pr_cycle_time_hours": 1.42,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.67,
-        "ai_percentage": 0.88,
-        "collaborative_percentage": 32.46
+        "human_percentage": 66.95,
+        "ai_percentage": 0.85,
+        "collaborative_percentage": 32.2
       },
       "ai_review": {
         "review_coverage": 0,
@@ -41,15 +41,15 @@
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 0.58,
+        "pr_cycle_time_hours": 1.42,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.67,
-        "ai_percentage": 0.88,
-        "collaborative_percentage": 32.46
+        "human_percentage": 66.95,
+        "ai_percentage": 0.85,
+        "collaborative_percentage": 32.2
       },
       "ai_review": {
         "review_coverage": 0,
@@ -142,15 +142,15 @@
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 0.58,
+        "pr_cycle_time_hours": 1.42,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.67,
-        "ai_percentage": 0.88,
-        "collaborative_percentage": 32.46
+        "human_percentage": 66.95,
+        "ai_percentage": 0.85,
+        "collaborative_percentage": 32.2
       },
       "ai_review": {
         "review_coverage": 0,
@@ -243,15 +243,15 @@
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 0.58,
+        "pr_cycle_time_hours": 1.42,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.67,
-        "ai_percentage": 0.88,
-        "collaborative_percentage": 32.46
+        "human_percentage": 66.95,
+        "ai_percentage": 0.85,
+        "collaborative_percentage": 32.2
       },
       "ai_review": {
         "review_coverage": 0,
@@ -344,15 +344,15 @@
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 0.58,
+        "pr_cycle_time_hours": 1.42,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.67,
-        "ai_percentage": 0.88,
-        "collaborative_percentage": 32.46
+        "human_percentage": 66.95,
+        "ai_percentage": 0.85,
+        "collaborative_percentage": 32.2
       },
       "ai_review": {
         "review_coverage": 0,
@@ -445,15 +445,15 @@
         "change_failure_rate": 0
       },
       "github": {
-        "pr_cycle_time_hours": 0.58,
+        "pr_cycle_time_hours": 1.42,
         "merge_rate": 100.0,
         "conflict_rate": 0,
         "features_per_week": 4.0
       },
       "contributions": {
-        "human_percentage": 66.67,
-        "ai_percentage": 0.88,
-        "collaborative_percentage": 32.46
+        "human_percentage": 66.95,
+        "ai_percentage": 0.85,
+        "collaborative_percentage": 32.2
       },
       "ai_review": {
         "review_coverage": 0,

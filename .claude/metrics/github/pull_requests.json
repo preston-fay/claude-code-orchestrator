@@ -1,8 +1,22 @@
 {
   "metric": "pr_cycle_time",
-  "period": "2025-08-27/2025-11-25",
-  "collection_timestamp": "2025-11-25T20:15:14.472454",
+  "period": "2025-08-28/2025-11-26",
+  "collection_timestamp": "2025-11-26T02:11:11.469198",
   "pull_requests": [
+    {
+      "pr_number": 7,
+      "title": "Self-hardening: fix runs API initialization issues",
+      "opened_at": "2025-11-25T21:20:43+00:00",
+      "merged_at": "2025-11-26T02:10:24+00:00",
+      "closed_at": "2025-11-26T02:10:24+00:00",
+      "cycle_time_hours": 4.83,
+      "commits": 2,
+      "files_changed": 2,
+      "additions": 28,
+      "deletions": 21,
+      "author": "preston-fay",
+      "state": "merged"
+    },
     {
       "pr_number": 6,
       "title": "Self-hardening: orchestrator runs API + UI wiring",
@@ -75,9 +89,9 @@
     }
   ],
   "summary": {
-    "total_prs": 5,
-    "merged_prs": 5,
-    "median_cycle_time_hours": 0.58,
+    "total_prs": 6,
+    "merged_prs": 6,
+    "median_cycle_time_hours": 1.42,
     "merge_rate": 100.0
   }
 }

@@ -1,8 +1,56 @@
 {
   "metric": "contribution_attribution",
-  "period": "2025-08-27/2025-11-25",
-  "collection_timestamp": "2025-11-25T20:15:08.340892",
+  "period": "2025-08-28/2025-11-26",
+  "collection_timestamp": "2025-11-26T02:11:12.147499",
   "commits": [
+    {
+      "sha": "e214e7999061f78542797dab6c18adceb74f5146",
+      "author": "Preston Fay",
+      "date": "2025-11-25 16:56:23 -0500",
+      "message": "fix(api): map ProjectState.phase_states to RunDTO for GET /runs endpoints",
+      "contributor_type": "human",
+      "lines_added": 22,
+      "lines_deleted": 15,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "b5c4ea14e6a5d6419652ecdff18aad628f07dcd0",
+      "author": "Preston Fay",
+      "date": "2025-11-25 16:20:11 -0500",
+      "message": "fix(api): fix runs API initialization issues",
+      "contributor_type": "collaborative",
+      "lines_added": 6,
+      "lines_deleted": 6,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "6a6cebc013af7d89a80e4d0f3ac701fc7086aec6",
+      "author": "github-actions[bot]",
+      "date": "2025-11-25 20:16:15 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 1260,
+      "lines_deleted": 198,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "47861dd3a480ba8e28cae6df21af7c7d46579ec4",
+      "author": "preston-fay",
+      "date": "2025-11-25 15:14:41 -0500",
+      "message": "feat(orchestrator): implement runs API + UI with complete documentation",
+      "contributor_type": "human",
+      "lines_added": 5671,
+      "lines_deleted": 0,
+      "files_changed": 20,
+      "ai_indicators": []
+    },
     {
       "sha": "f0c1c07655ed52e7b38245c82861224907876da8",
       "author": "preston-fay",
@@ -1410,19 +1458,19 @@
     }
   ],
   "summary": {
-    "total_commits": 114,
-    "human_commits": 76,
+    "total_commits": 118,
+    "human_commits": 79,
     "ai_commits": 1,
-    "collaborative_commits": 37,
-    "human_percentage": 66.67,
-    "ai_percentage": 0.88,
-    "collaborative_percentage": 32.46,
-    "human_lines_added": 43526,
+    "collaborative_commits": 38,
+    "human_percentage": 66.95,
+    "ai_percentage": 0.85,
+    "collaborative_percentage": 32.2,
+    "human_lines_added": 50479,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 86709,
-    "total_lines_added": 173121,
-    "human_lines_percentage": 25.14,
-    "ai_lines_percentage": 24.77,
-    "collaborative_lines_percentage": 50.09
+    "collaborative_lines_added": 86715,
+    "total_lines_added": 180080,
+    "human_lines_percentage": 28.03,
+    "ai_lines_percentage": 23.81,
+    "collaborative_lines_percentage": 48.15
   }
 }
