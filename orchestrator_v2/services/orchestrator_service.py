@@ -167,6 +167,84 @@ class OrchestratorService:
             metadata=state.metadata,
         )
 
+    async def list_runs(
+        self,
+        status: str | None = None,
+        profile: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[RunSummary], int]:
+        """
+        List orchestrator runs with optional filtering and pagination.
+
+        Args:
+            status: Filter by run status (e.g., "running", "completed", "failed")
+            profile: Filter by profile name
+            limit: Maximum number of runs to return
+            offset: Number of runs to skip for pagination
+
+        Returns:
+            Tuple of (list of RunSummary, total count before pagination)
+        """
+        # Get all project IDs
+        all_project_ids = await self._project_repo.list_projects()
+
+        # Load states and create summaries
+        summaries = []
+        for project_id in all_project_ids:
+            try:
+                state = await self._project_repo.load(project_id)
+
+                # Calculate status
+                run_status = "running"
+                doc_phase = state.phase_states.get("documentation")
+                if state.current_phase == PhaseType.DOCUMENTATION and doc_phase:
+                    doc_status = doc_phase.status if isinstance(doc_phase.status, str) else doc_phase.status.value if doc_phase.status else "pending"
+                    if doc_status == "completed":
+                        run_status = "completed"
+
+                # Check if any phase has failed
+                for phase_state in state.phase_states.values():
+                    phase_status = phase_state.status if isinstance(phase_state.status, str) else phase_state.status.value if phase_state.status else "pending"
+                    if phase_status == "failed":
+                        run_status = "failed"
+                        break
+
+                # Apply filters
+                if status and run_status != status:
+                    continue
+                if profile and (state.template_id != profile and state.project_type != profile):
+                    continue
+
+                # Create summary
+                summary = RunSummary(
+                    run_id=state.project_id,
+                    profile=state.template_id or state.project_type,
+                    project_name=state.project_name,
+                    current_phase=state.current_phase.value,
+                    status=run_status,
+                    created_at=state.created_at,
+                    updated_at=datetime.utcnow(),
+                )
+                summaries.append(summary)
+
+            except Exception as e:
+                # Skip corrupted/invalid state files
+                logger.warning(f"Failed to load project {project_id}: {e}")
+                continue
+
+        # Sort by created_at descending (newest first)
+        summaries.sort(key=lambda x: x.created_at, reverse=True)
+
+        # Get total before pagination
+        total = len(summaries)
+
+        # Apply pagination
+        paginated_summaries = summaries[offset:offset + limit]
+
+        logger.info(f"Listed {len(paginated_summaries)} runs (total: {total})")
+        return paginated_summaries, total
+
     async def advance_run(
         self,
         run_id: str,

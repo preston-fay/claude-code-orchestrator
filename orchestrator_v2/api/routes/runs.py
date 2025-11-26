@@ -17,6 +17,7 @@ from orchestrator_v2.api.dto.runs import (
     MetricsSummary,
     AdvanceRunRequest,
     AdvanceRunResponse,
+    ListRunsResponse,
 )
 from orchestrator_v2.services.orchestrator_service import OrchestratorService
 from orchestrator_v2.user.models import UserProfile
@@ -60,7 +61,84 @@ def get_orchestrator_service() -> OrchestratorService:
 
 
 # -----------------------------------------------------------------------------
-# Endpoint 1: POST /runs - Create orchestrator run
+# Endpoint 1: GET /runs - List orchestrator runs
+# -----------------------------------------------------------------------------
+
+@router.get("", response_model=ListRunsResponse)
+async def list_runs(
+    status: str | None = None,
+    profile: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    service: OrchestratorService = Depends(get_orchestrator_service),
+) -> ListRunsResponse:
+    """
+    List all orchestrator runs with optional filtering and pagination.
+
+    Returns a list of run summaries with support for filtering by status and profile,
+    as well as pagination via limit and offset parameters.
+
+    **Query Parameters:**
+    - status: Filter by run status ("running", "completed", "failed")
+    - profile: Filter by profile name (e.g., 'analytics_forecast_app')
+    - limit: Maximum number of runs to return (default: 50)
+    - offset: Number of runs to skip for pagination (default: 0)
+
+    **Returns:**
+    - ListRunsResponse with array of RunSummary objects and pagination info
+
+    **Example:**
+    ```
+    GET /runs?status=running&limit=10&offset=0
+    ```
+
+    **Example Response:**
+    ```json
+    {
+        "runs": [
+            {
+                "run_id": "abc123",
+                "profile": "analytics_forecast_app",
+                "project_name": "Forecast Project",
+                "current_phase": "development",
+                "status": "running",
+                "created_at": "2025-11-26T12:00:00Z",
+                "updated_at": "2025-11-26T14:30:00Z"
+            }
+        ],
+        "total": 25,
+        "limit": 10,
+        "offset": 0
+    }
+    ```
+    """
+    try:
+        logger.info(f"Listing runs with filters: status={status}, profile={profile}, limit={limit}, offset={offset}")
+
+        runs, total = await service.list_runs(
+            status=status,
+            profile=profile,
+            limit=limit,
+            offset=offset,
+        )
+
+        response = ListRunsResponse(
+            runs=runs,
+            total=total,
+            limit=limit,
+            offset=offset,
+        )
+
+        logger.info(f"Listed {len(runs)} runs (total: {total})")
+        return response
+
+    except Exception as e:
+        logger.error(f"Failed to list runs: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to list runs: {str(e)}")
+
+
+# -----------------------------------------------------------------------------
+# Endpoint 2: POST /runs - Create orchestrator run
 # -----------------------------------------------------------------------------
 
 @router.post("", response_model=RunSummary, status_code=201)

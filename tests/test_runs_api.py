@@ -745,3 +745,204 @@ class TestFullWorkflow:
         metrics_response = client.get(f"/runs/{run_id}/metrics")
         assert metrics_response.status_code == 200
         assert metrics_response.json()["governance_score"] == 1.0
+
+
+# -------------------------------------------------------------------------
+# Test GET /runs - List runs
+# -------------------------------------------------------------------------
+
+class TestListRuns:
+    """Tests for GET /runs endpoint."""
+
+    @patch("orchestrator_v2.services.orchestrator_service.OrchestratorService.list_runs")
+    def test_list_runs_empty(self, mock_list_runs, client):
+        """Test listing runs when no runs exist."""
+        # Mock empty list
+        mock_list_runs.return_value = ([], 0)
+
+        response = client.get("/runs")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["runs"] == []
+        assert data["total"] == 0
+        assert data["limit"] == 50
+        assert data["offset"] == 0
+
+    @patch("orchestrator_v2.services.orchestrator_service.OrchestratorService.list_runs")
+    def test_list_runs_multiple(self, mock_list_runs, client):
+        """Test listing multiple runs."""
+        # Create sample runs
+        runs = [
+            RunSummary(
+                run_id="run-1",
+                profile="analytics_forecast_app",
+                project_name="Project 1",
+                current_phase="planning",
+                status="running",
+                created_at=datetime(2025, 11, 26, 10, 0, 0),
+                updated_at=datetime(2025, 11, 26, 12, 0, 0),
+            ),
+            RunSummary(
+                run_id="run-2",
+                profile="data_pipeline",
+                project_name="Project 2",
+                current_phase="development",
+                status="running",
+                created_at=datetime(2025, 11, 25, 10, 0, 0),
+                updated_at=datetime(2025, 11, 25, 12, 0, 0),
+            ),
+            RunSummary(
+                run_id="run-3",
+                profile="analytics_forecast_app",
+                project_name="Project 3",
+                current_phase="documentation",
+                status="completed",
+                created_at=datetime(2025, 11, 24, 10, 0, 0),
+                updated_at=datetime(2025, 11, 24, 18, 0, 0),
+            ),
+        ]
+
+        mock_list_runs.return_value = (runs, 3)
+
+        response = client.get("/runs")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["runs"]) == 3
+        assert data["total"] == 3
+
+        # Verify runs are in response
+        assert data["runs"][0]["run_id"] == "run-1"
+        assert data["runs"][1]["run_id"] == "run-2"
+        assert data["runs"][2]["run_id"] == "run-3"
+
+    @patch("orchestrator_v2.services.orchestrator_service.OrchestratorService.list_runs")
+    def test_list_runs_filter_by_status(self, mock_list_runs, client):
+        """Test filtering runs by status."""
+        # Only return completed runs
+        completed_runs = [
+            RunSummary(
+                run_id="run-completed-1",
+                profile="analytics_forecast_app",
+                project_name="Completed Project",
+                current_phase="documentation",
+                status="completed",
+                created_at=datetime(2025, 11, 24, 10, 0, 0),
+                updated_at=datetime(2025, 11, 24, 18, 0, 0),
+            ),
+        ]
+
+        mock_list_runs.return_value = (completed_runs, 1)
+
+        response = client.get("/runs?status=completed")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["runs"]) == 1
+        assert data["runs"][0]["status"] == "completed"
+
+        # Verify service was called with status filter
+        mock_list_runs.assert_called_once()
+        call_args = mock_list_runs.call_args
+        assert call_args.kwargs["status"] == "completed"
+
+    @patch("orchestrator_v2.services.orchestrator_service.OrchestratorService.list_runs")
+    def test_list_runs_filter_by_profile(self, mock_list_runs, client):
+        """Test filtering runs by profile."""
+        # Only return analytics_forecast_app runs
+        forecast_runs = [
+            RunSummary(
+                run_id="run-forecast-1",
+                profile="analytics_forecast_app",
+                project_name="Forecast Project 1",
+                current_phase="development",
+                status="running",
+                created_at=datetime(2025, 11, 26, 10, 0, 0),
+                updated_at=datetime(2025, 11, 26, 12, 0, 0),
+            ),
+            RunSummary(
+                run_id="run-forecast-2",
+                profile="analytics_forecast_app",
+                project_name="Forecast Project 2",
+                current_phase="planning",
+                status="running",
+                created_at=datetime(2025, 11, 25, 10, 0, 0),
+                updated_at=datetime(2025, 11, 25, 12, 0, 0),
+            ),
+        ]
+
+        mock_list_runs.return_value = (forecast_runs, 2)
+
+        response = client.get("/runs?profile=analytics_forecast_app")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["runs"]) == 2
+        assert all(run["profile"] == "analytics_forecast_app" for run in data["runs"])
+
+        # Verify service was called with profile filter
+        mock_list_runs.assert_called_once()
+        call_args = mock_list_runs.call_args
+        assert call_args.kwargs["profile"] == "analytics_forecast_app"
+
+    @patch("orchestrator_v2.services.orchestrator_service.OrchestratorService.list_runs")
+    def test_list_runs_pagination(self, mock_list_runs, client):
+        """Test pagination with limit and offset."""
+        # Return paginated results
+        paginated_runs = [
+            RunSummary(
+                run_id=f"run-{i}",
+                profile="analytics_forecast_app",
+                project_name=f"Project {i}",
+                current_phase="planning",
+                status="running",
+                created_at=datetime(2025, 11, 26 - i, 10, 0, 0),
+                updated_at=datetime(2025, 11, 26 - i, 12, 0, 0),
+            )
+            for i in range(10, 20)  # Runs 10-19 (second page)
+        ]
+
+        mock_list_runs.return_value = (paginated_runs, 100)
+
+        response = client.get("/runs?limit=10&offset=10")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["runs"]) == 10
+        assert data["total"] == 100
+        assert data["limit"] == 10
+        assert data["offset"] == 10
+
+        # Verify service was called with pagination params
+        mock_list_runs.assert_called_once()
+        call_args = mock_list_runs.call_args
+        assert call_args.kwargs["limit"] == 10
+        assert call_args.kwargs["offset"] == 10
+
+    @patch("orchestrator_v2.services.orchestrator_service.OrchestratorService.list_runs")
+    def test_list_runs_combined_filters(self, mock_list_runs, client):
+        """Test combining multiple filters."""
+        # Return filtered & paginated results
+        filtered_runs = [
+            RunSummary(
+                run_id="run-filtered-1",
+                profile="analytics_forecast_app",
+                project_name="Filtered Project",
+                current_phase="planning",
+                status="running",
+                created_at=datetime(2025, 11, 26, 10, 0, 0),
+                updated_at=datetime(2025, 11, 26, 12, 0, 0),
+            ),
+        ]
+
+        mock_list_runs.return_value = (filtered_runs, 1)
+
+        response = client.get("/runs?status=running&profile=analytics_forecast_app&limit=5&offset=0")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["runs"]) == 1
+        assert data["total"] == 1
+
+        # Verify all filters were passed to service
+        mock_list_runs.assert_called_once()
+        call_args = mock_list_runs.call_args
+        assert call_args.kwargs["status"] == "running"
+        assert call_args.kwargs["profile"] == "analytics_forecast_app"
+        assert call_args.kwargs["limit"] == 5
+        assert call_args.kwargs["offset"] == 0
