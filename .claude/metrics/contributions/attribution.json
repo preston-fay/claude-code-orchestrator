@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T09:20:27.058017",
+  "collection_timestamp": "2025-11-27T14:34:55.271022",
   "commits": [
+    {
+      "sha": "f4635a3b55f85830e18faabca2944c4ad2761f3b",
+      "author": "preston-fay",
+      "date": "2025-11-27 09:34:07 -0500",
+      "message": "feat(agents): Add prompt builder and enable real LLM calls in agents",
+      "contributor_type": "human",
+      "lines_added": 1194,
+      "lines_deleted": 0,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "259e80157ce998e24a435d0d463b43278bd251f2",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 09:21:37 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 178,
+      "lines_deleted": 152,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "6b1d9d2513c423cc1ce72881584128e8ca02c962",
       "author": "github-actions[bot]",
@@ -1562,19 +1584,19 @@
     }
   ],
   "summary": {
-    "total_commits": 126,
-    "human_commits": 83,
+    "total_commits": 128,
+    "human_commits": 85,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 65.87,
-    "ai_percentage": 0.79,
-    "collaborative_percentage": 33.33,
-    "human_lines_added": 51293,
+    "human_percentage": 66.41,
+    "ai_percentage": 0.78,
+    "collaborative_percentage": 32.81,
+    "human_lines_added": 52665,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 182016,
-    "human_lines_percentage": 28.18,
-    "ai_lines_percentage": 23.56,
-    "collaborative_lines_percentage": 48.26
+    "total_lines_added": 183388,
+    "human_lines_percentage": 28.72,
+    "ai_lines_percentage": 23.39,
+    "collaborative_lines_percentage": 47.9
   }
 }
