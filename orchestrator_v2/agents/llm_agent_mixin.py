@@ -15,6 +15,7 @@ from orchestrator_v2.agents.response_parser import (
     ActResponse,
 )
 from orchestrator_v2.llm import get_provider_registry, LlmResult
+from orchestrator_v2.llm.providers.base import LlmAuthenticationError
 
 if TYPE_CHECKING:
     from orchestrator_v2.engine.state_models import (
@@ -88,16 +89,28 @@ class LlmAgentMixin:
             f"estimated tokens: {built_prompt.estimated_tokens}"
         )
         
-        # Call LLM if context provided
-        if context:
+        # CRITICAL FIX: Check for API key specifically, not just context existence
+        # Context is always passed but may not have an API key
+        if context and context.llm_api_key:
+            logger.info(f"Agent {self.id} has API key, making real LLM call for planning")
             try:
                 result = await self._call_llm_with_prompt(built_prompt, context)
                 return parser.parse_plan_response(result.text)
+            except LlmAuthenticationError:
+                # Don't fall back to simulation for auth errors - bubble up
+                logger.error(f"Authentication error for agent {self.id} - API key invalid")
+                raise
             except Exception as e:
                 logger.error(f"LLM call failed for planning: {e}")
-                # Fall through to simulated response
+                # Fall through to simulated response for other errors
+        else:
+            logger.warning(
+                f"Agent {self.id} has no API key (context={context is not None}, "
+                f"has_key={bool(context.llm_api_key) if context else False}). "
+                f"Using simulated response."
+            )
         
-        # Return simulated response if no context or LLM failed
+        # Return simulated response if no API key or LLM failed
         return self._simulate_plan_response(task, phase)
     
     async def _llm_act(
@@ -142,16 +155,25 @@ class LlmAgentMixin:
             f"for task {plan.task_id}"
         )
         
-        # Call LLM if context provided
-        if context:
+        # CRITICAL FIX: Check for API key specifically, not just context existence
+        if context and context.llm_api_key:
+            logger.info(f"Agent {self.id} has API key, making real LLM call for execution")
             try:
                 result = await self._call_llm_with_prompt(built_prompt, context)
                 return parser.parse_act_response(result.text)
+            except LlmAuthenticationError:
+                # Don't fall back to simulation for auth errors - bubble up
+                logger.error(f"Authentication error for agent {self.id} during execution")
+                raise
             except Exception as e:
                 logger.error(f"LLM call failed for execution: {e}")
-                # Fall through to simulated response
+                # Fall through to simulated response for other errors
+        else:
+            logger.warning(
+                f"Agent {self.id} has no API key for execution. Using simulated response."
+            )
         
-        # Return simulated response if no context or LLM failed
+        # Return simulated response if no API key or LLM failed
         return self._simulate_act_response(plan, project_state)
     
     async def _call_llm_with_prompt(
@@ -234,7 +256,7 @@ class LlmAgentMixin:
     ) -> PlanResponse:
         """Generate a simulated plan response.
         
-        Used when no LLM context is available.
+        Used when no LLM API key is available.
         
         Args:
             task: Task definition.
@@ -244,23 +266,24 @@ class LlmAgentMixin:
             Simulated plan response.
         """
         return PlanResponse(
-            analysis=f"Simulated analysis for {task.task_id} in {phase.value} phase",
+            analysis=f"[SIMULATED - NO API KEY] Analysis for {task.task_id} in {phase.value} phase. "
+                     f"Configure your Anthropic API key in Settings to enable real AI responses.",
             steps=[
                 {
                     "step_id": f"{task.task_id}_step_1",
-                    "description": f"{self.role} analysis step",
+                    "description": f"[SIMULATED] {self.role} analysis step",
                     "estimated_tokens": 500,
                 },
                 {
                     "step_id": f"{task.task_id}_step_2",
-                    "description": f"{self.role} execution step",
+                    "description": f"[SIMULATED] {self.role} execution step",
                     "estimated_tokens": 500,
                 },
             ],
             outputs=[f"{self.role}_output.md"],
             dependencies=[],
             validation_criteria=["Output is complete", "Quality standards met"],
-            raw_response="[Simulated response - no LLM context provided]",
+            raw_response="[SIMULATED - No API key configured. Go to Settings to add your Anthropic API key.]",
         )
     
     def _simulate_act_response(
@@ -270,7 +293,7 @@ class LlmAgentMixin:
     ) -> ActResponse:
         """Generate a simulated execution response.
         
-        Used when no LLM context is available.
+        Used when no LLM API key is available.
         
         Args:
             plan: Execution plan.
@@ -282,27 +305,39 @@ class LlmAgentMixin:
         from orchestrator_v2.agents.response_parser import ArtifactData
         
         return ActResponse(
-            execution_summary=f"Simulated execution of {plan.task_id} by {self.role}",
+            execution_summary=f"[SIMULATED - NO API KEY] Execution of {plan.task_id} by {self.role}. "
+                             f"Configure your Anthropic API key in Settings.",
             artifacts=[
                 ArtifactData(
                     filename=f"{self.role}_output.md",
-                    content=f"""# {self.role.title()} Output
+                    content=f"""# {self.role.title()} Output - SIMULATED
+
+## WARNING: This is a simulated response
+
+**No API key was configured.** To get real AI-generated content:
+1. Go to Settings in the top-right menu
+2. Enter your Anthropic API key
+3. Save and try running the phase again
 
 ## Project: {project_state.project_name}
 ## Task: {plan.task_id}
 ## Phase: {project_state.current_phase.value}
 
-### Summary
-This is a simulated artifact from the {self.role} agent.
-No LLM context was provided, so this is placeholder content.
-
-### Steps Executed
+### Steps That Would Execute
 {chr(10).join(f"- {s.description}" for s in plan.steps)}
+
+### What This Phase Would Produce
+With a valid API key, the {self.role} agent would analyze your project
+requirements and generate real architectural decisions, technical specifications,
+and implementation guidance.
 """,
                     artifact_type="document",
                 )
             ],
-            recommendations=["Provide LLM context for real execution"],
+            recommendations=[
+                "Configure your Anthropic API key in Settings",
+                "The API key is stored securely and used for your account only",
+            ],
             success=True,
-            raw_response="[Simulated response - no LLM context provided]",
+            raw_response="[SIMULATED - No API key configured]",
         )
