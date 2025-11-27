@@ -18,6 +18,7 @@ from orchestrator_v2.persistence.interfaces import (
 )
 from orchestrator_v2.rsg.models import GoStatus, ReadyStatus, RsgOverview, SetStatus
 from orchestrator_v2.workspace.manager import WorkspaceManager
+from orchestrator_v2.user.models import UserProfile
 
 
 # Phase boundaries for RSG stages
@@ -58,13 +59,18 @@ class RsgService:
         self._artifact_repo = artifact_repository
         self._workspace_manager = workspace_manager
 
-    async def start_ready(self, project_id: str) -> ReadyStatus:
+    async def start_ready(
+        self,
+        project_id: str,
+        user: UserProfile | None = None,
+    ) -> ReadyStatus:
         """Start the Ready stage (PLANNING + ARCHITECTURE).
 
         Executes phases until ARCHITECTURE is complete or DATA begins.
 
         Args:
             project_id: Project identifier.
+            user: User profile with API key for real LLM calls.
 
         Returns:
             ReadyStatus with completion info.
@@ -100,7 +106,7 @@ class RsgService:
                 break
 
             try:
-                await engine.run_phase()
+                await engine.run_phase(user=user)
                 messages.append(f"Completed {state.current_phase.value} phase")
             except Exception as e:
                 messages.append(f"Error in {state.current_phase.value}: {str(e)}")
@@ -158,13 +164,18 @@ class RsgService:
             messages=[],
         )
 
-    async def start_set(self, project_id: str) -> SetStatus:
+    async def start_set(
+        self,
+        project_id: str,
+        user: UserProfile | None = None,
+    ) -> SetStatus:
         """Start the Set stage (DATA + early DEVELOPMENT).
 
         Executes phases until QA begins.
 
         Args:
             project_id: Project identifier.
+            user: User profile with API key for real LLM calls.
 
         Returns:
             SetStatus with completion info.
@@ -201,7 +212,7 @@ class RsgService:
                 break
 
             try:
-                await engine.run_phase()
+                await engine.run_phase(user=user)
                 messages.append(f"Completed {state.current_phase.value} phase")
 
                 if PhaseType.DATA in state.completed_phases:
@@ -269,13 +280,18 @@ class RsgService:
             messages=[],
         )
 
-    async def start_go(self, project_id: str) -> GoStatus:
+    async def start_go(
+        self,
+        project_id: str,
+        user: UserProfile | None = None,
+    ) -> GoStatus:
         """Start the Go stage (DEVELOPMENT + QA + DOCUMENTATION).
 
         Executes remaining phases until complete or blocked.
 
         Args:
             project_id: Project identifier.
+            user: User profile with API key for real LLM calls.
 
         Returns:
             GoStatus with completion info.
@@ -309,7 +325,7 @@ class RsgService:
 
         while state.current_phase != PhaseType.COMPLETE:
             try:
-                await engine.run_phase()
+                await engine.run_phase(user=user)
                 messages.append(f"Completed {state.current_phase.value} phase")
             except Exception as e:
                 error_msg = str(e)
