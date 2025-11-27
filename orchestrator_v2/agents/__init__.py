@@ -22,6 +22,16 @@ from orchestrator_v2.agents.consensus import ConsensusAgent, create_consensus_ag
 from orchestrator_v2.agents.steward import StewardAgent, create_steward_agent
 from orchestrator_v2.agents.reviewer import ReviewerAgent, create_reviewer_agent
 
+# Agent factory
+from orchestrator_v2.agents.factory import (
+    create_agent,
+    get_agent_class,
+    list_available_agents,
+    create_agents_for_phase,
+    AgentPool,
+    get_agent_pool,
+)
+
 # LLM integration components
 from orchestrator_v2.agents.prompt_builder import (
     PromptBuilder,
@@ -52,7 +62,7 @@ __all__ = [
     "ConsensusAgent",
     "StewardAgent",
     "ReviewerAgent",
-    # Factory functions
+    # Factory functions (individual)
     "create_architect_agent",
     "create_data_agent",
     "create_developer_agent",
@@ -61,6 +71,13 @@ __all__ = [
     "create_consensus_agent",
     "create_steward_agent",
     "create_reviewer_agent",
+    # Factory (generic)
+    "create_agent",
+    "get_agent_class",
+    "list_available_agents",
+    "create_agents_for_phase",
+    "AgentPool",
+    "get_agent_pool",
     # LLM integration
     "PromptBuilder",
     "PromptTemplate",
