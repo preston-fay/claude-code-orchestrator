@@ -16,7 +16,7 @@ from orchestrator_v2.api.dto.runs import (
     AdvanceRunResponse,
 )
 
-# Legacy DTOs (for backward compatibility)
+# Common DTOs (RSC + legacy)
 from orchestrator_v2.api.dto.common import (
     ProjectDTO,
     ProjectTemplateDTO,
@@ -28,12 +28,21 @@ from orchestrator_v2.api.dto.common import (
     UpdateProviderSettingsDTO,
     ProviderTestResultDTO,
     EventDTO,
+    # RSC DTOs (primary)
     ReadyStatusDTO,
     SetStatusDTO,
-    GoStatusDTO,
-    RsgOverviewDTO,
+    CodeStatusDTO,
+    RscOverviewDTO,
+    PhaseAdvanceResultDTO,
+    # Converters (primary)
     ready_status_to_dto,
     set_status_to_dto,
+    code_status_to_dto,
+    rsc_overview_to_dto,
+    phase_advance_result_to_dto,
+    # Backward compatibility aliases
+    GoStatusDTO,
+    RsgOverviewDTO,
     go_status_to_dto,
     rsg_overview_to_dto,
 )
@@ -50,7 +59,7 @@ __all__ = [
     "MetricsSummary",
     "AdvanceRunRequest",
     "AdvanceRunResponse",
-    # Legacy DTOs
+    # Common DTOs
     "ProjectDTO",
     "ProjectTemplateDTO",
     "PhaseDTO",
@@ -61,12 +70,21 @@ __all__ = [
     "UpdateProviderSettingsDTO",
     "ProviderTestResultDTO",
     "EventDTO",
+    # RSC DTOs (primary)
     "ReadyStatusDTO",
     "SetStatusDTO",
-    "GoStatusDTO",
-    "RsgOverviewDTO",
+    "CodeStatusDTO",
+    "RscOverviewDTO",
+    "PhaseAdvanceResultDTO",
+    # Converters (primary)
     "ready_status_to_dto",
     "set_status_to_dto",
+    "code_status_to_dto",
+    "rsc_overview_to_dto",
+    "phase_advance_result_to_dto",
+    # Backward compatibility aliases
+    "GoStatusDTO",
+    "RsgOverviewDTO",
     "go_status_to_dto",
     "rsg_overview_to_dto",
 ]
