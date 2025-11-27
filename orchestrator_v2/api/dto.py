@@ -119,7 +119,7 @@ class EventDTO(BaseModel):
 
 
 # -----------------------------------------------------------------------------
-# Ready/Set/Go DTOs
+# Ready/Set/Code DTOs
 # -----------------------------------------------------------------------------
 
 class ReadyStatusDTO(BaseModel):
@@ -143,8 +143,8 @@ class SetStatusDTO(BaseModel):
     messages: list[str] = Field(default_factory=list)
 
 
-class GoStatusDTO(BaseModel):
-    """Go stage status DTO."""
+class CodeStatusDTO(BaseModel):
+    """Code stage status DTO."""
     stage: str
     completed: bool
     current_phase: str | None = None
@@ -154,14 +154,34 @@ class GoStatusDTO(BaseModel):
     messages: list[str] = Field(default_factory=list)
 
 
-class RsgOverviewDTO(BaseModel):
-    """RSG overview DTO."""
+# Backward compatibility alias
+GoStatusDTO = CodeStatusDTO
+
+
+class RscOverviewDTO(BaseModel):
+    """RSC (Ready/Set/Code) overview DTO."""
     project_id: str
     project_name: str
     stage: str
     ready: ReadyStatusDTO
     set: SetStatusDTO
-    go: GoStatusDTO
+    code: CodeStatusDTO
+
+
+# Backward compatibility alias
+RsgOverviewDTO = RscOverviewDTO
+
+
+class PhaseAdvanceResultDTO(BaseModel):
+    """Result of advancing a single phase."""
+    phase_executed: str
+    success: bool
+    message: str
+    error: str | None = None
+    current_phase: str
+    completed_phases: list[str]
+    rsc_stage: str
+    has_more_phases: bool = True
 
 
 # -----------------------------------------------------------------------------
@@ -193,9 +213,9 @@ def set_status_to_dto(status) -> SetStatusDTO:
     )
 
 
-def go_status_to_dto(status) -> GoStatusDTO:
-    """Convert GoStatus to DTO."""
-    return GoStatusDTO(
+def code_status_to_dto(status) -> CodeStatusDTO:
+    """Convert CodeStatus to DTO."""
+    return CodeStatusDTO(
         stage=status.stage.value,
         completed=status.completed,
         current_phase=status.current_phase.value if status.current_phase else None,
@@ -206,13 +226,35 @@ def go_status_to_dto(status) -> GoStatusDTO:
     )
 
 
-def rsg_overview_to_dto(overview) -> RsgOverviewDTO:
-    """Convert RsgOverview to DTO."""
-    return RsgOverviewDTO(
+# Backward compatibility alias
+go_status_to_dto = code_status_to_dto
+
+
+def rsc_overview_to_dto(overview) -> RscOverviewDTO:
+    """Convert RscOverview to DTO."""
+    return RscOverviewDTO(
         project_id=overview.project_id,
         project_name=overview.project_name,
         stage=overview.stage.value,
         ready=ready_status_to_dto(overview.ready),
         set=set_status_to_dto(overview.set),
-        go=go_status_to_dto(overview.go),
+        code=code_status_to_dto(overview.code),
+    )
+
+
+# Backward compatibility alias
+rsg_overview_to_dto = rsc_overview_to_dto
+
+
+def phase_advance_result_to_dto(result) -> PhaseAdvanceResultDTO:
+    """Convert PhaseAdvanceResult to DTO."""
+    return PhaseAdvanceResultDTO(
+        phase_executed=result.phase_executed.value,
+        success=result.success,
+        message=result.message,
+        error=result.error,
+        current_phase=result.current_phase.value,
+        completed_phases=[p.value for p in result.completed_phases],
+        rsc_stage=result.rsc_stage.value,
+        has_more_phases=result.has_more_phases,
     )
