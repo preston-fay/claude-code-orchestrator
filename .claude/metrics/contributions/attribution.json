@@ -1,8 +1,52 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T20:32:03.198537",
+  "collection_timestamp": "2025-11-27T20:52:51.196136",
   "commits": [
+    {
+      "sha": "8a5ef8d0f27b58dded29f68dd34e17d30a309f1b",
+      "author": "preston-fay",
+      "date": "2025-11-27 15:52:00 -0500",
+      "message": "fix(engine): Pass correct arguments to agent.summarize()",
+      "contributor_type": "human",
+      "lines_added": 3,
+      "lines_deleted": 3,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "f6fabcb30d76ae954b5597f16134760aec7f2b56",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 20:33:11 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 108,
+      "lines_deleted": 86,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "5ebe2242f8529a87a94489d56514d0473f663ab8",
+      "author": "preston-fay",
+      "date": "2025-11-27 15:32:34 -0500",
+      "message": "fix: Update SettingsPanel to use localStorage for API key",
+      "contributor_type": "human",
+      "lines_added": 65,
+      "lines_deleted": 21,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "3dfc46159a6c09659bb39660e8a443d3ec8fcb55",
+      "author": "preston-fay",
+      "date": "2025-11-27 15:31:47 -0500",
+      "message": "fix: Read API key from X-LLM-Api-Key header as fallback",
+      "contributor_type": "human",
+      "lines_added": 16,
+      "lines_deleted": 2,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
     {
       "sha": "a5f10820fac8b8d8bd50f34cca4146c8a9171e1c",
       "author": "preston-fay",
@@ -2255,19 +2299,19 @@
     }
   ],
   "summary": {
-    "total_commits": 189,
-    "human_commits": 146,
+    "total_commits": 193,
+    "human_commits": 150,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 77.25,
-    "ai_percentage": 0.53,
-    "collaborative_percentage": 22.22,
-    "human_lines_added": 61431,
+    "human_percentage": 77.72,
+    "ai_percentage": 0.52,
+    "collaborative_percentage": 21.76,
+    "human_lines_added": 61623,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 192154,
-    "human_lines_percentage": 31.97,
-    "ai_lines_percentage": 22.32,
-    "collaborative_lines_percentage": 45.71
+    "total_lines_added": 192346,
+    "human_lines_percentage": 32.04,
+    "ai_lines_percentage": 22.3,
+    "collaborative_lines_percentage": 45.67
   }
 }
