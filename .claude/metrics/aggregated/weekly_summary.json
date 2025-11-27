@@ -14,12 +14,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -44,12 +44,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -145,12 +145,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -246,12 +246,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -347,12 +347,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -448,12 +448,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -549,12 +549,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -650,12 +650,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -751,12 +751,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -852,12 +852,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -953,12 +953,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
@@ -1054,12 +1054,12 @@
         "pr_cycle_time_hours": 0.66,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.0
+        "features_per_week": 4.17
       },
       "contributions": {
-        "human_percentage": 67.67,
-        "ai_percentage": 0.75,
-        "collaborative_percentage": 31.58
+        "human_percentage": 68.61,
+        "ai_percentage": 0.73,
+        "collaborative_percentage": 30.66
       },
       "ai_review": {
         "review_coverage": 0,
