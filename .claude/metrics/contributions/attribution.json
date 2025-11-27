@@ -1,8 +1,52 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T15:02:36.443815",
+  "collection_timestamp": "2025-11-27T15:10:16.792914",
   "commits": [
+    {
+      "sha": "052b5b7253afaa28c34a0c15425b1d57a29f0aea",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:09:24 -0500",
+      "message": "docs: Add LLM integration guide and API key verification script",
+      "contributor_type": "human",
+      "lines_added": 358,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "28109c1bb457e11d7eddf3658593b035a0d2c508",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 15:03:56 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 139,
+      "lines_deleted": 117,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "8dc2fa9840a09eb9f26ccd7ed76de76688505a03",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:03:58 -0500",
+      "message": "feat(agents): Export agent factory functions from agents module",
+      "contributor_type": "human",
+      "lines_added": 18,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "bc57d788263c4536e08bd2f456e65e59b01134cc",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:03:17 -0500",
+      "message": "feat(tests): Add end-to-end workflow integration tests",
+      "contributor_type": "human",
+      "lines_added": 730,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
     {
       "sha": "63220eef38fb54d28a9d09a3bcfd10f43ce70f71",
       "author": "preston-fay",
@@ -1771,19 +1815,19 @@
     }
   ],
   "summary": {
-    "total_commits": 145,
-    "human_commits": 102,
+    "total_commits": 149,
+    "human_commits": 106,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 70.34,
-    "ai_percentage": 0.69,
-    "collaborative_percentage": 28.97,
-    "human_lines_added": 57138,
+    "human_percentage": 71.14,
+    "ai_percentage": 0.67,
+    "collaborative_percentage": 28.19,
+    "human_lines_added": 58383,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 187861,
-    "human_lines_percentage": 30.42,
-    "ai_lines_percentage": 22.83,
-    "collaborative_lines_percentage": 46.76
+    "total_lines_added": 189106,
+    "human_lines_percentage": 30.87,
+    "ai_lines_percentage": 22.68,
+    "collaborative_lines_percentage": 46.45
   }
 }
