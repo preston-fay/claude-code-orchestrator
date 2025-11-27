@@ -492,9 +492,13 @@ class WorkflowEngine:
         # Set LLM provider info from user and model config
         if user:
             context.user_id = user.user_id
-            context.llm_api_key = user.anthropic_api_key
-            context.llm_provider = user.default_provider or "anthropic"
-            context.model_preferences = user.entitlements.model_access if user.entitlements else []
+            # CRITICAL FIX: Use llm_api_key, not anthropic_api_key (which doesn't exist)
+            context.llm_api_key = user.llm_api_key
+            context.llm_provider = user.llm_provider or "anthropic"
+            context.model_preferences = list(user.model_entitlements.keys()) if user.model_entitlements else []
+            
+            # Log for debugging
+            logger.info(f"Building agent context for user {user.user_id}: has_api_key={bool(user.llm_api_key)}, provider={user.llm_provider}")
 
         if model_config:
             context.provider = model_config.provider
@@ -596,7 +600,7 @@ class WorkflowEngine:
 
             # Plan - PASS CONTEXT for real LLM calls
             agent_state.status = AgentStatus.PLANNING
-            logger.debug(f"Agent {agent_id} planning with context (has API key: {bool(context.llm_api_key)})")
+            logger.info(f"Agent {agent_id} planning with context (has API key: {bool(context.llm_api_key)})")
             
             if asyncio.iscoroutinefunction(agent.plan):
                 plan = await agent.plan(task, phase, self.state, context)
