@@ -21,6 +21,9 @@ boto3>=1.28.0
 pandas>=2.1.0
 numpy>=1.24.0
 
+# Machine learning (required for territory POC skills)
+scikit-learn>=1.3.0
+
 # YAML/JSON processing
 pyyaml>=6.0
 
