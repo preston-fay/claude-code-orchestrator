@@ -8,11 +8,17 @@ and technical specifications. It is responsible for:
 - Selecting technologies and patterns
 - Creating Architecture Decision Records (ADRs)
 
+This agent now uses real LLM calls when an AgentContext is provided,
+falling back to simulated responses otherwise.
+
 See ADR-001 for agent responsibilities.
 """
 
+import logging
+
 from orchestrator_v2.agents.base_agent import BaseAgent, BaseAgentConfig
 from orchestrator_v2.engine.state_models import (
+    AgentContext,
     AgentOutput,
     AgentPlan,
     AgentPlanStep,
@@ -22,6 +28,8 @@ from orchestrator_v2.engine.state_models import (
     TaskDefinition,
     TokenUsage,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_architect_agent() -> "ArchitectAgent":
@@ -62,6 +70,12 @@ class ArchitectAgent(BaseAgent):
     - API contract design
     - Creating ADRs for decisions
 
+    LLM Integration:
+    - Uses architect.md template from subagent_prompts/
+    - Produces structured architectural documents
+    - Creates data model specifications
+    - Generates technology rationale
+
     Subagents:
     - architect.data: Data architecture specialization
     - architect.security: Security architecture
@@ -82,8 +96,12 @@ class ArchitectAgent(BaseAgent):
         task: TaskDefinition,
         phase: PhaseType,
         project_state: ProjectState,
+        context: AgentContext | None = None,
     ) -> AgentPlan:
         """Plan architecture design approach.
+
+        When LLM context is available, generates a real plan based on
+        project requirements. Otherwise, returns a standard plan template.
 
         Creates plan for:
         1. Requirements analysis
@@ -96,38 +114,53 @@ class ArchitectAgent(BaseAgent):
             task: Task to plan for.
             phase: Current phase.
             project_state: Project state.
+            context: Optional agent context for LLM calls.
 
         Returns:
             Execution plan with architecture-specific steps.
         """
-        # Get base plan
-        plan = await super().plan(task, phase, project_state)
+        # Use parent's LLM-enabled plan method
+        plan = await super().plan(task, phase, project_state, context)
 
-        # Override with architecture-specific steps
-        plan.steps = [
-            AgentPlanStep(
-                step_id=f"{task.task_id}_analyze",
-                description="Analyze requirements and constraints",
-            ),
-            AgentPlanStep(
-                step_id=f"{task.task_id}_propose",
-                description="Create architecture proposal",
-            ),
-            AgentPlanStep(
-                step_id=f"{task.task_id}_data_model",
-                description="Design data models and schemas",
-            ),
-            AgentPlanStep(
-                step_id=f"{task.task_id}_tech_select",
-                description="Select technologies and patterns",
-            ),
-            AgentPlanStep(
-                step_id=f"{task.task_id}_adr",
-                description="Create Architecture Decision Records",
-            ),
-        ]
+        # If we got a simulated plan (no LLM context), enhance with architecture defaults
+        if not context and not self._agent_context:
+            plan.steps = [
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_analyze",
+                    description="Analyze requirements and constraints",
+                    estimated_tokens=300,
+                ),
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_propose",
+                    description="Create architecture proposal",
+                    estimated_tokens=500,
+                ),
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_data_model",
+                    description="Design data models and schemas",
+                    estimated_tokens=400,
+                ),
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_tech_select",
+                    description="Select technologies and patterns",
+                    estimated_tokens=200,
+                ),
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_adr",
+                    description="Create Architecture Decision Records",
+                    estimated_tokens=300,
+                ),
+            ]
+            plan.estimated_tokens = sum(s.estimated_tokens for s in plan.steps)
+            plan.expected_outputs = [
+                "architecture_proposal.md",
+                "data_model.md",
+                "adr_001_technology_stack.md",
+            ]
 
-        plan.estimated_tokens = 1500
+        logger.info(
+            f"Architect created plan with {len(plan.steps)} steps for {task.task_id}"
+        )
 
         return plan
 
@@ -135,8 +168,12 @@ class ArchitectAgent(BaseAgent):
         self,
         plan: AgentPlan,
         project_state: ProjectState,
+        context: AgentContext | None = None,
     ) -> AgentOutput:
         """Execute architecture design steps.
+
+        When LLM context is available, generates real architectural artifacts.
+        Otherwise, creates template-based placeholder artifacts.
 
         Creates architecture artifacts including:
         - Architecture proposal document
@@ -146,47 +183,61 @@ class ArchitectAgent(BaseAgent):
         Args:
             plan: Execution plan.
             project_state: Project state.
+            context: Optional agent context for LLM calls.
 
         Returns:
             Execution output with architecture artifacts.
         """
+        ctx = context or self._agent_context
         phase = project_state.current_phase
 
-        # Record token usage for architecture work
+        # If we have LLM context, use the parent's LLM-enabled act method
+        if ctx:
+            logger.info(f"Architect executing with LLM for project {project_state.project_name}")
+            return await super().act(plan, project_state, context)
+
+        # Otherwise, generate template-based artifacts
+        logger.info(f"Architect executing with templates for project {project_state.project_name}")
+
+        # Record token usage for architecture work (simulated)
         self._record_tokens(input_tokens=800, output_tokens=600)
 
         # Create architecture proposal artifact
         proposal_content = f"""# Architecture Proposal
 
 ## Project: {project_state.project_name}
-## Agent: {self.id}
+## Client: {project_state.client}
 ## Phase: {phase.value}
 
 ### Executive Summary
 This document outlines the proposed system architecture for the project.
+The architecture follows modern best practices with a focus on scalability,
+maintainability, and security.
 
 ### System Overview
-[Architecture description based on requirements]
+The system is designed as a modular architecture with clear separation of concerns:
+
+1. **Presentation Layer**: User-facing interfaces and API endpoints
+2. **Business Logic Layer**: Core application logic and workflows
+3. **Data Access Layer**: Database interactions and data transformations
+4. **Infrastructure Layer**: Deployment, monitoring, and operations
 
 ### Technology Stack
-- Backend: Python/FastAPI
-- Database: PostgreSQL
-- Cache: Redis
-- Deployment: Docker/Kubernetes
 
-### Data Models
-[Data model definitions]
-
-### API Contracts
-[API endpoint definitions]
+| Component          | Technology                | Rationale |
+|-------------------|---------------------------|-----------| 
+| Backend Framework | Python/FastAPI            | High performance, async support, excellent typing |
+| Database          | PostgreSQL                | Robust, scalable, excellent JSON support |
+| Cache             | Redis                     | In-memory performance, pub/sub capabilities |
+| Message Queue     | RabbitMQ/Redis Streams    | Reliable async processing |
+| Containerization  | Docker + Kubernetes       | Scalable deployment, orchestration |
 
 ### Quality Attributes
-- Scalability: Horizontal scaling via Kubernetes
-- Security: OAuth2/JWT authentication
-- Performance: Sub-100ms response times
 
-### Decisions
-See ADR documents for key architectural decisions.
+- **Scalability**: Horizontal scaling via container orchestration
+- **Security**: OAuth2/JWT authentication, encrypted data at rest
+- **Performance**: Sub-100ms response times for API endpoints
+- **Maintainability**: Clean architecture, comprehensive documentation
 
 ### Steps Executed
 """
@@ -206,13 +257,58 @@ See ADR documents for key architectural decisions.
 ## Project: {project_state.project_name}
 
 ### Entity Definitions
-[Entity schemas and relationships]
+
+#### Core Entities
+The data model centers around the following core entities:
+
+1. **Project**: Main work container
+2. **Task**: Individual work items within a project
+3. **User**: System users and their roles
+4. **Artifact**: Generated outputs and documents
 
 ### Database Schema
-[SQL/ORM definitions]
+
+```sql
+-- Projects table
+CREATE TABLE projects (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    client_id UUID REFERENCES clients(id),
+    status VARCHAR(50) DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tasks table  
+CREATE TABLE tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status VARCHAR(50) DEFAULT 'pending',
+    assigned_to UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Artifacts table
+CREATE TABLE artifacts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id),
+    task_id UUID REFERENCES tasks(id),
+    path VARCHAR(500) NOT NULL,
+    hash VARCHAR(64) NOT NULL,
+    size_bytes BIGINT,
+    artifact_type VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
 ### Validation Rules
-[Data validation constraints]
+
+- Project names must be unique per client
+- Task status transitions follow defined workflow
+- Artifacts are immutable once created
 """
 
         self._create_artifact(
@@ -222,10 +318,67 @@ See ADR documents for key architectural decisions.
             project_state.project_id,
         )
 
-        # Run subagents for specialized architecture tasks
+        # Create ADR artifact
+        adr_content = f"""# ADR-001: Technology Stack Selection
+
+## Status
+Accepted
+
+## Context
+Project {project_state.project_name} requires a technology stack that supports:
+- Rapid development and iteration
+- Scalable deployment
+- Strong type safety and maintainability
+- Integration with AI/LLM services
+
+## Decision
+We will use the following technology stack:
+
+### Backend
+- **Language**: Python 3.11+
+- **Framework**: FastAPI
+- **Async Runtime**: asyncio with uvicorn
+
+### Database
+- **Primary**: PostgreSQL 15+
+- **Cache**: Redis 7+
+
+### Infrastructure
+- **Containers**: Docker
+- **Orchestration**: Kubernetes (optional)
+- **CI/CD**: GitHub Actions
+
+## Consequences
+
+### Positive
+- Strong Python ecosystem for AI/ML integrations
+- FastAPI provides excellent performance and auto-documentation
+- PostgreSQL is battle-tested and feature-rich
+- Container-based deployment enables portability
+
+### Negative
+- Python GIL may limit CPU-bound parallelism
+- Requires team expertise in async programming
+- Infrastructure complexity with Kubernetes
+
+## Alternatives Considered
+
+1. **Node.js/Express**: Rejected due to weaker typing and async complexity
+2. **Go/Gin**: Rejected due to less mature AI/ML ecosystem
+3. **Java/Spring**: Rejected due to development velocity requirements
+"""
+
+        self._create_artifact(
+            "adr_001_technology_stack.md",
+            adr_content,
+            phase,
+            project_state.project_id,
+        )
+
+        # Run subagents if configured
         subagent_summaries = []
         for subagent_id, subagent_config in self.config.subagents.items():
-            summary = await self._run_subagent(subagent_config, phase, project_state)
+            summary = await self._run_subagent(subagent_config, phase, project_state, ctx)
             subagent_summaries.append(summary)
 
         # Emit event
@@ -234,6 +387,7 @@ See ADR documents for key architectural decisions.
             phase.value,
             artifacts=len(self._artifacts),
             subagents=len(subagent_summaries),
+            used_llm=ctx is not None,
         )
 
         return AgentOutput(
@@ -245,6 +399,12 @@ See ADR documents for key architectural decisions.
                 output_tokens=self._token_usage.output_tokens,
                 total_tokens=self._token_usage.total_tokens,
             ),
+            execution_summary=f"Created architecture documentation for {project_state.project_name}",
+            recommendations=[
+                "Review architecture proposal with stakeholders",
+                "Validate data model against requirements",
+                "Consider security review of proposed stack",
+            ],
         )
 
     async def summarize(
@@ -277,5 +437,11 @@ See ADR documents for key architectural decisions.
             f"technology selection, and ADR creation. "
             f"Produced {len(self._artifacts)} artifacts."
         )
+
+        # Add architect-specific recommendations
+        summary.recommendations = output.recommendations + [
+            "Conduct architecture review meeting",
+            "Document any deviations during implementation",
+        ]
 
         return summary
