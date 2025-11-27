@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T14:37:22.888042",
+  "collection_timestamp": "2025-11-27T14:39:28.564688",
   "commits": [
+    {
+      "sha": "5b36b80109ccf27e50d6ddc464efbf8ff9b28d0d",
+      "author": "preston-fay",
+      "date": "2025-11-27 09:38:41 -0500",
+      "message": "feat(architect): Update ArchitectAgent to use LLM integration",
+      "contributor_type": "human",
+      "lines_added": 216,
+      "lines_deleted": 50,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "7d162c6398e9aa85f8e7617edc46e8b5539cd52a",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 14:38:36 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 150,
+      "lines_deleted": 117,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "999439d3170c230c2d649030bd53c979aa936a90",
       "author": "preston-fay",
@@ -1617,19 +1639,19 @@
     }
   ],
   "summary": {
-    "total_commits": 131,
-    "human_commits": 88,
+    "total_commits": 133,
+    "human_commits": 90,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 67.18,
-    "ai_percentage": 0.76,
-    "collaborative_percentage": 32.06,
-    "human_lines_added": 52945,
+    "human_percentage": 67.67,
+    "ai_percentage": 0.75,
+    "collaborative_percentage": 31.58,
+    "human_lines_added": 53311,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 183668,
-    "human_lines_percentage": 28.83,
-    "ai_lines_percentage": 23.35,
-    "collaborative_lines_percentage": 47.82
+    "total_lines_added": 184034,
+    "human_lines_percentage": 28.97,
+    "ai_lines_percentage": 23.3,
+    "collaborative_lines_percentage": 47.73
   }
 }

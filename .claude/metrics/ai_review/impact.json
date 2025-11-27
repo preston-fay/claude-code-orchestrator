@@ -1,7 +1,7 @@
 {
   "metric": "ai_review_impact",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T14:37:36.187919",
+  "collection_timestamp": "2025-11-27T14:39:32.747957",
   "reviews": [],
   "summary": {
     "total_prs_analyzed": 10,

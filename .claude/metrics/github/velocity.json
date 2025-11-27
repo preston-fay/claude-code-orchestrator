@@ -1,15 +1,15 @@
 {
   "metric": "feature_velocity",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T14:37:43.272870",
+  "collection_timestamp": "2025-11-27T14:39:41.734998",
   "sprints": [
     {
       "week_id": "2025-W47",
       "start_date": "2025-11-24",
       "features": 1,
       "bugs": 3,
-      "chores": 20,
-      "total_commits": 56
+      "chores": 21,
+      "total_commits": 59
     },
     {
       "week_id": "2025-W46",
