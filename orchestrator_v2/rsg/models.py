@@ -9,6 +9,26 @@ from pydantic import BaseModel, Field
 from orchestrator_v2.engine.state_models import PhaseType, RsgStage
 
 
+class PhaseAdvanceResult(BaseModel):
+    """Result of advancing a single phase.
+    
+    This is the primary response model for user-controlled phase execution.
+    Users receive this after calling advance_phase() to know:
+    - What phase was executed
+    - Whether it succeeded
+    - What phase is next
+    - Overall progress
+    """
+    phase_executed: PhaseType
+    success: bool
+    message: str
+    error: str | None = None
+    current_phase: PhaseType
+    completed_phases: list[PhaseType] = Field(default_factory=list)
+    rsg_stage: RsgStage
+    has_more_phases: bool = True
+
+
 class ReadyStatus(BaseModel):
     """Status of the Ready stage (PLANNING + ARCHITECTURE)."""
     stage: RsgStage
