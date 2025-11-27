@@ -16,8 +16,8 @@ import {
   OrchestratorEvent,
 } from './types';
 
-// Default configuration
-const FALLBACK_API_URL = 'https://kup99hcmh5.us-east-2.awsapprunner.com';
+// Default configuration - Railway backend URL
+const FALLBACK_API_URL = 'https://eloquent-liberation-production.up.railway.app';
 
 const DEFAULT_BASE_URL =
   import.meta.env.VITE_ORCHESTRATOR_API_URL?.trim() || FALLBACK_API_URL;
@@ -220,103 +220,5 @@ export async function getProjectEvents(
   const response = await axiosInstance.get<OrchestratorEvent[]>(
     `/projects/${projectId}/events?${params.toString()}`
   );
-  return response.data;
-}
-
-// Territory POC Endpoints
-
-export interface TerritoryConfig {
-  workspace_path: string;
-  intake_config?: {
-    territory?: {
-      target_territories?: number;
-      states?: string[];
-    };
-    scoring?: {
-      weights?: {
-        value_weight?: number;
-        opportunity_weight?: number;
-        workload_weight?: number;
-      };
-    };
-  };
-}
-
-export interface TerritoryResult {
-  success: boolean;
-  skill_id: string;
-  artifacts: Array<{
-    name: string;
-    path: string;
-    type: string;
-    description: string;
-  }>;
-  metadata: Record<string, unknown>;
-  error?: string;
-}
-
-export interface TerritoryAssignment {
-  retail_id: string;
-  retail_name: string;
-  state: string;
-  territory_id: string;
-  rvs: number;
-  ros: number;
-  rws: number;
-  composite_score: number;
-  latitude: number | null;
-  longitude: number | null;
-}
-
-export interface TerritoryKpi {
-  territory_id: string;
-  retailer_count: number;
-  total_revenue: number;
-  avg_rvs: number;
-  avg_ros: number;
-  avg_rws: number;
-  avg_composite: number;
-  centroid_lat: number;
-  centroid_lon: number;
-  coverage_km: number;
-}
-
-export async function runTerritoryScoring(config: TerritoryConfig): Promise<TerritoryResult> {
-  const response = await axiosInstance.post<TerritoryResult>('/territory/score', config);
-  return response.data;
-}
-
-export async function runTerritoryClustering(config: TerritoryConfig): Promise<TerritoryResult> {
-  const response = await axiosInstance.post<TerritoryResult>('/territory/cluster', config);
-  return response.data;
-}
-
-export interface TerritoryRunFullResult {
-  success: boolean;
-  scoring: TerritoryResult;
-  clustering: TerritoryResult | null;
-  error?: string;
-}
-
-export async function runTerritoryFullPipeline(config: TerritoryConfig): Promise<TerritoryRunFullResult> {
-  const response = await axiosInstance.post<TerritoryRunFullResult>('/territory/run-full', config);
-  return response.data;
-}
-
-export async function getTerritoryAssignments(
-  workspacePath: string
-): Promise<{ assignments: TerritoryAssignment[]; count: number }> {
-  const response = await axiosInstance.get('/territory/assignments', {
-    params: { workspace_path: workspacePath },
-  });
-  return response.data;
-}
-
-export async function getTerritoryKpis(
-  workspacePath: string
-): Promise<{ kpis: TerritoryKpi[]; territory_count: number }> {
-  const response = await axiosInstance.get('/territory/kpis', {
-    params: { workspace_path: workspacePath },
-  });
   return response.data;
 }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
@@ -47,7 +46,8 @@ const ProjectDetailPage: React.FC = () => {
     try {
       setRunningPhase(phaseName);
       setError(null);
-      await runPhase(projectId, phaseName);
+      // API advances to next phase - phaseName is for UI display only
+      await runPhase(projectId);
       // Reload project to get updated state
       await loadProject();
     } catch (err) {
@@ -78,11 +78,10 @@ const ProjectDetailPage: React.FC = () => {
   const getPhaseStatus = (phaseName: string): 'pending' | 'in_progress' | 'completed' | 'failed' => {
     if (!project) return 'pending';
 
-    const phaseIndex = phases.indexOf(phaseName);
-    const currentIndex = phases.indexOf(project.current_phase);
-
-    if (phaseIndex < currentIndex) return 'completed';
-    if (phaseIndex === currentIndex) {
+    const completedPhases = project.completed_phases || [];
+    
+    if (completedPhases.includes(phaseName)) return 'completed';
+    if (project.current_phase === phaseName) {
       if (project.status === 'running') return 'in_progress';
       if (project.status === 'failed') return 'failed';
       return 'pending';
@@ -94,11 +93,8 @@ const ProjectDetailPage: React.FC = () => {
     if (!project || runningPhase) return false;
     if (project.status === 'running') return false;
 
-    const phaseIndex = phases.indexOf(phaseName);
-    const currentIndex = phases.indexOf(project.current_phase);
-
-    // Can run current phase or any completed phase (re-run)
-    return phaseIndex <= currentIndex;
+    // Can only run the current phase
+    return project.current_phase === phaseName;
   };
 
   // Determine RSG stage completion based on completed_phases
@@ -151,7 +147,7 @@ const ProjectDetailPage: React.FC = () => {
     <div className="page project-detail-page">
       <div className="page-header">
         <div className="breadcrumb">
-          <button className="link-button" onClick={() => navigate('/projects')}>
+          <button className="link-button" onClick={() => navigate('/')}>
             Projects
           </button>
           <span className="separator">/</span>
@@ -225,7 +221,7 @@ const ProjectDetailPage: React.FC = () => {
                 <div className="phase-info">
                   <span className="phase-name">{phase}</span>
                   <span className={`phase-status status-${status}`}>
-                    {isRunning ? 'Running...' : status}
+                    {isRunning ? 'Running...' : status.replace('_', ' ')}
                   </span>
                 </div>
                 <div className="phase-actions">
