@@ -253,6 +253,10 @@ class ProjectState(BaseModel):
     client: str = "kearney-default"
     project_type: str = "generic"
 
+    # INTAKE: Project requirements/description from user
+    # This is critical for agents to understand what to build
+    intake: str | None = None
+
     # Workspace path (absolute path to workspace root)
     workspace_path: str | None = None
 
@@ -324,6 +328,8 @@ class TaskDefinition(BaseModel):
     tool_ids: list[str] = Field(default_factory=list)
     context: dict[str, Any] = Field(default_factory=dict)
     budget: BudgetConfig | None = None
+    # INTAKE: Project requirements text passed to agents
+    intake: str | None = None
 
 
 class AgentPlanStep(BaseModel):

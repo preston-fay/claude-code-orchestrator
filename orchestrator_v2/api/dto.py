@@ -18,6 +18,8 @@ class ProjectDTO(BaseModel):
     project_type: str = "generic"
     workspace_path: str | None = None
     template_id: str | None = None
+    # INTAKE: Project requirements/description
+    intake: str | None = None
     current_phase: str
     completed_phases: list[str] = Field(default_factory=list)
     created_at: datetime

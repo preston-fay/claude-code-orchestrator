@@ -14,6 +14,7 @@ const ProjectListPage: React.FC = () => {
     project_name: '',
     client: 'kearney-default',
     template_id: undefined,
+    description: '',  // INTAKE: Project requirements
   });
   const [creating, setCreating] = useState(false);
 
@@ -55,7 +56,7 @@ const ProjectListPage: React.FC = () => {
       const created = await createProject(newProject);
       setProjects([...projects, created]);
       setShowCreateModal(false);
-      setNewProject({ project_name: '', client: 'kearney-default', template_id: undefined });
+      setNewProject({ project_name: '', client: 'kearney-default', template_id: undefined, description: '' });
       navigate(`/projects/${created.project_id}`);
     } catch (err) {
       setError('Failed to create project');
@@ -196,6 +197,28 @@ const ProjectListPage: React.FC = () => {
                   placeholder="My New Project"
                   autoFocus
                 />
+              </div>
+
+              {/* INTAKE: Project Requirements/Description - CRITICAL for agents */}
+              <div className="form-group">
+                <label htmlFor="projectDescription">
+                  Project Requirements
+                  <span className="label-hint"> - What should this project accomplish?</span>
+                </label>
+                <textarea
+                  id="projectDescription"
+                  value={newProject.description || ''}
+                  onChange={(e) =>
+                    setNewProject({ ...newProject, description: e.target.value })
+                  }
+                  placeholder="Describe what you want to build. Be specific about:&#10;• Goals and objectives&#10;• Key features and functionality&#10;• Data sources and requirements&#10;• Success criteria&#10;&#10;Example: Build a customer demand forecasting model that predicts weekly product demand using historical sales data. The model should achieve at least 85% accuracy and provide actionable insights for inventory planning."
+                  rows={6}
+                  className="description-textarea"
+                />
+                <p className="form-hint">
+                  This description helps the Planning agent understand what to build.
+                  The more detail you provide, the better the results.
+                </p>
               </div>
 
               <div className="form-group">
