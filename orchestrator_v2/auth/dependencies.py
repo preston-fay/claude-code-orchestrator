@@ -33,6 +33,7 @@ async def get_current_user(
     x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
     x_user_email: Optional[str] = Header(None, alias="X-User-Email"),
     x_user_name: Optional[str] = Header(None, alias="X-User-Name"),
+    x_llm_api_key: Optional[str] = Header(None, alias="X-LLM-Api-Key"),
     user_repo: FileSystemUserRepository = Depends(get_user_repository),
 ) -> UserProfile:
     """
@@ -48,6 +49,7 @@ async def get_current_user(
        X-User-Id: <user_id>
        X-User-Email: <email>
        X-User-Name: <name> (optional)
+       X-LLM-Api-Key: <api_key> (optional, takes precedence over stored key)
 
     Returns:
         UserProfile for the authenticated user.
@@ -111,9 +113,19 @@ async def get_current_user(
         )
         await user_repo.save(user)
 
-    # Update last login
+    # CRITICAL FIX: If API key is provided in header, use it
+    # This works around Railway's ephemeral filesystem issue where
+    # the stored user profile loses its API key on every deploy
+    if x_llm_api_key:
+        user.llm_api_key = x_llm_api_key
+        # Don't save to file - just use for this request
+        # This avoids constant file writes and works with ephemeral storage
+
+    # Update last login (but don't overwrite API key from header)
     user.last_login = datetime.utcnow()
-    await user_repo.save(user)
+    # Only save if we have a real API key stored (not from header)
+    if user.llm_api_key and not x_llm_api_key:
+        await user_repo.save(user)
 
     return user
 
@@ -228,6 +240,7 @@ async def optional_user(
     authorization: Optional[str] = Header(None, alias="Authorization"),
     x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
     x_user_email: Optional[str] = Header(None, alias="X-User-Email"),
+    x_llm_api_key: Optional[str] = Header(None, alias="X-LLM-Api-Key"),
     user_repo: FileSystemUserRepository = Depends(get_user_repository),
 ) -> Optional[UserProfile]:
     """
@@ -243,6 +256,7 @@ async def optional_user(
             authorization=authorization,
             x_user_id=x_user_id,
             x_user_email=x_user_email,
+            x_llm_api_key=x_llm_api_key,
             user_repo=user_repo,
         )
     except HTTPException:
