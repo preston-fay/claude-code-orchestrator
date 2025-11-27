@@ -618,12 +618,12 @@ class WorkflowEngine:
                     output = agent.act(plan, self.state, context)
                 context.previous_outputs.append(output)
 
-            # Summarize
+            # Summarize - FIXED: Pass correct arguments (plan, output, project_state)
             agent_state.status = AgentStatus.SUMMARIZING
             if asyncio.iscoroutinefunction(agent.summarize):
-                summary = await agent.summarize(self.state.run_id)
+                summary = await agent.summarize(plan, output, self.state)
             else:
-                summary = agent.summarize(self.state.run_id)
+                summary = agent.summarize(plan, output, self.state)
 
             # Complete
             if asyncio.iscoroutinefunction(agent.complete):
