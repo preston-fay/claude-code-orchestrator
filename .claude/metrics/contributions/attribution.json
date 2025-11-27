@@ -1,8 +1,41 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T19:31:47.419998",
+  "collection_timestamp": "2025-11-27T20:09:22.288507",
   "commits": [
+    {
+      "sha": "198f230efc760910aeb5f17116f144b6e0cf2b13",
+      "author": "preston-fay",
+      "date": "2025-11-27 15:08:34 -0500",
+      "message": "fix: Use correct field name for API key (llm_api_key not anthropic_api_key)",
+      "contributor_type": "human",
+      "lines_added": 8,
+      "lines_deleted": 4,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "cd0574a899f60f352eae20bea045e3045dafd909",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 19:32:54 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 141,
+      "lines_deleted": 119,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "64125431ef72a3d18483026ef2ec5671db4e0b13",
+      "author": "preston-fay",
+      "date": "2025-11-27 14:31:40 -0500",
+      "message": "fix: Pass user to engine.run_phase() in RSG service",
+      "contributor_type": "human",
+      "lines_added": 22,
+      "lines_deleted": 6,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
     {
       "sha": "8b09bcdb5361b44d9f03bf12f1cf26520c0f50e2",
       "author": "preston-fay",
@@ -2178,19 +2211,19 @@
     }
   ],
   "summary": {
-    "total_commits": 182,
-    "human_commits": 139,
+    "total_commits": 185,
+    "human_commits": 142,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 76.37,
-    "ai_percentage": 0.55,
-    "collaborative_percentage": 23.08,
-    "human_lines_added": 60824,
+    "human_percentage": 76.76,
+    "ai_percentage": 0.54,
+    "collaborative_percentage": 22.7,
+    "human_lines_added": 60995,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 191547,
-    "human_lines_percentage": 31.75,
-    "ai_lines_percentage": 22.39,
-    "collaborative_lines_percentage": 45.86
+    "total_lines_added": 191718,
+    "human_lines_percentage": 31.81,
+    "ai_lines_percentage": 22.37,
+    "collaborative_lines_percentage": 45.82
   }
 }
