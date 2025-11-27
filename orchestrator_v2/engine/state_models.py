@@ -275,6 +275,9 @@ class ProjectState(BaseModel):
     checkpoints: list[str] = Field(default_factory=list)  # Checkpoint IDs
     current_checkpoint_id: str | None = None
 
+    # Artifacts from all phases
+    artifacts: dict[str, ArtifactInfo] = Field(default_factory=dict)
+
     # Metadata
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -331,6 +334,7 @@ class AgentPlanStep(BaseModel):
     skill_id: str | None = None
     parameters: dict[str, Any] = Field(default_factory=dict)
     expected_output: str = ""
+    estimated_tokens: int = 500
 
 
 class AgentPlan(BaseModel):
@@ -341,6 +345,11 @@ class AgentPlan(BaseModel):
     steps: list[AgentPlanStep] = Field(default_factory=list)
     estimated_tokens: int = 0
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    # LLM-generated plan metadata
+    analysis: str = ""
+    expected_outputs: list[str] = Field(default_factory=list)
+    dependencies: list[str] = Field(default_factory=list)
+    validation_criteria: list[str] = Field(default_factory=list)
 
 
 class AgentOutput(BaseModel):
@@ -351,6 +360,9 @@ class AgentOutput(BaseModel):
     artifacts: list[ArtifactInfo] = Field(default_factory=list)
     token_usage: TokenUsage = Field(default_factory=TokenUsage)
     error_message: str | None = None
+    # LLM-generated output metadata
+    execution_summary: str = ""
+    recommendations: list[str] = Field(default_factory=list)
 
 
 class AgentSummary(BaseModel):
