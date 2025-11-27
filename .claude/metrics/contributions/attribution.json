@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
-  "period": "2025-08-28/2025-11-26",
-  "collection_timestamp": "2025-11-26T16:43:29.484999",
+  "period": "2025-08-29/2025-11-27",
+  "collection_timestamp": "2025-11-27T09:20:27.058017",
   "commits": [
+    {
+      "sha": "6b1d9d2513c423cc1ce72881584128e8ca02c962",
+      "author": "github-actions[bot]",
+      "date": "2025-11-26 16:44:46 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 258,
+      "lines_deleted": 189,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "471f2e00447e390a614f93d538e6646a52f662c7",
+      "author": "Preston Fay",
+      "date": "2025-11-26 11:13:11 -0500",
+      "message": "fix(api): use correct PhaseState attribute in metrics endpoint",
+      "contributor_type": "collaborative",
+      "lines_added": 2,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
     {
       "sha": "297fbb11cb5f527d9aa556690468d2162b2e0067",
       "author": "Preston Fay",
@@ -1536,19 +1562,19 @@
     }
   ],
   "summary": {
-    "total_commits": 124,
-    "human_commits": 82,
+    "total_commits": 126,
+    "human_commits": 83,
     "ai_commits": 1,
-    "collaborative_commits": 41,
-    "human_percentage": 66.13,
-    "ai_percentage": 0.81,
-    "collaborative_percentage": 33.06,
-    "human_lines_added": 51035,
+    "collaborative_commits": 42,
+    "human_percentage": 65.87,
+    "ai_percentage": 0.79,
+    "collaborative_percentage": 33.33,
+    "human_lines_added": 51293,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 87835,
-    "total_lines_added": 181756,
-    "human_lines_percentage": 28.08,
-    "ai_lines_percentage": 23.6,
-    "collaborative_lines_percentage": 48.33
+    "collaborative_lines_added": 87837,
+    "total_lines_added": 182016,
+    "human_lines_percentage": 28.18,
+    "ai_lines_percentage": 23.56,
+    "collaborative_lines_percentage": 48.26
   }
 }
