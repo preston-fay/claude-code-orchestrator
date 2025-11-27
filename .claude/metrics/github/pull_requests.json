@@ -1,7 +1,7 @@
 {
   "metric": "pr_cycle_time",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T21:01:56.681117",
+  "collection_timestamp": "2025-11-27T21:05:13.538183",
   "pull_requests": [
     {
       "pr_number": 11,
