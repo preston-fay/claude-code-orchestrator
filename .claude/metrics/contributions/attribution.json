@@ -1,8 +1,41 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T19:02:41.825850",
+  "collection_timestamp": "2025-11-27T19:16:56.996213",
   "commits": [
+    {
+      "sha": "3f9d53ac989301328617f656c0b0db24011cb8bb",
+      "author": "preston-fay",
+      "date": "2025-11-27 14:16:07 -0500",
+      "message": "fix: Use npm install instead of npm ci (no lockfile in repo)",
+      "contributor_type": "human",
+      "lines_added": 2,
+      "lines_deleted": 2,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "b5bf1a105a14d03cbbd7b26197cd2f32c8b75e98",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 19:03:59 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 139,
+      "lines_deleted": 117,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "541cc907289e436ee3157825e992594739550c2e",
+      "author": "preston-fay",
+      "date": "2025-11-27 14:03:50 -0500",
+      "message": "fix: Use serve for production static file serving",
+      "contributor_type": "human",
+      "lines_added": 10,
+      "lines_deleted": 6,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
     {
       "sha": "38dd5ffcd6debbd1133d2fb172c6ab78b27d5376",
       "author": "preston-fay",
@@ -2123,19 +2156,19 @@
     }
   ],
   "summary": {
-    "total_commits": 177,
-    "human_commits": 134,
+    "total_commits": 180,
+    "human_commits": 137,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 75.71,
+    "human_percentage": 76.11,
     "ai_percentage": 0.56,
-    "collaborative_percentage": 23.73,
-    "human_lines_added": 60529,
+    "collaborative_percentage": 23.33,
+    "human_lines_added": 60680,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 191252,
-    "human_lines_percentage": 31.65,
-    "ai_lines_percentage": 22.42,
-    "collaborative_lines_percentage": 45.93
+    "total_lines_added": 191403,
+    "human_lines_percentage": 31.7,
+    "ai_lines_percentage": 22.41,
+    "collaborative_lines_percentage": 45.89
   }
 }
