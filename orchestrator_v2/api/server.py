@@ -514,8 +514,14 @@ async def get_project_status(project_id: str):
 
 
 @app.post("/projects/{project_id}/advance", response_model=PhaseDTO)
-async def advance_project(project_id: str):
-    """Advance project to next phase."""
+async def advance_project(
+    project_id: str,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Advance project to next phase.
+    
+    Requires authenticated user with API key configured to make real LLM calls.
+    """
     try:
         state = await project_repo.load(project_id)
     except KeyError:
@@ -528,7 +534,8 @@ async def advance_project(project_id: str):
     engine._state = state
 
     try:
-        phase_state = await engine.run_phase()
+        # Pass user to run_phase so agents can use their API key for real LLM calls
+        phase_state = await engine.run_phase(user=user)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -688,7 +695,10 @@ async def delete_project(project_id: str):
 # -----------------------------------------------------------------------------
 
 @app.post("/rsg/{project_id}/ready/start", response_model=ReadyStatusDTO)
-async def start_ready(project_id: str):
+async def start_ready(
+    project_id: str,
+    user: UserProfile = Depends(get_current_user),
+):
     """Start the Ready stage (PLANNING + ARCHITECTURE)."""
     try:
         await project_repo.load(project_id)
@@ -696,7 +706,7 @@ async def start_ready(project_id: str):
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
     try:
-        status = await rsg_service.start_ready(project_id)
+        status = await rsg_service.start_ready(project_id, user=user)
         return ready_status_to_dto(status)
     except RsgServiceError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -715,7 +725,10 @@ async def get_ready_status(project_id: str):
 
 
 @app.post("/rsg/{project_id}/set/start", response_model=SetStatusDTO)
-async def start_set(project_id: str):
+async def start_set(
+    project_id: str,
+    user: UserProfile = Depends(get_current_user),
+):
     """Start the Set stage (DATA + early DEVELOPMENT)."""
     try:
         await project_repo.load(project_id)
@@ -723,7 +736,7 @@ async def start_set(project_id: str):
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
     try:
-        status = await rsg_service.start_set(project_id)
+        status = await rsg_service.start_set(project_id, user=user)
         return set_status_to_dto(status)
     except RsgServiceError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -742,7 +755,10 @@ async def get_set_status(project_id: str):
 
 
 @app.post("/rsg/{project_id}/go/start", response_model=GoStatusDTO)
-async def start_go(project_id: str):
+async def start_go(
+    project_id: str,
+    user: UserProfile = Depends(get_current_user),
+):
     """Start the Go stage (DEVELOPMENT + QA + DOCUMENTATION)."""
     try:
         await project_repo.load(project_id)
@@ -750,7 +766,7 @@ async def start_go(project_id: str):
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
     try:
-        status = await rsg_service.start_go(project_id)
+        status = await rsg_service.start_go(project_id, user=user)
         return go_status_to_dto(status)
     except RsgServiceError as e:
         raise HTTPException(status_code=400, detail=str(e))
