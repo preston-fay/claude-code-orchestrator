@@ -16,10 +16,12 @@ from typing import Any, Mapping
 from uuid import uuid4
 
 from orchestrator_v2.agents.base_agent import BaseAgent
+from orchestrator_v2.agents.factory import create_agent, get_agent_pool
 from orchestrator_v2.engine.model_selection import (
     select_model_for_agent,
     estimate_tokens_for_agent,
 )
+from orchestrator_v2.llm.retry import retry_async, RetryConfig, LLMRetryError
 from orchestrator_v2.phases.execution_service import PhaseExecutionService
 from orchestrator_v2.telemetry.budget_enforcer import (
     BudgetEnforcer,
@@ -63,6 +65,16 @@ from orchestrator_v2.telemetry.token_tracking import TokenTracker
 from orchestrator_v2.workspace.models import WorkspaceConfig
 
 
+# LLM retry configuration for agent execution
+AGENT_RETRY_CONFIG = RetryConfig(
+    max_attempts=3,
+    initial_delay=2.0,
+    max_delay=30.0,
+    exponential_base=2.0,
+    jitter=True,
+)
+
+
 class WorkflowEngine:
     """Central orchestration engine for Orchestrator v2.
 
@@ -86,6 +98,7 @@ class WorkflowEngine:
         agents: Mapping[str, BaseAgent] | None = None,
         workspace: WorkspaceConfig | None = None,
         user_repository: FileSystemUserRepository | None = None,
+        use_real_agents: bool = True,
     ):
         """Initialize the WorkflowEngine.
 
@@ -97,18 +110,20 @@ class WorkflowEngine:
             agents: Mapping of agent_id to agent instances.
             workspace: Workspace configuration for file isolation.
             user_repository: User repository for BYOK and entitlements.
+            use_real_agents: Whether to create real agent instances (default True).
         """
         self._phase_manager = phase_manager or PhaseManager()
         self._checkpoint_manager = checkpoint_manager or CheckpointManager()
         self._governance_engine = governance_engine or GovernanceEngine()
         self._token_tracker = token_tracker or TokenTracker()
-        self._agents = agents or {}
+        self._agents = dict(agents) if agents else {}
         self._phase_execution_service = PhaseExecutionService()
         self._state: ProjectState | None = None
         self._workspace: WorkspaceConfig | None = workspace
         self._repo_adapter: RepoAdapter | None = None
         self._user_repository = user_repository or FileSystemUserRepository()
         self._budget_enforcer = BudgetEnforcer(self._user_repository, self._token_tracker)
+        self._use_real_agents = use_real_agents
 
         # Initialize repo adapter if workspace provided
         if workspace:
@@ -183,6 +198,29 @@ class WorkflowEngine:
     def phase_manager(self) -> PhaseManager:
         """Get the phase manager."""
         return self._phase_manager
+
+    def _get_or_create_agent(self, agent_id: str) -> BaseAgent | None:
+        """Get an agent instance, creating it if needed.
+        
+        Args:
+            agent_id: Agent identifier.
+            
+        Returns:
+            Agent instance or None if not available.
+        """
+        # First check pre-registered agents
+        if agent_id in self._agents:
+            return self._agents[agent_id]
+        
+        # Try to create a real agent if enabled
+        if self._use_real_agents:
+            agent = create_agent(agent_id)
+            if agent is not None:
+                self._agents[agent_id] = agent
+                logger.info(f"Created real agent instance for {agent_id}")
+                return agent
+        
+        return None
 
     async def start_project(
         self,
@@ -422,6 +460,53 @@ class WorkflowEngine:
 
         return phase_state
 
+    def _build_agent_context(
+        self,
+        task: TaskDefinition,
+        user: UserProfile | None = None,
+        model_config: Any | None = None,
+    ) -> AgentContext:
+        """Build an AgentContext with all necessary information.
+        
+        Args:
+            task: Task definition for the agent.
+            user: User profile for BYOK and entitlements.
+            model_config: Selected model configuration.
+            
+        Returns:
+            Configured AgentContext.
+        """
+        context = AgentContext(
+            project_state=self.state,
+            task=task,
+        )
+        
+        # Add workspace paths if available
+        if self._workspace:
+            context.workspace_root = str(self._workspace.workspace_root)
+            context.repo_path = str(self._workspace.repo_path)
+            context.artifacts_path = str(self._workspace.artifacts_path)
+            context.logs_path = str(self._workspace.logs_path)
+            context.tmp_path = str(self._workspace.tmp_path)
+
+        # Set LLM provider info from user and model config
+        if user:
+            context.user_id = user.user_id
+            context.llm_api_key = user.anthropic_api_key
+            context.llm_provider = user.default_provider or "anthropic"
+            context.model_preferences = user.entitlements.model_access if user.entitlements else []
+
+        if model_config:
+            context.provider = model_config.provider
+            context.model = model_config.model
+        elif user and user.default_model:
+            context.model = user.default_model
+        else:
+            # Default model
+            context.model = "claude-sonnet-4-5-20250929"
+        
+        return context
+
     async def _execute_agent(
         self,
         agent_id: str,
@@ -454,8 +539,8 @@ class WorkflowEngine:
             started_at=datetime.utcnow(),
         )
 
-        # Get agent instance (or use stub)
-        agent = self._agents.get(agent_id)
+        # Get agent instance (creates real agent if available)
+        agent = self._get_or_create_agent(agent_id)
 
         # Emit agent started event
         self._emit_event(
@@ -489,58 +574,67 @@ class WorkflowEngine:
             return agent_state
 
         try:
-            # Initialize
-            agent_state.status = AgentStatus.INITIALIZING
-            agent.initialize(self.state)
-
-            # Plan
-            agent_state.status = AgentStatus.PLANNING
+            # Create task definition
             task = TaskDefinition(
                 task_id=f"{phase.value}_{agent_id}_{uuid4().hex[:8]}",
                 description=f"Execute {phase.value} phase tasks",
                 requirements=self.state.metadata.get("requirements", []),
             )
-            plan = agent.plan(task)
+            
+            # Build agent context with LLM credentials
+            context = self._build_agent_context(task, user, model_config)
 
-            # Act
+            # Initialize
+            agent_state.status = AgentStatus.INITIALIZING
+            logger.debug(f"Initializing agent {agent_id}")
+            
+            # Check if agent methods are async
+            if asyncio.iscoroutinefunction(agent.initialize):
+                await agent.initialize(self.state, context)
+            else:
+                agent.initialize(self.state, context)
+
+            # Plan - PASS CONTEXT for real LLM calls
+            agent_state.status = AgentStatus.PLANNING
+            logger.debug(f"Agent {agent_id} planning with context (has API key: {bool(context.llm_api_key)})")
+            
+            if asyncio.iscoroutinefunction(agent.plan):
+                plan = await agent.plan(task, phase, self.state, context)
+            else:
+                plan = agent.plan(task, phase, self.state, context)
+
+            # Act - PASS CONTEXT for real LLM calls
             agent_state.status = AgentStatus.ACTING
-            context = AgentContext(
-                project_state=self.state,
-                task=task,
-            )
-            # Add workspace paths if available
-            if self._workspace:
-                context.workspace_root = str(self._workspace.workspace_root)
-                context.repo_path = str(self._workspace.repo_path)
-                context.artifacts_path = str(self._workspace.artifacts_path)
-                context.logs_path = str(self._workspace.logs_path)
-                context.tmp_path = str(self._workspace.tmp_path)
-
-            # Set LLM provider info from user and model config
-            if user:
-                context.user_id = user.user_id
-                context.llm_api_key = user.anthropic_api_key
-                context.llm_provider = user.default_provider
-                context.model_preferences = user.entitlements.model_access
-
-            if model_config:
-                context.provider = model_config.provider
-                context.model = model_config.model
-
+            logger.debug(f"Agent {agent_id} executing {len(plan.steps)} steps")
+            
             for step in plan.steps:
-                output = agent.act(step, context)
+                if asyncio.iscoroutinefunction(agent.act):
+                    output = await agent.act(plan, self.state, context)
+                else:
+                    output = agent.act(plan, self.state, context)
                 context.previous_outputs.append(output)
 
             # Summarize
             agent_state.status = AgentStatus.SUMMARIZING
-            summary = agent.summarize(self.state.run_id)
+            if asyncio.iscoroutinefunction(agent.summarize):
+                summary = await agent.summarize(self.state.run_id)
+            else:
+                summary = agent.summarize(self.state.run_id)
 
             # Complete
-            agent.complete(self.state)
+            if asyncio.iscoroutinefunction(agent.complete):
+                await agent.complete(self.state)
+            else:
+                agent.complete(self.state)
+                
             agent_state.status = AgentStatus.COMPLETE
             agent_state.completed_at = datetime.utcnow()
             agent_state.summary = summary.summary
-            agent_state.token_usage = summary.total_token_usage
+            agent_state.token_usage = summary.total_token_usage or TokenUsage(
+                input_tokens=0,
+                output_tokens=0,
+                total_tokens=0,
+            )
 
             # Emit agent completed event
             self._emit_event(
@@ -548,7 +642,23 @@ class WorkflowEngine:
                 f"Agent {agent_id} completed successfully",
                 phase=phase.value,
                 agent_id=agent_id,
-                tokens_used=summary.total_token_usage.total_tokens if summary.total_token_usage else 0,
+                tokens_used=agent_state.token_usage.total_tokens if agent_state.token_usage else 0,
+            )
+
+        except LLMRetryError as e:
+            # LLM call failed after all retries
+            agent_state.status = AgentStatus.FAILED
+            agent_state.error_message = f"LLM call failed after {e.attempts} attempts: {e.last_error}"
+            agent_state.completed_at = datetime.utcnow()
+
+            # Emit agent failed event
+            self._emit_event(
+                EventType.AGENT_FAILED,
+                f"Agent {agent_id} failed: LLM retry exhausted",
+                phase=phase.value,
+                agent_id=agent_id,
+                error=str(e),
+                attempts=e.attempts,
             )
 
         except Exception as e:
@@ -672,8 +782,22 @@ class WorkflowEngine:
                 logger.error(f"Budget exceeded for {agent_id}: {e}")
                 raise BudgetExceededError(str(e))
 
-        # Execute the agent with user and model config
-        agent_state = await self._execute_agent(agent_id, phase, user, model_config)
+        # Execute the agent with user and model config (with retry for LLM errors)
+        try:
+            agent_state = await retry_async(
+                self._execute_agent,
+                agent_id,
+                phase,
+                user,
+                model_config,
+                config=AGENT_RETRY_CONFIG,
+            )
+        except LLMRetryError:
+            # Re-raise as-is for specific handling
+            raise
+        except Exception as e:
+            # Other errors don't get retried
+            raise
 
         # Update state with model info
         agent_state.model_used = model_config.model
