@@ -578,11 +578,14 @@ class WorkflowEngine:
             return agent_state
 
         try:
-            # Create task definition
+            # Create task definition with INTAKE from project state
+            # This is CRITICAL - agents need to know what the project is about
             task = TaskDefinition(
                 task_id=f"{phase.value}_{agent_id}_{uuid4().hex[:8]}",
                 description=f"Execute {phase.value} phase tasks",
                 requirements=self.state.metadata.get("requirements", []),
+                # CRITICAL: Pass intake/project requirements to agents
+                intake=self.state.intake,
             )
             
             # Build agent context with LLM credentials
@@ -600,7 +603,7 @@ class WorkflowEngine:
 
             # Plan - PASS CONTEXT for real LLM calls
             agent_state.status = AgentStatus.PLANNING
-            logger.info(f"Agent {agent_id} planning with context (has API key: {bool(context.llm_api_key)})")
+            logger.info(f"Agent {agent_id} planning with context (has API key: {bool(context.llm_api_key)}, has intake: {bool(task.intake)})")
             
             if asyncio.iscoroutinefunction(agent.plan):
                 plan = await agent.plan(task, phase, self.state, context)

@@ -72,6 +72,7 @@ class CreateProjectRequest(BaseModel):
     client: str = "kearney-default"
     project_type: str = "generic"
     template_id: str | None = None
+    # INTAKE: Project description/requirements - CRITICAL for agents to know what to build
     description: str | None = None
     intake_path: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -370,6 +371,7 @@ async def list_projects():
                 project_type=state.project_type,
                 workspace_path=state.workspace_path,
                 template_id=state.template_id,
+                intake=state.intake,
                 current_phase=state.current_phase.value,
                 completed_phases=[p.value for p in state.completed_phases],
                 created_at=state.created_at,
@@ -418,6 +420,9 @@ async def create_project(request: CreateProjectRequest):
     )
     state.project_type = project_type
     state.template_id = template_id
+    
+    # CRITICAL: Store the description as intake for agents to use
+    state.intake = request.description
 
     try:
         workspace_config = workspace_manager.create_data_workspace(
@@ -440,6 +445,7 @@ async def create_project(request: CreateProjectRequest):
         project_type=state.project_type,
         workspace_path=state.workspace_path,
         template_id=state.template_id,
+        intake=state.intake,
         current_phase=state.current_phase.value,
         completed_phases=[p.value for p in state.completed_phases],
         created_at=state.created_at,
@@ -462,6 +468,7 @@ async def get_project(project_id: str):
         project_type=state.project_type,
         workspace_path=state.workspace_path,
         template_id=state.template_id,
+        intake=state.intake,
         current_phase=state.current_phase.value,
         completed_phases=[p.value for p in state.completed_phases],
         created_at=state.created_at,

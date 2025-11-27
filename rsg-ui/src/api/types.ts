@@ -18,6 +18,8 @@ export interface ProjectSummary {
   project_type: string;
   workspace_path?: string | null;
   template_id?: string | null;
+  // INTAKE: Project requirements/description
+  intake?: string | null;
   current_phase: string;
   completed_phases: string[];
   created_at: string;
@@ -36,6 +38,7 @@ export interface CreateProjectPayload {
   client?: string;
   project_type?: string;
   template_id?: string;
+  // INTAKE: Project requirements - CRITICAL for agents to know what to build
   description?: string;
   intake_path?: string;
   metadata?: Record<string, unknown>;
