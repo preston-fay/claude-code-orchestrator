@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProject, runPhase, getProjectCheckpoints } from '../api/client';
 import { Project, Checkpoint } from '../api/types';
-import RsgStatus from '../components/RsgStatus';
+import RscStatus from '../components/RscStatus';
 import RunActivityPanel from '../components/RunActivityPanel';
 
 const ProjectDetailPage: React.FC = () => {
@@ -72,7 +72,7 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
-  // Derive phases from project or use default RSG phases
+  // Derive phases from project or use default RSC phases
   const phases = project?.phases ?? ['planning', 'architecture', 'data', 'development', 'qa', 'documentation'];
 
   const getPhaseStatus = (phaseName: string): 'pending' | 'in_progress' | 'completed' | 'failed' => {
@@ -97,7 +97,7 @@ const ProjectDetailPage: React.FC = () => {
     return project.current_phase === phaseName;
   };
 
-  // Determine RSG stage completion based on completed_phases
+  // Determine RSC stage completion based on completed_phases
   const getReadyCompleted = (): boolean => {
     if (!project) return false;
     const readyPhases = ['planning', 'architecture'];
@@ -110,16 +110,16 @@ const ProjectDetailPage: React.FC = () => {
     return setPhases.every(p => project.completed_phases?.includes(p));
   };
 
-  const getGoCompleted = (): boolean => {
+  const getCodeCompleted = (): boolean => {
     if (!project) return false;
-    const goPhases = ['qa', 'documentation'];
-    return goPhases.every(p => project.completed_phases?.includes(p));
+    const codePhases = ['qa', 'documentation'];
+    return codePhases.every(p => project.completed_phases?.includes(p));
   };
 
   const getCurrentStage = (): string => {
     if (!project) return 'ready';
-    if (getGoCompleted()) return 'complete';
-    if (getSetCompleted()) return 'go';
+    if (getCodeCompleted()) return 'complete';
+    if (getSetCompleted()) return 'code';
     if (getReadyCompleted()) return 'set';
     return 'ready';
   };
@@ -195,14 +195,14 @@ const ProjectDetailPage: React.FC = () => {
         )}
       </div>
 
-      {/* RSG Macro Status */}
+      {/* RSC Macro Status */}
       <section className="section">
-        <h3>Ready / Set / Go Status</h3>
-        <RsgStatus
+        <h3>Ready / Set / Code Status</h3>
+        <RscStatus
           currentStage={getCurrentStage()}
           readyCompleted={getReadyCompleted()}
           setCompleted={getSetCompleted()}
-          goCompleted={getGoCompleted()}
+          codeCompleted={getCodeCompleted()}
         />
       </section>
 
