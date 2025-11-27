@@ -1,8 +1,41 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T15:10:16.792914",
+  "collection_timestamp": "2025-11-27T15:19:19.780445",
   "commits": [
+    {
+      "sha": "5244341acc0a16326e8f6368580fa57f9d744f91",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:18:30 -0500",
+      "message": "chore: Add deprecation warning to V1, create migration guide, setup archive",
+      "contributor_type": "human",
+      "lines_added": 118,
+      "lines_deleted": 1,
+      "files_changed": 3,
+      "ai_indicators": []
+    },
+    {
+      "sha": "4ec2f09edb663e506fb5e0c77dcafc728dd5b77f",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:18:00 -0500",
+      "message": "feat: Add Railway deployment configuration",
+      "contributor_type": "human",
+      "lines_added": 48,
+      "lines_deleted": 0,
+      "files_changed": 4,
+      "ai_indicators": []
+    },
+    {
+      "sha": "6328aab5a07ff8a9b8c6d8c8bbdd693bbbee1acc",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 15:11:16 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 161,
+      "lines_deleted": 117,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "052b5b7253afaa28c34a0c15425b1d57a29f0aea",
       "author": "preston-fay",
@@ -1815,19 +1848,19 @@
     }
   ],
   "summary": {
-    "total_commits": 149,
-    "human_commits": 106,
+    "total_commits": 152,
+    "human_commits": 109,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 71.14,
-    "ai_percentage": 0.67,
-    "collaborative_percentage": 28.19,
-    "human_lines_added": 58383,
+    "human_percentage": 71.71,
+    "ai_percentage": 0.66,
+    "collaborative_percentage": 27.63,
+    "human_lines_added": 58710,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 189106,
-    "human_lines_percentage": 30.87,
-    "ai_lines_percentage": 22.68,
-    "collaborative_lines_percentage": 46.45
+    "total_lines_added": 189433,
+    "human_lines_percentage": 30.99,
+    "ai_lines_percentage": 22.64,
+    "collaborative_lines_percentage": 46.37
   }
 }
