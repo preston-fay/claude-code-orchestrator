@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T21:49:25.111627",
+  "collection_timestamp": "2025-11-27T22:08:51.131341",
   "commits": [
+    {
+      "sha": "871d7739e757d0466c686e347cc120b0b075c311",
+      "author": "preston-fay",
+      "date": "2025-11-27 17:08:03 -0500",
+      "message": "refactor: Apply KDS tokens and rename RSG \u2192 RSC (Ready-Set-Code) (#14)",
+      "contributor_type": "human",
+      "lines_added": 771,
+      "lines_deleted": 461,
+      "files_changed": 8,
+      "ai_indicators": []
+    },
+    {
+      "sha": "c2231e2a7d1081014a847300831b77fb2db361dd",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 21:50:27 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 191,
+      "lines_deleted": 155,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "62f0cb709e1ae40a0fedfecb79eb79a6e750ef85",
       "author": "preston-fay",
@@ -2387,19 +2409,19 @@
     }
   ],
   "summary": {
-    "total_commits": 201,
-    "human_commits": 158,
+    "total_commits": 203,
+    "human_commits": 160,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 78.61,
-    "ai_percentage": 0.5,
-    "collaborative_percentage": 20.9,
-    "human_lines_added": 62534,
+    "human_percentage": 78.82,
+    "ai_percentage": 0.49,
+    "collaborative_percentage": 20.69,
+    "human_lines_added": 63496,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 193257,
-    "human_lines_percentage": 32.36,
-    "ai_lines_percentage": 22.19,
-    "collaborative_lines_percentage": 45.45
+    "total_lines_added": 194219,
+    "human_lines_percentage": 32.69,
+    "ai_lines_percentage": 22.08,
+    "collaborative_lines_percentage": 45.23
   }
 }
