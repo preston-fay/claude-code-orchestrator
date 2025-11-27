@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T16:05:43.810049",
+  "collection_timestamp": "2025-11-27T16:33:04.595254",
   "commits": [
+    {
+      "sha": "c5778b518f457876d4a3a6568a32c477e23666c0",
+      "author": "preston-fay",
+      "date": "2025-11-27 11:32:12 -0500",
+      "message": "fix: Update CORS and frontend API URL for Railway deployment",
+      "contributor_type": "human",
+      "lines_added": 66,
+      "lines_deleted": 121,
+      "files_changed": 6,
+      "ai_indicators": []
+    },
+    {
+      "sha": "9e4f7b8557c87ed6ab0e1304103858868f3a4137",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 16:07:03 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 108,
+      "lines_deleted": 86,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "8578e912a6ccdc1e86d5f1e539df5387663fcba0",
       "author": "preston-fay",
@@ -2079,19 +2101,19 @@
     }
   ],
   "summary": {
-    "total_commits": 173,
-    "human_commits": 130,
+    "total_commits": 175,
+    "human_commits": 132,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 75.14,
-    "ai_percentage": 0.58,
-    "collaborative_percentage": 24.28,
-    "human_lines_added": 60175,
+    "human_percentage": 75.43,
+    "ai_percentage": 0.57,
+    "collaborative_percentage": 24.0,
+    "human_lines_added": 60349,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 190898,
-    "human_lines_percentage": 31.52,
-    "ai_lines_percentage": 22.47,
-    "collaborative_lines_percentage": 46.01
+    "total_lines_added": 191072,
+    "human_lines_percentage": 31.58,
+    "ai_lines_percentage": 22.44,
+    "collaborative_lines_percentage": 45.97
   }
 }
