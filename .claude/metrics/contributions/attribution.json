@@ -1,8 +1,63 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T15:23:57.705063",
+  "collection_timestamp": "2025-11-27T15:29:31.148903",
   "commits": [
+    {
+      "sha": "d0525b94a83f99e2c675c8ea212d2c94386f6fb4",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:28:41 -0500",
+      "message": "feat: Add startup diagnostic script for debugging import issues",
+      "contributor_type": "human",
+      "lines_added": 91,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "a0efab7f0174f53c4686e18595e0a06b4be8400a",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 15:25:19 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 163,
+      "lines_deleted": 119,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "024b1098bd2228f247ffc27f500c7151941f9159",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:25:21 -0500",
+      "message": "fix: Add scikit-learn dependency (required for territory POC skills)",
+      "contributor_type": "human",
+      "lines_added": 3,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "3fb2a26e7562ca2b975d6749cecc9f8b886cebdb",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:24:05 -0500",
+      "message": "fix: Use Dockerfile builder in Railway config, increase health timeout",
+      "contributor_type": "human",
+      "lines_added": 3,
+      "lines_deleted": 2,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "528745a6eb37385d5a22fe103f31c7ba380dc407",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:23:25 -0500",
+      "message": "fix: Install curl in Docker image for health checks",
+      "contributor_type": "human",
+      "lines_added": 5,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
     {
       "sha": "49ccf2871795fac9f68a7defd4999db6a83eaa54",
       "author": "preston-fay",
@@ -1892,19 +1947,19 @@
     }
   ],
   "summary": {
-    "total_commits": 156,
-    "human_commits": 113,
+    "total_commits": 161,
+    "human_commits": 118,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 72.44,
-    "ai_percentage": 0.64,
-    "collaborative_percentage": 26.92,
-    "human_lines_added": 59086,
+    "human_percentage": 73.29,
+    "ai_percentage": 0.62,
+    "collaborative_percentage": 26.09,
+    "human_lines_added": 59351,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 189809,
-    "human_lines_percentage": 31.13,
-    "ai_lines_percentage": 22.59,
-    "collaborative_lines_percentage": 46.28
+    "total_lines_added": 190074,
+    "human_lines_percentage": 31.23,
+    "ai_lines_percentage": 22.56,
+    "collaborative_lines_percentage": 46.21
   }
 }
