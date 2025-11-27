@@ -10,6 +10,14 @@ from orchestrator_v2.llm.provider_registry import (
     get_provider_registry,
     resolve_model_alias,
 )
+from orchestrator_v2.llm.providers.base import (
+    LlmResult,
+    LlmProvider,
+    LlmProviderError,
+    LlmAuthenticationError,
+    LlmRateLimitError,
+    LlmModelNotFoundError,
+)
 from orchestrator_v2.llm.retry import (
     LLMRetryError,
     RetryConfig,
@@ -25,6 +33,16 @@ __all__ = [
     "ProviderRegistry",
     "get_provider_registry",
     "resolve_model_alias",
+    
+    # LLM types
+    "LlmResult",
+    "LlmProvider",
+    
+    # Exceptions
+    "LlmProviderError",
+    "LlmAuthenticationError",
+    "LlmRateLimitError",
+    "LlmModelNotFoundError",
     
     # Retry utilities
     "LLMRetryError",
