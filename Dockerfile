@@ -26,4 +26,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:${PORT}/health || exit 1
 
 # Run startup diagnostic then start the V2 API server
-CMD python startup_check.py && uvicorn orchestrator_v2.api.server:app --host 0.0.0.0 --port ${PORT}
+# Use shell form so $PORT gets expanded
+CMD sh -c "python startup_check.py && uvicorn orchestrator_v2.api.server:app --host 0.0.0.0 --port $PORT"
