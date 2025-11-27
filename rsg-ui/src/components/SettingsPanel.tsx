@@ -5,6 +5,14 @@ import {
   getCurrentUser,
   updateProviderSettings,
   testProviderConnection,
+  getLlmApiKey,
+  hasLlmApiKey,
+  getLlmApiKeySuffix,
+  getLlmProvider,
+  getDefaultModel,
+  setLlmApiKey,
+  setLlmProvider,
+  setDefaultModel,
 } from '../api/client';
 import { UserPublicProfile, ProviderTestResult } from '../api/types';
 
@@ -25,10 +33,14 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
   const [userProfile, setUserProfile] = useState<UserPublicProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
 
-  // LLM Provider settings
-  const [llmProvider, setLlmProvider] = useState<string>('anthropic');
+  // LLM Provider settings - initialize from localStorage
+  const [llmProvider, setLlmProviderState] = useState<string>(getLlmProvider());
   const [apiKey, setApiKey] = useState<string>('');
-  const [defaultModel, setDefaultModel] = useState<string>('claude-sonnet-4-5-20250929');
+  const [defaultModel, setDefaultModelState] = useState<string>(getDefaultModel());
+  
+  // Track if we have an API key stored locally
+  const [hasLocalApiKey, setHasLocalApiKey] = useState<boolean>(hasLlmApiKey());
+  const [localApiKeySuffix, setLocalApiKeySuffix] = useState<string | null>(getLlmApiKeySuffix());
 
   // Model options per provider
   const modelOptions: Record<string, { value: string; label: string; tooltip?: string }[]> = {
@@ -46,6 +58,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
   const [testStatus, setTestStatus] = useState<ProviderTestResult | null>(null);
   const [isTesting, setIsTesting] = useState(false);
   const [isSavingProvider, setIsSavingProvider] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Load user profile when settings open
   useEffect(() => {
@@ -57,9 +70,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
       setLoadingProfile(true);
       const profile = await getCurrentUser();
       setUserProfile(profile);
-      setLlmProvider(profile.llm_provider);
-      setDefaultModel(profile.default_model);
-      // Don't set apiKey from backend - we never get the full key
+      // Note: We don't override local state from server since server loses API key on restart
     } catch (e) {
       console.error('Failed to load user profile:', e);
     } finally {
@@ -76,9 +87,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
     try {
       setIsTesting(true);
       setTestStatus(null);
+      
+      // Use the locally entered API key for testing
+      const testKey = apiKey || (hasLocalApiKey ? getLlmApiKey() : undefined);
+      
       const result = await testProviderConnection({
         llm_provider: llmProvider,
-        api_key: apiKey || undefined,
+        api_key: testKey || undefined,
         default_model: defaultModel || undefined,
       });
       setTestStatus(result);
@@ -97,14 +112,35 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
   const handleSaveProviderSettings = async () => {
     try {
       setIsSavingProvider(true);
-      const updated = await updateProviderSettings({
-        llm_provider: llmProvider,
-        api_key: apiKey || undefined,
-        default_model: defaultModel || undefined,
-      });
-      setUserProfile(updated);
+      setSaveSuccess(false);
+      
+      // Save to localStorage first (this persists!)
+      if (apiKey) {
+        setLlmApiKey(apiKey);
+        setHasLocalApiKey(true);
+        setLocalApiKeySuffix(apiKey.slice(-4));
+      }
+      setLlmProvider(llmProvider);
+      setDefaultModel(defaultModel);
+      
+      // Also try to save to backend (may not persist on Railway, but that's OK)
+      try {
+        await updateProviderSettings({
+          llm_provider: llmProvider,
+          api_key: apiKey || undefined,
+          default_model: defaultModel || undefined,
+        });
+      } catch (e) {
+        // Backend save failed, but local save succeeded - that's fine
+        console.warn('Backend save failed, but API key saved locally:', e);
+      }
+      
       setApiKey(''); // Clear local field after save
       setTestStatus(null);
+      setSaveSuccess(true);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (e) {
       console.error('Failed to save provider settings:', e);
     } finally {
@@ -178,7 +214,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
             <h3>LLM Access</h3>
             <p className="settings-description">
               Configure how Ready-Set-Code connects to your LLM provider.
-              Use an Anthropic API key (BYOK) or AWS Bedrock.
+              Your API key is stored locally in your browser and sent with each request.
             </p>
 
             {loadingProfile ? (
@@ -192,11 +228,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
                     value={llmProvider}
                     onChange={(e) => {
                       const newProvider = e.target.value;
-                      setLlmProvider(newProvider);
+                      setLlmProviderState(newProvider);
                       // Reset to provider's default model
                       const providerModels = modelOptions[newProvider];
                       if (providerModels && providerModels.length > 0) {
-                        setDefaultModel(providerModels[0].value);
+                        setDefaultModelState(providerModels[0].value);
                       }
                     }}
                   >
@@ -212,8 +248,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
                       id="apiKey"
                       type="password"
                       placeholder={
-                        userProfile?.llm_key_set
-                          ? `API key is set (••••${userProfile.llm_key_suffix ?? ''})`
+                        hasLocalApiKey
+                          ? `API key is set (••••${localApiKeySuffix ?? ''})`
                           : 'Enter your sk-ant-... key'
                       }
                       value={apiKey}
@@ -221,7 +257,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
                       autoComplete="off"
                     />
                     <small>
-                      Key is stored securely in the backend and never shown in full.
+                      {hasLocalApiKey 
+                        ? '✅ Key stored in your browser. Enter a new key to replace it.'
+                        : '⚠️ No API key configured. Enter your Anthropic API key to enable AI features.'}
                     </small>
                   </div>
                 )}
@@ -231,7 +269,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
                   <select
                     id="defaultModel"
                     value={defaultModel}
-                    onChange={(e) => setDefaultModel(e.target.value)}
+                    onChange={(e) => setDefaultModelState(e.target.value)}
                     title="Recommended default: Sonnet 4.5. Use Haiku 4.5 for cost-efficient mode."
                   >
                     {(modelOptions[llmProvider] || []).map((option) => (
@@ -247,7 +285,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
                   <button
                     className="button-secondary"
                     type="button"
-                    disabled={isTesting}
+                    disabled={isTesting || (!apiKey && !hasLocalApiKey)}
                     onClick={handleTestConnection}
                   >
                     {isTesting ? 'Testing...' : 'Test Connection'}
@@ -261,6 +299,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose, onSave }) => {
                     {isSavingProvider ? 'Saving...' : 'Save Provider Settings'}
                   </button>
                 </div>
+
+                {saveSuccess && (
+                  <div className="test-status test-status-success">
+                    <strong>Saved!</strong> Your API key is stored locally and will be used for all requests.
+                  </div>
+                )}
 
                 {testStatus && (
                   <div
