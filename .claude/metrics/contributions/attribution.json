@@ -1,8 +1,52 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T15:29:31.148903",
+  "collection_timestamp": "2025-11-27T15:32:30.568454",
   "commits": [
+    {
+      "sha": "cdc7bb4592f15c9c0b7e905aa73200efe2e93fee",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:31:37 -0500",
+      "message": "fix: Remove startCommand from railway.json, let Dockerfile CMD handle it",
+      "contributor_type": "human",
+      "lines_added": 0,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "68bfb9fd447cf8a5a9ea57b1173c2d4eca546aff",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 15:30:50 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 208,
+      "lines_deleted": 153,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "b5b03e5d5e4093a43d90c8c1f18deccf0f32bbf1",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:29:18 -0500",
+      "message": "fix: Use shell form for CMD to expand $PORT variable",
+      "contributor_type": "human",
+      "lines_added": 2,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "0d9a5b8637cdff15461ee72d966fe2ae87d24238",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:28:56 -0500",
+      "message": "fix: Run startup diagnostic before server to catch import errors",
+      "contributor_type": "human",
+      "lines_added": 2,
+      "lines_deleted": 2,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
     {
       "sha": "d0525b94a83f99e2c675c8ea212d2c94386f6fb4",
       "author": "preston-fay",
@@ -1947,19 +1991,19 @@
     }
   ],
   "summary": {
-    "total_commits": 161,
-    "human_commits": 118,
+    "total_commits": 165,
+    "human_commits": 122,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 73.29,
-    "ai_percentage": 0.62,
-    "collaborative_percentage": 26.09,
-    "human_lines_added": 59351,
+    "human_percentage": 73.94,
+    "ai_percentage": 0.61,
+    "collaborative_percentage": 25.45,
+    "human_lines_added": 59563,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 190074,
-    "human_lines_percentage": 31.23,
-    "ai_lines_percentage": 22.56,
-    "collaborative_lines_percentage": 46.21
+    "total_lines_added": 190286,
+    "human_lines_percentage": 31.3,
+    "ai_lines_percentage": 22.54,
+    "collaborative_lines_percentage": 46.16
   }
 }
