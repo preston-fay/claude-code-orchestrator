@@ -1,43 +1,37 @@
 """
-LLM provider subsystem for Orchestrator v2.
+LLM Provider module for Orchestrator v2.
 
-This module provides a pluggable LLM backend system supporting
-multiple providers (Anthropic API, AWS Bedrock, etc.).
-
-Usage:
-    from orchestrator_v2.llm import get_provider_registry
-
-    registry = get_provider_registry()
-    result = await registry.generate(prompt, model, context)
-
-See docs/LLM_PROVIDERS.md for architecture details.
+Provides unified interface to LLM providers (Anthropic, Bedrock, etc.)
+with support for BYOK (Bring Your Own Key) and retry logic.
 """
 
 from orchestrator_v2.llm.provider_registry import (
     ProviderRegistry,
     get_provider_registry,
-    reset_provider_registry,
+    resolve_model_alias,
 )
-from orchestrator_v2.llm.providers.base import (
-    LlmAuthenticationError,
-    LlmModelNotFoundError,
-    LlmProvider,
-    LlmProviderError,
-    LlmRateLimitError,
-    LlmResult,
+from orchestrator_v2.llm.retry import (
+    LLMRetryError,
+    RetryConfig,
+    DEFAULT_RETRY_CONFIG,
+    retry_async,
+    with_retry,
+    LLMCallContext,
+    is_retryable_error,
 )
 
 __all__ = [
-    # Registry
+    # Provider registry
     "ProviderRegistry",
     "get_provider_registry",
-    "reset_provider_registry",
-    # Base types
-    "LlmProvider",
-    "LlmResult",
-    # Exceptions
-    "LlmProviderError",
-    "LlmAuthenticationError",
-    "LlmRateLimitError",
-    "LlmModelNotFoundError",
+    "resolve_model_alias",
+    
+    # Retry utilities
+    "LLMRetryError",
+    "RetryConfig",
+    "DEFAULT_RETRY_CONFIG",
+    "retry_async",
+    "with_retry",
+    "LLMCallContext",
+    "is_retryable_error",
 ]
