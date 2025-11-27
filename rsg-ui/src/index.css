@@ -1027,7 +1027,7 @@ p {
 }
 
 .activity-count {
-  color: var(--color-silver);
+  color: var(--color-grey-200);
 }
 
 .activity-body {
@@ -1043,7 +1043,7 @@ p {
 .activity-empty {
   padding: var(--spacing-xl);
   text-align: center;
-  color: var(--color-silver);
+  color: var(--color-grey-200);
 }
 
 .activity-error {
@@ -1062,7 +1062,7 @@ p {
   align-items: flex-start;
   gap: var(--spacing-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
-  color: var(--color-silver);
+  color: var(--color-grey-200);
   border-radius: var(--radius-sm);
 }
 
@@ -1078,13 +1078,14 @@ p {
 
 .event-time {
   flex-shrink: 0;
-  color: var(--color-grey-500);
+  color: var(--color-grey-300);
   width: 60px;
 }
 
 .event-message {
   flex: 1;
   word-break: break-word;
+  color: var(--color-grey-200);
 }
 
 .event-phase-tag,
@@ -1095,6 +1096,7 @@ p {
   border-radius: var(--radius-sm);
   font-size: 0.625rem;
   text-transform: uppercase;
+  color: var(--color-grey-200);
 }
 
 .event-agent-tag {
@@ -1113,7 +1115,11 @@ p {
 }
 
 .event-agent .event-icon {
-  color: var(--color-grey-300);
+  color: var(--color-grey-200);
+}
+
+.event-agent .event-message {
+  color: var(--color-grey-200);
 }
 
 .event-governance .event-icon {
@@ -1121,11 +1127,11 @@ p {
 }
 
 .event-checkpoint .event-icon {
-  color: var(--color-silver);
+  color: var(--color-grey-200);
 }
 
 .event-llm .event-icon {
-  color: var(--color-grey-500);
+  color: var(--color-grey-300);
 }
 
 .event-success .event-icon,
@@ -1135,7 +1141,7 @@ p {
 
 .event-error .event-icon,
 .event-error .event-message {
-  color: var(--error);
+  color: var(--color-violet-3);
 }
 
 .event-warning .event-icon,
@@ -1144,7 +1150,7 @@ p {
 }
 
 .event-info .event-icon {
-  color: var(--color-silver);
+  color: var(--color-grey-200);
 }
 
 /* Scroll to bottom button */
@@ -1153,7 +1159,7 @@ p {
   width: 100%;
   padding: var(--spacing-sm);
   background-color: var(--color-grey-700);
-  color: var(--color-silver);
+  color: var(--color-grey-200);
   border: none;
   cursor: pointer;
   font-size: 0.75rem;
