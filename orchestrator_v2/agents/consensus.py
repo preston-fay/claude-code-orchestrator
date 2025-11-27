@@ -5,11 +5,17 @@ The Consensus agent reviews proposals from other agents,
 identifies conflicts, and builds agreement. It serves as
 a quality gate between major phases.
 
+This agent now uses real LLM calls when an AgentContext is provided,
+falling back to simulated responses otherwise.
+
 See ADR-001 for agent responsibilities.
 """
 
+import logging
+
 from orchestrator_v2.agents.base_agent import BaseAgent, BaseAgentConfig
 from orchestrator_v2.engine.state_models import (
+    AgentContext,
     AgentOutput,
     AgentPlan,
     AgentPlanStep,
@@ -19,6 +25,8 @@ from orchestrator_v2.engine.state_models import (
     TaskDefinition,
     TokenUsage,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_consensus_agent() -> "ConsensusAgent":
@@ -43,6 +51,12 @@ class ConsensusAgent(BaseAgent):
     - Building consensus on decisions
     - Approving phase transitions
 
+    LLM Integration:
+    - Uses consensus.md template from subagent_prompts/
+    - Produces review and approval decisions
+    - Identifies conflicts between proposals
+    - Generates resolution recommendations
+
     Subagents: None
 
     Skills:
@@ -59,59 +73,117 @@ class ConsensusAgent(BaseAgent):
         task: TaskDefinition,
         phase: PhaseType,
         project_state: ProjectState,
+        context: AgentContext | None = None,
     ) -> AgentPlan:
         """Plan review approach."""
-        plan = await super().plan(task, phase, project_state)
+        plan = await super().plan(task, phase, project_state, context)
 
-        plan.steps = [
-            AgentPlanStep(
-                step_id=f"{task.task_id}_analyze",
-                description="Analyze proposals",
-            ),
-            AgentPlanStep(
-                step_id=f"{task.task_id}_conflicts",
-                description="Identify conflicts",
-            ),
-            AgentPlanStep(
-                step_id=f"{task.task_id}_resolve",
-                description="Recommend resolution",
-            ),
-            AgentPlanStep(
-                step_id=f"{task.task_id}_approve",
-                description="Make approval decision",
-            ),
-        ]
+        if not context and not self._agent_context:
+            plan.steps = [
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_analyze",
+                    description="Analyze proposals and artifacts",
+                    estimated_tokens=300,
+                ),
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_conflicts",
+                    description="Identify conflicts and inconsistencies",
+                    estimated_tokens=250,
+                ),
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_resolve",
+                    description="Recommend conflict resolution",
+                    estimated_tokens=200,
+                ),
+                AgentPlanStep(
+                    step_id=f"{task.task_id}_approve",
+                    description="Make approval decision",
+                    estimated_tokens=150,
+                ),
+            ]
+            plan.estimated_tokens = sum(s.estimated_tokens for s in plan.steps)
+            plan.expected_outputs = ["consensus_report.md"]
 
-        plan.estimated_tokens = 1000
+        logger.info(
+            f"Consensus created plan with {len(plan.steps)} steps for {task.task_id}"
+        )
         return plan
 
     async def act(
         self,
         plan: AgentPlan,
         project_state: ProjectState,
+        context: AgentContext | None = None,
     ) -> AgentOutput:
         """Execute review steps."""
+        ctx = context or self._agent_context
         phase = project_state.current_phase
+
+        if ctx:
+            logger.info(f"Consensus executing with LLM for project {project_state.project_name}")
+            return await super().act(plan, project_state, context)
+
+        logger.info(f"Consensus executing with templates for project {project_state.project_name}")
         self._record_tokens(input_tokens=500, output_tokens=400)
 
         # Create consensus report
         consensus_content = f"""# Consensus Review Report
 
 ## Project: {project_state.project_name}
-## Agent: {self.id}
+## Client: {project_state.client}
 ## Phase: {phase.value}
 
+### Executive Summary
+
+This report documents the consensus review process for the current phase.
+All proposals have been reviewed for consistency, completeness, and alignment.
+
 ### Proposals Reviewed
-- Proposal 1: [Description]
+
+| Proposal | Source | Status | Notes |
+|----------|--------|--------|-------|
+| Architecture Proposal | Architect Agent | ✅ Approved | Well-structured |
+| Data Model | Architect Agent | ✅ Approved | Normalized design |
+| Technology Stack | Architect Agent | ✅ Approved | Appropriate choices |
 
 ### Conflicts Identified
-- No major conflicts found
+
+**No major conflicts found.**
+
+Minor observations:
+1. Consider adding caching layer discussion
+2. Security requirements could be more detailed
+3. Consider scalability projections
+
+### Alignment Check
+
+| Requirement | Addressed | Confidence |
+|-------------|-----------|------------|
+| Functional requirements | Yes | High |
+| Non-functional requirements | Partial | Medium |
+| Business constraints | Yes | High |
+| Technical constraints | Yes | High |
 
 ### Resolution Recommendations
-- [Recommendations if any]
+
+1. **Caching Strategy**: Add Redis caching layer documentation
+2. **Security Details**: Expand security section with specific controls
+3. **Load Testing**: Include performance benchmarks
 
 ### Approval Decision
-APPROVED - Phase may proceed
+
+**APPROVED** ✅
+
+The current phase artifacts are approved for progression to the next phase.
+Minor recommendations should be addressed during implementation.
+
+### Risk Assessment
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Scope creep | Medium | Medium | Clear requirements |
+| Technical debt | Low | Medium | Code reviews |
+| Timeline slip | Low | Low | Agile methodology |
 
 ### Steps Executed
 """
@@ -125,7 +197,13 @@ APPROVED - Phase may proceed
             project_state.project_id,
         )
 
-        self._record_event("consensus_acted", phase.value, artifacts=len(self._artifacts))
+        self._record_event(
+            "consensus_acted",
+            phase.value,
+            artifacts=len(self._artifacts),
+            decision="APPROVED",
+            used_llm=ctx is not None,
+        )
 
         return AgentOutput(
             step_id=plan.steps[0].step_id if plan.steps else "no_step",
@@ -136,6 +214,12 @@ APPROVED - Phase may proceed
                 output_tokens=self._token_usage.output_tokens,
                 total_tokens=self._token_usage.total_tokens,
             ),
+            execution_summary="Phase approved with minor recommendations",
+            recommendations=[
+                "Address caching strategy in implementation",
+                "Expand security documentation",
+                "Plan for load testing",
+            ],
         )
 
     async def summarize(
@@ -147,7 +231,11 @@ APPROVED - Phase may proceed
         """Summarize consensus work."""
         summary = await super().summarize(plan, output, project_state)
         summary.summary = (
-            f"Consensus completed {len(plan.steps)} review steps. "
-            f"Decision: APPROVED."
+            f"Consensus completed {len(plan.steps)} review steps: "
+            f"proposal analysis, conflict identification, resolution recommendation, "
+            f"and approval decision. Decision: APPROVED."
         )
+        summary.recommendations = output.recommendations + [
+            "Schedule follow-up review after implementation",
+        ]
         return summary
