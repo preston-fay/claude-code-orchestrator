@@ -4,6 +4,11 @@ Agent implementations for Orchestrator v2.
 This module contains the base agent protocol and all specialized
 role agents that execute workflow tasks.
 
+LLM Integration:
+- Agents support real LLM calls when AgentContext is provided
+- Uses prompt templates from subagent_prompts/ directory
+- Falls back to simulated responses without LLM context
+
 See ADR-001 for agent architecture details.
 """
 
@@ -16,6 +21,22 @@ from orchestrator_v2.agents.documentarian import DocumentarianAgent, create_docu
 from orchestrator_v2.agents.consensus import ConsensusAgent, create_consensus_agent
 from orchestrator_v2.agents.steward import StewardAgent, create_steward_agent
 from orchestrator_v2.agents.reviewer import ReviewerAgent, create_reviewer_agent
+
+# LLM integration components
+from orchestrator_v2.agents.prompt_builder import (
+    PromptBuilder,
+    PromptTemplate,
+    BuiltPrompt,
+    get_prompt_builder,
+)
+from orchestrator_v2.agents.response_parser import (
+    ResponseParser,
+    PlanResponse,
+    ActResponse,
+    ArtifactData,
+    get_response_parser,
+)
+from orchestrator_v2.agents.llm_agent_mixin import LlmAgentMixin
 
 __all__ = [
     # Base
@@ -40,4 +61,15 @@ __all__ = [
     "create_consensus_agent",
     "create_steward_agent",
     "create_reviewer_agent",
+    # LLM integration
+    "PromptBuilder",
+    "PromptTemplate",
+    "BuiltPrompt",
+    "get_prompt_builder",
+    "ResponseParser",
+    "PlanResponse",
+    "ActResponse",
+    "ArtifactData",
+    "get_response_parser",
+    "LlmAgentMixin",
 ]
