@@ -168,24 +168,24 @@
     ]
   },
   "contributions.human_percentage": {
-    "current_value": 78.82,
-    "previous_value": 78.82,
+    "current_value": 79.02,
+    "previous_value": 79.02,
     "change_percentage": 0.0,
     "direction": "stable",
     "is_anomaly": false,
     "historical_values": [
-      78.82,
-      78.82,
-      78.82,
-      78.82,
-      78.82,
-      78.82,
-      78.82,
-      78.82,
-      78.82,
-      78.82,
-      78.82,
-      78.82
+      79.02,
+      79.02,
+      79.02,
+      79.02,
+      79.02,
+      79.02,
+      79.02,
+      79.02,
+      79.02,
+      79.02,
+      79.02,
+      79.02
     ]
   },
   "contributions.ai_percentage": {
@@ -210,24 +210,24 @@
     ]
   },
   "contributions.collaborative_percentage": {
-    "current_value": 20.69,
-    "previous_value": 20.69,
+    "current_value": 20.49,
+    "previous_value": 20.49,
     "change_percentage": 0.0,
     "direction": "stable",
     "is_anomaly": false,
     "historical_values": [
-      20.69,
-      20.69,
-      20.69,
-      20.69,
-      20.69,
-      20.69,
-      20.69,
-      20.69,
-      20.69,
-      20.69,
-      20.69,
-      20.69
+      20.49,
+      20.49,
+      20.49,
+      20.49,
+      20.49,
+      20.49,
+      20.49,
+      20.49,
+      20.49,
+      20.49,
+      20.49,
+      20.49
     ]
   },
   "ai_review.review_coverage": {
