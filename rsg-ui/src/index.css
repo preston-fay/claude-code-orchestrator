@@ -1116,20 +1116,23 @@ p {
 
 .event-agent .event-icon,
 .event-agent .event-message {
-  color: var(--color-grey-200);
+  color: var(--color-white);
 }
 
+/* Governance events - use bright violet-1 instead of dim violet-2 */
 .event-governance .event-icon,
 .event-governance .event-message {
-  color: var(--color-violet-2);
+  color: var(--color-violet-1);
 }
 
-.event-checkpoint .event-icon {
+.event-checkpoint .event-icon,
+.event-checkpoint .event-message {
+  color: var(--color-white);
+}
+
+.event-llm .event-icon,
+.event-llm .event-message {
   color: var(--color-grey-200);
-}
-
-.event-llm .event-icon {
-  color: var(--color-grey-300);
 }
 
 .event-success .event-icon,
@@ -1148,8 +1151,15 @@ p {
   color: #FFB74D;
 }
 
-.event-info .event-icon {
-  color: var(--color-grey-200);
+.event-info .event-icon,
+.event-info .event-message {
+  color: var(--color-white);
+}
+
+/* Default event type */
+.event-default .event-icon,
+.event-default .event-message {
+  color: var(--color-white);
 }
 
 /* Scroll to bottom button */
