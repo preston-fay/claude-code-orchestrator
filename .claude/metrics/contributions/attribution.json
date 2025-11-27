@@ -1,8 +1,41 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T22:13:57.663566",
+  "collection_timestamp": "2025-11-27T22:23:09.581951",
   "commits": [
+    {
+      "sha": "50e9d80ed44be5f5c9ac33bde535999940149195",
+      "author": "preston-fay",
+      "date": "2025-11-27 17:22:23 -0500",
+      "message": "fix: Add RSC DTOs and PhaseAdvanceResultDTO to common.py",
+      "contributor_type": "human",
+      "lines_added": 57,
+      "lines_deleted": 13,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "9c6711d82f3399734c781e257a30cfd45f1c827c",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 22:15:04 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 108,
+      "lines_deleted": 86,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "ad0de085f392c98f287fddec5d822c78b22cf600",
+      "author": "preston-fay",
+      "date": "2025-11-27 17:13:24 -0500",
+      "message": "fix: Make RsgStatus.tsx re-export RscStatus for backward compatibility",
+      "contributor_type": "human",
+      "lines_added": 5,
+      "lines_deleted": 0,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
     {
       "sha": "2bc4991a5e8357a741d41dc2be028032b937e6c0",
       "author": "preston-fay",
@@ -2431,19 +2464,19 @@
     }
   ],
   "summary": {
-    "total_commits": 205,
-    "human_commits": 162,
+    "total_commits": 208,
+    "human_commits": 165,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 79.02,
-    "ai_percentage": 0.49,
-    "collaborative_percentage": 20.49,
-    "human_lines_added": 63665,
+    "human_percentage": 79.33,
+    "ai_percentage": 0.48,
+    "collaborative_percentage": 20.19,
+    "human_lines_added": 63835,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 194388,
-    "human_lines_percentage": 32.75,
-    "ai_lines_percentage": 22.06,
-    "collaborative_lines_percentage": 45.19
+    "total_lines_added": 194558,
+    "human_lines_percentage": 32.81,
+    "ai_lines_percentage": 22.04,
+    "collaborative_lines_percentage": 45.15
   }
 }
