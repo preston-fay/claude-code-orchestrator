@@ -58,29 +58,37 @@ class GateStatus(str, Enum):
     BLOCKED = "blocked"
 
 
-class RsgStage(str, Enum):
-    """Ready/Set/Go macro stage.
+class RscStage(str, Enum):
+    """Ready/Set/Code macro stage.
 
     Maps to engine phases:
     - READY = PLANNING + ARCHITECTURE
     - SET = DATA + early DEVELOPMENT
-    - GO = full DEVELOPMENT + QA + DOCUMENTATION
+    - CODE = full DEVELOPMENT + QA + DOCUMENTATION
     """
     NOT_STARTED = "not_started"
     READY = "ready"
     SET = "set"
-    GO = "go"
+    CODE = "code"
     COMPLETE = "complete"
 
 
-class RsgProgress(BaseModel):
-    """Progress tracking for Ready/Set/Go stages."""
+# Backward compatibility alias (deprecated - use RscStage)
+RsgStage = RscStage
+
+
+class RscProgress(BaseModel):
+    """Progress tracking for Ready/Set/Code stages."""
     ready_completed: bool = False
     set_completed: bool = False
-    go_completed: bool = False
+    code_completed: bool = False
     last_ready_phase: PhaseType | None = None
     last_set_phase: PhaseType | None = None
-    last_go_phase: PhaseType | None = None
+    last_code_phase: PhaseType | None = None
+
+
+# Backward compatibility alias (deprecated - use RscProgress)
+RsgProgress = RscProgress
 
 
 # -----------------------------------------------------------------------------
@@ -287,9 +295,20 @@ class ProjectState(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
-    # Ready/Set/Go stage tracking
-    rsg_stage: RsgStage = RsgStage.NOT_STARTED
-    rsg_progress: RsgProgress = Field(default_factory=RsgProgress)
+    # Ready/Set/Code stage tracking
+    rsc_stage: RscStage = RscStage.NOT_STARTED
+    rsc_progress: RscProgress = Field(default_factory=RscProgress)
+
+    # Backward compatibility properties (deprecated)
+    @property
+    def rsg_stage(self) -> RscStage:
+        """Deprecated: Use rsc_stage instead."""
+        return self.rsc_stage
+
+    @property
+    def rsg_progress(self) -> RscProgress:
+        """Deprecated: Use rsc_progress instead."""
+        return self.rsc_progress
 
 
 # -----------------------------------------------------------------------------
