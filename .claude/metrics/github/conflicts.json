@@ -1,7 +1,7 @@
 {
   "metric": "merge_conflicts",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T15:42:08.225327",
+  "collection_timestamp": "2025-11-27T15:52:20.285289",
   "conflicts": [],
   "summary": {
     "total_conflicts": 0,
