@@ -16,18 +16,24 @@ from orchestrator_v2.api.dto import (
     CheckpointDTO,
     EventDTO,
     GovernanceResultDTO,
+    CodeStatusDTO,
     GoStatusDTO,
+    PhaseAdvanceResultDTO,
     PhaseDTO,
     ProjectDTO,
     ProjectTemplateDTO,
     ProviderTestResultDTO,
     ReadyStatusDTO,
+    RscOverviewDTO,
     RsgOverviewDTO,
     SetStatusDTO,
     StatusDTO,
     UpdateProviderSettingsDTO,
+    code_status_to_dto,
     go_status_to_dto,
+    phase_advance_result_to_dto,
     ready_status_to_dto,
+    rsc_overview_to_dto,
     rsg_overview_to_dto,
     set_status_to_dto,
 )
@@ -36,7 +42,7 @@ from orchestrator_v2.config.templates import (
     get_template_by_id,
 )
 from orchestrator_v2.telemetry.events_repository import get_event_repository
-from orchestrator_v2.rsg.service import RsgService, RsgServiceError
+from orchestrator_v2.rsg.service import RscService, RscServiceError, RsgService, RsgServiceError
 from orchestrator_v2.workspace.manager import WorkspaceManager
 from orchestrator_v2.engine.engine import WorkflowEngine
 from orchestrator_v2.engine.state_models import (
@@ -97,9 +103,9 @@ checkpoint_repo = FileSystemCheckpointRepository()
 artifact_repo = FileSystemArtifactRepository()
 governance_repo = FileSystemGovernanceLogRepository()
 
-# Initialize workspace manager and RSG service
+# Initialize workspace manager and RSC service
 workspace_manager = WorkspaceManager()
-rsg_service = RsgService(
+rsc_service = RscService(
     project_repository=project_repo,
     checkpoint_repository=checkpoint_repo,
     artifact_repository=artifact_repo,
@@ -698,11 +704,34 @@ async def delete_project(project_id: str):
 
 
 # -----------------------------------------------------------------------------
-# Ready/Set/Go Endpoints
+# Ready/Set/Code (RSC) Endpoints - Primary API
 # -----------------------------------------------------------------------------
 
-@app.post("/rsg/{project_id}/ready/start", response_model=ReadyStatusDTO)
-async def start_ready(
+@app.post("/rsc/{project_id}/advance", response_model=PhaseAdvanceResultDTO)
+async def advance_phase(
+    project_id: str,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Advance exactly ONE phase, then return control to user.
+    
+    This is the primary endpoint for user-controlled phase execution.
+    Each call runs only one phase, giving the user explicit control
+    over when the next phase runs.
+    """
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    try:
+        result = await rsc_service.advance_phase(project_id, user=user)
+        return phase_advance_result_to_dto(result)
+    except RscServiceError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/rsc/{project_id}/ready/start", response_model=ReadyStatusDTO)
+async def start_ready_rsc(
     project_id: str,
     user: UserProfile = Depends(get_current_user),
 ):
@@ -713,26 +742,26 @@ async def start_ready(
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
     try:
-        status = await rsg_service.start_ready(project_id, user=user)
+        status = await rsc_service.start_ready(project_id, user=user)
         return ready_status_to_dto(status)
-    except RsgServiceError as e:
+    except RscServiceError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/rsg/{project_id}/ready/status", response_model=ReadyStatusDTO)
-async def get_ready_status(project_id: str):
+@app.get("/rsc/{project_id}/ready/status", response_model=ReadyStatusDTO)
+async def get_ready_status_rsc(project_id: str):
     """Get Ready stage status."""
     try:
         await project_repo.load(project_id)
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
-    status = await rsg_service.get_ready_status(project_id)
+    status = await rsc_service.get_ready_status(project_id)
     return ready_status_to_dto(status)
 
 
-@app.post("/rsg/{project_id}/set/start", response_model=SetStatusDTO)
-async def start_set(
+@app.post("/rsc/{project_id}/set/start", response_model=SetStatusDTO)
+async def start_set_rsc(
     project_id: str,
     user: UserProfile = Depends(get_current_user),
 ):
@@ -743,64 +772,119 @@ async def start_set(
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
     try:
-        status = await rsg_service.start_set(project_id, user=user)
+        status = await rsc_service.start_set(project_id, user=user)
         return set_status_to_dto(status)
-    except RsgServiceError as e:
+    except RscServiceError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/rsg/{project_id}/set/status", response_model=SetStatusDTO)
-async def get_set_status(project_id: str):
+@app.get("/rsc/{project_id}/set/status", response_model=SetStatusDTO)
+async def get_set_status_rsc(project_id: str):
     """Get Set stage status."""
     try:
         await project_repo.load(project_id)
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
-    status = await rsg_service.get_set_status(project_id)
+    status = await rsc_service.get_set_status(project_id)
     return set_status_to_dto(status)
 
 
-@app.post("/rsg/{project_id}/go/start", response_model=GoStatusDTO)
+@app.post("/rsc/{project_id}/code/start", response_model=CodeStatusDTO)
+async def start_code_rsc(
+    project_id: str,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Start the Code stage (DEVELOPMENT + QA + DOCUMENTATION)."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    try:
+        status = await rsc_service.start_code(project_id, user=user)
+        return code_status_to_dto(status)
+    except RscServiceError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/rsc/{project_id}/code/status", response_model=CodeStatusDTO)
+async def get_code_status_rsc(project_id: str):
+    """Get Code stage status."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    status = await rsc_service.get_code_status(project_id)
+    return code_status_to_dto(status)
+
+
+@app.get("/rsc/{project_id}/overview", response_model=RscOverviewDTO)
+async def get_rsc_overview(project_id: str):
+    """Get combined RSC overview."""
+    try:
+        await project_repo.load(project_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+    overview = await rsc_service.get_overview(project_id)
+    return rsc_overview_to_dto(overview)
+
+
+# -----------------------------------------------------------------------------
+# Legacy /rsg/ Endpoints (Backward Compatibility - Deprecated)
+# -----------------------------------------------------------------------------
+
+@app.post("/rsg/{project_id}/ready/start", response_model=ReadyStatusDTO, deprecated=True)
+async def start_ready(
+    project_id: str,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Deprecated: Use /rsc/{project_id}/ready/start instead."""
+    return await start_ready_rsc(project_id, user)
+
+
+@app.get("/rsg/{project_id}/ready/status", response_model=ReadyStatusDTO, deprecated=True)
+async def get_ready_status(project_id: str):
+    """Deprecated: Use /rsc/{project_id}/ready/status instead."""
+    return await get_ready_status_rsc(project_id)
+
+
+@app.post("/rsg/{project_id}/set/start", response_model=SetStatusDTO, deprecated=True)
+async def start_set(
+    project_id: str,
+    user: UserProfile = Depends(get_current_user),
+):
+    """Deprecated: Use /rsc/{project_id}/set/start instead."""
+    return await start_set_rsc(project_id, user)
+
+
+@app.get("/rsg/{project_id}/set/status", response_model=SetStatusDTO, deprecated=True)
+async def get_set_status(project_id: str):
+    """Deprecated: Use /rsc/{project_id}/set/status instead."""
+    return await get_set_status_rsc(project_id)
+
+
+@app.post("/rsg/{project_id}/go/start", response_model=CodeStatusDTO, deprecated=True)
 async def start_go(
     project_id: str,
     user: UserProfile = Depends(get_current_user),
 ):
-    """Start the Go stage (DEVELOPMENT + QA + DOCUMENTATION)."""
-    try:
-        await project_repo.load(project_id)
-    except KeyError:
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
-
-    try:
-        status = await rsg_service.start_go(project_id, user=user)
-        return go_status_to_dto(status)
-    except RsgServiceError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    """Deprecated: Use /rsc/{project_id}/code/start instead."""
+    return await start_code_rsc(project_id, user)
 
 
-@app.get("/rsg/{project_id}/go/status", response_model=GoStatusDTO)
+@app.get("/rsg/{project_id}/go/status", response_model=CodeStatusDTO, deprecated=True)
 async def get_go_status(project_id: str):
-    """Get Go stage status."""
-    try:
-        await project_repo.load(project_id)
-    except KeyError:
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
-
-    status = await rsg_service.get_go_status(project_id)
-    return go_status_to_dto(status)
+    """Deprecated: Use /rsc/{project_id}/code/status instead."""
+    return await get_code_status_rsc(project_id)
 
 
-@app.get("/rsg/{project_id}/overview", response_model=RsgOverviewDTO)
+@app.get("/rsg/{project_id}/overview", response_model=RscOverviewDTO, deprecated=True)
 async def get_rsg_overview(project_id: str):
-    """Get combined RSG overview."""
-    try:
-        await project_repo.load(project_id)
-    except KeyError:
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
-
-    overview = await rsg_service.get_overview(project_id)
-    return rsg_overview_to_dto(overview)
+    """Deprecated: Use /rsc/{project_id}/overview instead."""
+    return await get_rsc_overview(project_id)
 
 
 # Factory function for creating configured app

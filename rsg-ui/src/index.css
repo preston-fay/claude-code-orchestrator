@@ -1,19 +1,68 @@
-/* RSG UI Global Styles */
+/* Ready-Set-Code UI Global Styles - Using Kearney Design System (KDS) Tokens */
 
 :root {
-  --primary-color: #6366f1;
-  --primary-hover: #4f46e5;
-  --background-dark: #0f0f0f;
-  --background-card: #1a1a1a;
-  --background-input: #2a2a2a;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-muted: #666666;
-  --border-color: #333333;
-  --success-color: #22c55e;
-  --warning-color: #f59e0b;
-  --error-color: #ef4444;
-  --info-color: #3b82f6;
+  /* ==========================================================================
+     KDS CORE PALETTE (from design_system/tokens.json)
+     ========================================================================== */
+  
+  /* Core Colors */
+  --kds-charcoal: #1E1E1E;
+  --kds-silver: #A5A5A5;
+  --kds-purple: #7823DC;
+  --kds-grey-100: #F5F5F5;
+  --kds-grey-200: #D2D2D2;
+  --kds-grey-300: #BEBEBE;
+  --kds-grey-500: #787878;
+  --kds-grey-600: #5A5A5A;
+  --kds-grey-700: #4B4B4B;
+  --kds-grey-800: #2D2D2D;
+  --kds-grey-900: #1A1A1A;
+  
+  /* Violet Scale (for accents) */
+  --kds-violet-1: #E6D2FA;
+  --kds-violet-2: #C8A5F0;
+  --kds-violet-3: #AF7DEB;
+  --kds-violet-4: #9150E1;
+  
+  /* ==========================================================================
+     KDS DARK THEME SEMANTIC TOKENS (from design_system/tokens.json)
+     ========================================================================== */
+  
+  --background: #000000;
+  --surface: #1E1E1E;
+  --surface-elevated: #2D2D2D;
+  --text-primary: #FFFFFF;
+  --text-muted: #A5A5A5;
+  --text-inverse: #1E1E1E;
+  --border-color: #4B4B4B;
+  --emphasis: #AF7DEB;
+  --emphasis-hover: #C8A5F0;
+  
+  /* Status Colors (dark theme) */
+  --success: #66BB6A;
+  --success-tint: #1B5E20;
+  --warning: #FFA726;
+  --warning-tint: #E65100;
+  --error: #EF5350;
+  --error-tint: #B71C1C;
+  --info: #AF7DEB;
+  
+  /* Chart/Visualization */
+  --spot-color: #AF7DEB;
+  --chart-muted: #787878;
+  --chart-highlight: #C8A5F0;
+  
+  /* Legacy variable aliases for backward compatibility */
+  --primary-color: var(--emphasis);
+  --primary-hover: var(--emphasis-hover);
+  --background-dark: var(--background);
+  --background-card: var(--surface);
+  --background-input: var(--surface-elevated);
+  --text-secondary: var(--text-muted);
+  --success-color: var(--success);
+  --warning-color: var(--warning);
+  --error-color: var(--error);
+  --info-color: var(--info);
 }
 
 * {
@@ -23,9 +72,9 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  background-color: var(--background-dark);
+  /* KDS Typography: Inter with fallbacks */
+  font-family: Inter, Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+  background-color: var(--background);
   color: var(--text-primary);
   line-height: 1.5;
 }
@@ -67,8 +116,8 @@ button {
 }
 
 .button-primary {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--emphasis);
+  color: var(--text-inverse);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -76,7 +125,7 @@ button {
 }
 
 .button-primary:hover:not(:disabled) {
-  background-color: var(--primary-hover);
+  background-color: var(--emphasis-hover);
 }
 
 .button-primary:disabled {
@@ -94,7 +143,7 @@ button {
 }
 
 .button-secondary:hover {
-  background-color: var(--background-input);
+  background-color: var(--surface-elevated);
 }
 
 /* Forms */
@@ -111,7 +160,7 @@ button {
 
 .form-group .label-hint {
   font-weight: 400;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.9em;
 }
 
@@ -120,7 +169,7 @@ button {
 .form-group select {
   width: 100%;
   padding: 0.75rem 1rem;
-  background-color: var(--background-input);
+  background-color: var(--surface-elevated);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   color: var(--text-primary);
@@ -131,18 +180,18 @@ button {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--emphasis);
 }
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-  color: var(--text-muted);
+  color: var(--kds-grey-500);
 }
 
 .form-hint {
   margin-top: 0.5rem;
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 /* Textarea for project description */
@@ -157,7 +206,7 @@ button {
 .project-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: var(--background-card);
+  background-color: var(--surface);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -170,9 +219,9 @@ button {
 }
 
 .project-table th {
-  background-color: var(--background-input);
+  background-color: var(--surface-elevated);
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
@@ -184,7 +233,7 @@ button {
 }
 
 .project-table .clickable-row:hover {
-  background-color: var(--background-input);
+  background-color: var(--surface-elevated);
 }
 
 .project-name {
@@ -195,7 +244,7 @@ button {
 .phase-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  background-color: var(--background-input);
+  background-color: var(--surface-elevated);
   border-radius: 9999px;
   font-size: 0.85rem;
   text-transform: capitalize;
@@ -204,8 +253,8 @@ button {
 .project-type-tag {
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--emphasis);
+  color: var(--text-inverse);
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -229,15 +278,15 @@ button {
 }
 
 .status-active::before {
-  background-color: var(--success-color);
+  background-color: var(--success);
 }
 
 .status-complete::before {
-  background-color: var(--info-color);
+  background-color: var(--info);
 }
 
 .status-failed::before {
-  background-color: var(--error-color);
+  background-color: var(--error);
 }
 
 /* Modals */
@@ -255,7 +304,7 @@ button {
 }
 
 .modal-content {
-  background-color: var(--background-card);
+  background-color: var(--surface);
   border-radius: 16px;
   width: 90%;
   max-width: 600px;
@@ -279,7 +328,7 @@ button {
 .close-button {
   background: none;
   border: none;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 1.5rem;
   padding: 0.5rem;
   line-height: 1;
@@ -310,7 +359,7 @@ button {
 
 .template-card {
   padding: 1rem;
-  background-color: var(--background-input);
+  background-color: var(--surface-elevated);
   border: 2px solid var(--border-color);
   border-radius: 12px;
   cursor: pointer;
@@ -318,12 +367,12 @@ button {
 }
 
 .template-card:hover {
-  border-color: var(--primary-color);
+  border-color: var(--emphasis);
 }
 
 .template-card.selected {
-  border-color: var(--primary-color);
-  background-color: rgba(99, 102, 241, 0.1);
+  border-color: var(--emphasis);
+  background-color: rgba(175, 125, 235, 0.1); /* kds-violet-3 with opacity */
 }
 
 .template-name {
@@ -333,13 +382,13 @@ button {
 
 .template-description {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
 .template-category {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--kds-grey-500);
   text-transform: uppercase;
 }
 
@@ -347,31 +396,31 @@ button {
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  background-color: var(--background-card);
+  background-color: var(--surface);
   border-radius: 12px;
 }
 
 .empty-state p {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin-bottom: 1rem;
 }
 
 .quick-start-hint {
   margin-top: 2rem;
   padding: 1.5rem;
-  background-color: var(--background-input);
+  background-color: var(--surface-elevated);
   border-radius: 8px;
   display: inline-block;
 }
 
 .quick-start-hint h4 {
-  color: var(--primary-color);
+  color: var(--emphasis);
   margin-bottom: 0.5rem;
 }
 
 .hint-text {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--kds-grey-500);
 }
 
 /* Error Banner */
@@ -380,15 +429,15 @@ button {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--error-color);
+  background-color: var(--error-tint);
+  border: 1px solid var(--error);
   border-radius: 8px;
   margin-bottom: 1.5rem;
-  color: var(--error-color);
+  color: var(--error);
 }
 
 .error-banner button {
-  background-color: var(--error-color);
+  background-color: var(--error);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -400,10 +449,13 @@ button {
 .loading {
   text-align: center;
   padding: 4rem 2rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
-/* Run Activity Panel - Fixed event type colors for dark background */
+/* ==========================================================================
+   Run Activity Panel - Using KDS Palette Colors
+   ========================================================================== */
+
 .event-type {
   font-size: 0.75rem;
   font-weight: 600;
@@ -411,38 +463,82 @@ button {
   letter-spacing: 0.05em;
 }
 
-/* Use bright colors that are visible on dark backgrounds */
+/* Workflow events - White for high contrast */
 .event-type-workflow_started,
 .event-type-workflow_completed {
-  color: #FFFFFF; /* White - high contrast */
+  color: var(--text-primary);
 }
 
+/* Phase events - KDS Violet-1 (bright, readable on dark) */
 .event-type-phase_started,
 .event-type-phase_completed {
-  color: #E6D2FA; /* Violet-1 - bright violet */
+  color: var(--kds-violet-1);
 }
 
+/* Agent events - KDS Grey-200 */
 .event-type-agent_started,
 .event-type-agent_completed {
-  color: #D2D2D2; /* Grey-200 - visible gray */
+  color: var(--kds-grey-200);
 }
 
+/* Error events - KDS Warning/Error */
 .event-type-phase_failed,
 .event-type-agent_failed,
 .event-type-error {
-  color: #FFB74D; /* Orange - warning/error */
+  color: var(--warning);
 }
 
+/* Governance events - KDS Success */
 .event-type-governance_check_started,
 .event-type-governance_check_passed {
-  color: #81C784; /* Light green */
+  color: var(--success);
 }
 
 .event-type-governance_check_failed {
-  color: #FF8A65; /* Light coral/orange */
+  color: var(--error);
 }
 
+/* Checkpoint events - KDS Violet-2 */
 .event-type-checkpoint_created,
 .event-type-checkpoint_restored {
-  color: #90CAF9; /* Light blue */
+  color: var(--kds-violet-2);
+}
+
+/* ==========================================================================
+   Ready-Set-Code Stage Indicators
+   ========================================================================== */
+
+.rsc-stage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rsc-stage-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rsc-stage-ready {
+  background-color: var(--kds-violet-3);
+  color: var(--text-inverse);
+}
+
+.rsc-stage-set {
+  background-color: var(--kds-violet-2);
+  color: var(--text-inverse);
+}
+
+.rsc-stage-code {
+  background-color: var(--kds-purple);
+  color: white;
+}
+
+.rsc-stage-complete {
+  background-color: var(--success);
+  color: var(--text-inverse);
 }

@@ -1,41 +1,45 @@
 """
-Ready/Set/Go service for Orchestrator v2.
+Ready/Set/Code service for Orchestrator v2.
 
-Provides high-level RSG abstraction on top of the workflow engine.
+Provides high-level RSC abstraction on top of the workflow engine.
 
-RSG Phase Mapping:
+RSC Phase Mapping:
 - READY = PLANNING + ARCHITECTURE
 - SET = DATA + early DEVELOPMENT
-- GO = full DEVELOPMENT + QA + DOCUMENTATION
+- CODE = full DEVELOPMENT + QA + DOCUMENTATION
 """
 
 from orchestrator_v2.engine.engine import WorkflowEngine
-from orchestrator_v2.engine.state_models import PhaseType, RsgStage
+from orchestrator_v2.engine.state_models import PhaseType, RscStage
 from orchestrator_v2.persistence.interfaces import (
     ArtifactRepository,
     CheckpointRepository,
     ProjectRepository,
 )
-from orchestrator_v2.rsg.models import GoStatus, ReadyStatus, RsgOverview, SetStatus
+from orchestrator_v2.rsg.models import CodeStatus, ReadyStatus, RscOverview, SetStatus, PhaseAdvanceResult
 from orchestrator_v2.workspace.manager import WorkspaceManager
 from orchestrator_v2.user.models import UserProfile
 
 
-# Phase boundaries for RSG stages
+# Phase boundaries for RSC stages
 READY_PHASES = {PhaseType.PLANNING, PhaseType.ARCHITECTURE}
 SET_PHASES = {PhaseType.DATA, PhaseType.DEVELOPMENT}
-GO_PHASES = {PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION}
+CODE_PHASES = {PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION}
 
 
-class RsgServiceError(Exception):
-    """Base exception for RSG service errors."""
+class RscServiceError(Exception):
+    """Base exception for RSC service errors."""
     pass
 
 
-class RsgService:
-    """Service layer for Ready/Set/Go operations.
+# Backward compatibility alias
+RsgServiceError = RscServiceError
 
-    Wraps the workflow engine to provide high-level RSG abstractions
+
+class RscService:
+    """Service layer for Ready/Set/Code operations.
+
+    Wraps the workflow engine to provide high-level RSC abstractions
     that map to the underlying phase-based execution model.
     """
 
@@ -46,7 +50,7 @@ class RsgService:
         artifact_repository: ArtifactRepository,
         workspace_manager: WorkspaceManager,
     ):
-        """Initialize the RSG service.
+        """Initialize the RSC service.
 
         Args:
             project_repository: Repository for project state.
@@ -59,6 +63,111 @@ class RsgService:
         self._artifact_repo = artifact_repository
         self._workspace_manager = workspace_manager
 
+    async def advance_phase(
+        self,
+        project_id: str,
+        user: UserProfile | None = None,
+    ) -> PhaseAdvanceResult:
+        """Advance exactly ONE phase, then return control to user.
+        
+        This is the primary method for user-controlled phase execution.
+        Each call runs only one phase, giving the user explicit control
+        over when the next phase runs.
+        
+        Args:
+            project_id: Project identifier.
+            user: User profile with API key for real LLM calls.
+            
+        Returns:
+            PhaseAdvanceResult with execution details.
+            
+        Raises:
+            RscServiceError: If phase cannot be executed.
+        """
+        # Load project state
+        state = await self._project_repo.load(project_id)
+        
+        # Check if workflow is complete
+        if state.current_phase == PhaseType.COMPLETE:
+            return PhaseAdvanceResult(
+                phase_executed=PhaseType.COMPLETE,
+                success=True,
+                message="Workflow already complete",
+                current_phase=state.current_phase,
+                completed_phases=list(state.completed_phases),
+                rsc_stage=state.rsc_stage,
+                has_more_phases=False,
+            )
+        
+        # Get or create workspace
+        try:
+            workspace = self._workspace_manager.load_workspace(project_id)
+        except Exception:
+            workspace = self._workspace_manager.create_workspace(project_id)
+        
+        # Create engine with workspace
+        engine = WorkflowEngine(workspace=workspace)
+        engine._state = state
+        
+        # Record which phase we're about to execute
+        phase_to_execute = state.current_phase
+        
+        # Run EXACTLY ONE phase
+        try:
+            await engine.run_phase(user=user)
+            success = True
+            message = f"Completed {phase_to_execute.value} phase"
+            error = None
+        except Exception as e:
+            success = False
+            message = f"Error in {phase_to_execute.value} phase"
+            error = str(e)
+        
+        # Update RSC stage based on completed phases
+        await self._update_rsc_stage(state)
+        
+        # Save state
+        await self._project_repo.save(state)
+        
+        return PhaseAdvanceResult(
+            phase_executed=phase_to_execute,
+            success=success,
+            message=message,
+            error=error,
+            current_phase=state.current_phase,
+            completed_phases=list(state.completed_phases),
+            rsc_stage=state.rsc_stage,
+            has_more_phases=state.current_phase != PhaseType.COMPLETE,
+        )
+
+    async def _update_rsc_stage(self, state) -> None:
+        """Update RSC stage based on completed phases.
+        
+        Args:
+            state: ProjectState to update.
+        """
+        completed = set(state.completed_phases)
+        
+        # Check CODE completion (all CODE phases done)
+        if all(p in completed for p in [PhaseType.DEVELOPMENT, PhaseType.QA, PhaseType.DOCUMENTATION]):
+            state.rsc_stage = RscStage.COMPLETE
+            state.rsc_progress.code_completed = True
+            state.rsc_progress.last_code_phase = state.completed_phases[-1] if state.completed_phases else None
+        # Check SET completion (DATA phase done)
+        elif PhaseType.DATA in completed:
+            state.rsc_stage = RscStage.CODE if state.current_phase in CODE_PHASES else RscStage.SET
+            state.rsc_progress.set_completed = True
+            state.rsc_progress.last_set_phase = PhaseType.DATA
+        # Check READY completion (PLANNING + ARCHITECTURE done)
+        elif all(p in completed for p in [PhaseType.PLANNING, PhaseType.ARCHITECTURE]):
+            state.rsc_stage = RscStage.SET
+            state.rsc_progress.ready_completed = True
+            state.rsc_progress.last_ready_phase = PhaseType.ARCHITECTURE
+        # Partial READY (only PLANNING done)
+        elif PhaseType.PLANNING in completed:
+            state.rsc_stage = RscStage.READY
+            state.rsc_progress.last_ready_phase = PhaseType.PLANNING
+
     async def start_ready(
         self,
         project_id: str,
@@ -66,7 +175,7 @@ class RsgService:
     ) -> ReadyStatus:
         """Start the Ready stage (PLANNING + ARCHITECTURE).
 
-        Executes phases until ARCHITECTURE is complete or DATA begins.
+        Executes ONE phase and returns. User must call again to continue.
 
         Args:
             project_id: Project identifier.
@@ -76,64 +185,30 @@ class RsgService:
             ReadyStatus with completion info.
 
         Raises:
-            RsgServiceError: If stage cannot be started.
+            RscServiceError: If stage cannot be started.
         """
         # Load project state
         state = await self._project_repo.load(project_id)
 
         # Validate stage
-        if state.rsg_stage not in [RsgStage.NOT_STARTED, RsgStage.READY]:
-            raise RsgServiceError(
-                f"Cannot start Ready: project is in {state.rsg_stage.value} stage"
+        if state.rsc_stage not in [RscStage.NOT_STARTED, RscStage.READY]:
+            raise RscServiceError(
+                f"Cannot start Ready: project is in {state.rsc_stage.value} stage"
             )
 
-        # Get or create workspace
-        try:
-            workspace = self._workspace_manager.load_workspace(project_id)
-        except Exception:
-            workspace = self._workspace_manager.create_workspace(project_id)
-
-        # Create engine with workspace
-        engine = WorkflowEngine(workspace=workspace)
-        engine._state = state
-
-        # Run phases until end of Ready scope
-        messages = []
-        governance_passed = True
-
-        while state.current_phase in [PhaseType.PLANNING, PhaseType.ARCHITECTURE]:
-            if state.current_phase == PhaseType.COMPLETE:
-                break
-
-            try:
-                await engine.run_phase(user=user)
-                messages.append(f"Completed {state.current_phase.value} phase")
-            except Exception as e:
-                messages.append(f"Error in {state.current_phase.value}: {str(e)}")
-                governance_passed = False
-                break
-
-            # Check if we've moved past Ready phases
-            if state.current_phase not in READY_PHASES:
-                break
-
-        # Update RSG state
-        state.rsg_stage = RsgStage.READY
-        state.rsg_progress.ready_completed = True
-        state.rsg_progress.last_ready_phase = (
-            state.completed_phases[-1] if state.completed_phases else None
-        )
-
-        # Save state
-        await self._project_repo.save(state)
+        # Run one phase using advance_phase
+        result = await self.advance_phase(project_id, user)
+        
+        # Reload state after advance
+        state = await self._project_repo.load(project_id)
 
         return ReadyStatus(
-            stage=state.rsg_stage,
-            completed=state.rsg_progress.ready_completed,
+            stage=state.rsc_stage,
+            completed=state.rsc_progress.ready_completed,
             current_phase=state.current_phase,
             completed_phases=list(state.completed_phases),
-            governance_passed=governance_passed,
-            messages=messages,
+            governance_passed=result.success,
+            messages=[result.message] if result.message else [],
         )
 
     async def get_ready_status(self, project_id: str) -> ReadyStatus:
@@ -154,8 +229,8 @@ class RsgService:
         )
 
         return ReadyStatus(
-            stage=state.rsg_stage,
-            completed=ready_complete or state.rsg_progress.ready_completed,
+            stage=state.rsc_stage,
+            completed=ready_complete or state.rsc_progress.ready_completed,
             current_phase=state.current_phase,
             completed_phases=[
                 p for p in state.completed_phases if p in READY_PHASES
@@ -171,7 +246,7 @@ class RsgService:
     ) -> SetStatus:
         """Start the Set stage (DATA + early DEVELOPMENT).
 
-        Executes phases until QA begins.
+        Executes ONE phase and returns. User must call again to continue.
 
         Args:
             project_id: Project identifier.
@@ -181,74 +256,40 @@ class RsgService:
             SetStatus with completion info.
 
         Raises:
-            RsgServiceError: If stage cannot be started.
+            RscServiceError: If stage cannot be started.
         """
         # Load project state
         state = await self._project_repo.load(project_id)
 
         # Validate stage
-        if state.rsg_stage not in [RsgStage.READY, RsgStage.SET]:
-            if state.rsg_stage == RsgStage.NOT_STARTED:
-                raise RsgServiceError(
+        if state.rsc_stage not in [RscStage.READY, RscStage.SET]:
+            if state.rsc_stage == RscStage.NOT_STARTED:
+                raise RscServiceError(
                     "Cannot start Set: Ready stage not completed"
                 )
-            raise RsgServiceError(
-                f"Cannot start Set: project is in {state.rsg_stage.value} stage"
+            raise RscServiceError(
+                f"Cannot start Set: project is in {state.rsc_stage.value} stage"
             )
 
-        # Get workspace
-        workspace = self._workspace_manager.load_workspace(project_id)
-
-        # Create engine
-        engine = WorkflowEngine(workspace=workspace)
-        engine._state = state
-
-        # Run phases until end of Set scope
-        messages = []
-        data_ready = False
-
-        while state.current_phase in [PhaseType.DATA, PhaseType.DEVELOPMENT]:
-            if state.current_phase == PhaseType.COMPLETE:
-                break
-
-            try:
-                await engine.run_phase(user=user)
-                messages.append(f"Completed {state.current_phase.value} phase")
-
-                if PhaseType.DATA in state.completed_phases:
-                    data_ready = True
-
-            except Exception as e:
-                messages.append(f"Error in {state.current_phase.value}: {str(e)}")
-                break
-
-            # Check if we've moved to QA (end of Set)
-            if state.current_phase == PhaseType.QA:
-                break
+        # Run one phase using advance_phase
+        result = await self.advance_phase(project_id, user)
+        
+        # Reload state after advance
+        state = await self._project_repo.load(project_id)
 
         # Count artifacts
         artifacts = await self._artifact_repo.list_for_project(project_id)
 
-        # Update RSG state
-        state.rsg_stage = RsgStage.SET
-        state.rsg_progress.set_completed = data_ready
-        state.rsg_progress.last_set_phase = (
-            state.completed_phases[-1] if state.completed_phases else None
-        )
-
-        # Save state
-        await self._project_repo.save(state)
-
         return SetStatus(
-            stage=state.rsg_stage,
-            completed=state.rsg_progress.set_completed,
+            stage=state.rsc_stage,
+            completed=state.rsc_progress.set_completed,
             current_phase=state.current_phase,
             completed_phases=[
                 p for p in state.completed_phases if p in SET_PHASES
             ],
             artifacts_count=len(artifacts),
-            data_ready=data_ready,
-            messages=messages,
+            data_ready=PhaseType.DATA in state.completed_phases,
+            messages=[result.message] if result.message else [],
         )
 
     async def get_set_status(self, project_id: str) -> SetStatus:
@@ -269,8 +310,8 @@ class RsgService:
         artifacts = await self._artifact_repo.list_for_project(project_id)
 
         return SetStatus(
-            stage=state.rsg_stage,
-            completed=state.rsg_progress.set_completed,
+            stage=state.rsc_stage,
+            completed=state.rsc_progress.set_completed,
             current_phase=state.current_phase,
             completed_phases=[
                 p for p in state.completed_phases if p in SET_PHASES
@@ -280,135 +321,127 @@ class RsgService:
             messages=[],
         )
 
-    async def start_go(
+    async def start_code(
         self,
         project_id: str,
         user: UserProfile | None = None,
-    ) -> GoStatus:
-        """Start the Go stage (DEVELOPMENT + QA + DOCUMENTATION).
+    ) -> CodeStatus:
+        """Start the Code stage (DEVELOPMENT + QA + DOCUMENTATION).
 
-        Executes remaining phases until complete or blocked.
+        Executes ONE phase and returns. User must call again to continue.
 
         Args:
             project_id: Project identifier.
             user: User profile with API key for real LLM calls.
 
         Returns:
-            GoStatus with completion info.
+            CodeStatus with completion info.
 
         Raises:
-            RsgServiceError: If stage cannot be started.
+            RscServiceError: If stage cannot be started.
         """
         # Load project state
         state = await self._project_repo.load(project_id)
 
         # Validate stage
-        if state.rsg_stage not in [RsgStage.SET, RsgStage.GO]:
-            if state.rsg_stage in [RsgStage.NOT_STARTED, RsgStage.READY]:
-                raise RsgServiceError(
-                    "Cannot start Go: Set stage not completed"
+        if state.rsc_stage not in [RscStage.SET, RscStage.CODE]:
+            if state.rsc_stage in [RscStage.NOT_STARTED, RscStage.READY]:
+                raise RscServiceError(
+                    "Cannot start Code: Set stage not completed"
                 )
-            raise RsgServiceError(
-                f"Cannot start Go: project is in {state.rsg_stage.value} stage"
+            raise RscServiceError(
+                f"Cannot start Code: project is in {state.rsc_stage.value} stage"
             )
 
-        # Get workspace
-        workspace = self._workspace_manager.load_workspace(project_id)
-
-        # Create engine
-        engine = WorkflowEngine(workspace=workspace)
-        engine._state = state
-
-        # Run phases until complete or blocked
-        messages = []
-        governance_blocked = False
-
-        while state.current_phase != PhaseType.COMPLETE:
-            try:
-                await engine.run_phase(user=user)
-                messages.append(f"Completed {state.current_phase.value} phase")
-            except Exception as e:
-                error_msg = str(e)
-                messages.append(f"Error in {state.current_phase.value}: {error_msg}")
-                if "governance" in error_msg.lower() or "blocked" in error_msg.lower():
-                    governance_blocked = True
-                break
+        # Run one phase using advance_phase
+        result = await self.advance_phase(project_id, user)
+        
+        # Reload state after advance
+        state = await self._project_repo.load(project_id)
 
         # Count checkpoints
         checkpoints = await self._checkpoint_repo.list_for_project(project_id)
 
-        # Update RSG state
-        if state.current_phase == PhaseType.COMPLETE:
-            state.rsg_stage = RsgStage.COMPLETE
-            state.rsg_progress.go_completed = True
-        else:
-            state.rsg_stage = RsgStage.GO
+        governance_blocked = False
+        if result.error and ("governance" in result.error.lower() or "blocked" in result.error.lower()):
+            governance_blocked = True
 
-        state.rsg_progress.last_go_phase = (
-            state.completed_phases[-1] if state.completed_phases else None
-        )
-
-        # Save state
-        await self._project_repo.save(state)
-
-        return GoStatus(
-            stage=state.rsg_stage,
-            completed=state.rsg_progress.go_completed,
+        return CodeStatus(
+            stage=state.rsc_stage,
+            completed=state.rsc_progress.code_completed,
             current_phase=state.current_phase,
             completed_phases=[
-                p for p in state.completed_phases if p in GO_PHASES
+                p for p in state.completed_phases if p in CODE_PHASES
             ],
             checkpoints_count=len(checkpoints),
             governance_blocked=governance_blocked,
-            messages=messages,
+            messages=[result.message] if result.message else [],
         )
 
-    async def get_go_status(self, project_id: str) -> GoStatus:
-        """Get the current Go stage status.
+    # Backward compatibility alias
+    async def start_go(
+        self,
+        project_id: str,
+        user: UserProfile | None = None,
+    ) -> CodeStatus:
+        """Deprecated: Use start_code() instead."""
+        return await self.start_code(project_id, user)
+
+    async def get_code_status(self, project_id: str) -> CodeStatus:
+        """Get the current Code stage status.
 
         Args:
             project_id: Project identifier.
 
         Returns:
-            GoStatus with current info.
+            CodeStatus with current info.
         """
         state = await self._project_repo.load(project_id)
 
         # Count checkpoints
         checkpoints = await self._checkpoint_repo.list_for_project(project_id)
 
-        return GoStatus(
-            stage=state.rsg_stage,
-            completed=state.rsg_progress.go_completed,
+        return CodeStatus(
+            stage=state.rsc_stage,
+            completed=state.rsc_progress.code_completed,
             current_phase=state.current_phase,
             completed_phases=[
-                p for p in state.completed_phases if p in GO_PHASES
+                p for p in state.completed_phases if p in CODE_PHASES
             ],
             checkpoints_count=len(checkpoints),
             governance_blocked=False,
             messages=[],
         )
 
-    async def get_overview(self, project_id: str) -> RsgOverview:
-        """Get combined overview of all RSG stages.
+    # Backward compatibility alias
+    async def get_go_status(self, project_id: str) -> CodeStatus:
+        """Deprecated: Use get_code_status() instead."""
+        return await self.get_code_status(project_id)
+
+    async def get_overview(self, project_id: str) -> RscOverview:
+        """Get combined overview of all RSC stages.
 
         Args:
             project_id: Project identifier.
 
         Returns:
-            RsgOverview with all stage statuses.
+            RscOverview with all stage statuses.
         """
         state = await self._project_repo.load(project_id)
 
         ready_status = await self.get_ready_status(project_id)
         set_status = await self.get_set_status(project_id)
-        go_status = await self.get_go_status(project_id)
+        code_status = await self.get_code_status(project_id)
 
-        return RsgOverview(
+        return RscOverview(
             project_id=project_id,
             project_name=state.project_name,
-            stage=state.rsg_stage,
+            stage=state.rsc_stage,
             ready=ready_status,
             set=set_status,
-            go=go_status,
+            code=code_status,
         )
+
+
+# Backward compatibility alias
+RsgService = RscService
