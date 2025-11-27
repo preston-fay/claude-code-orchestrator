@@ -1017,7 +1017,7 @@ p {
 }
 
 .activity-running {
-  color: var(--color-violet-2);
+  color: var(--color-violet-1);
   animation: pulse 1.5s infinite;
 }
 
@@ -1047,7 +1047,7 @@ p {
 }
 
 .activity-error {
-  color: var(--error);
+  color: var(--color-violet-1);
 }
 
 /* Event List */
@@ -1103,27 +1103,25 @@ p {
   background-color: var(--color-grey-600);
 }
 
-/* Event Type Colors */
+/* Event Type Colors - ALL BRIGHT for dark background visibility */
 .event-workflow .event-icon,
 .event-workflow .event-message {
-  color: var(--color-violet-2);
+  color: var(--color-violet-1);
 }
 
 .event-phase .event-icon,
 .event-phase .event-message {
-  color: var(--color-violet-3);
+  color: var(--color-violet-1);
 }
 
-.event-agent .event-icon {
-  color: var(--color-grey-200);
-}
-
+.event-agent .event-icon,
 .event-agent .event-message {
   color: var(--color-grey-200);
 }
 
-.event-governance .event-icon {
-  color: var(--color-violet-4);
+.event-governance .event-icon,
+.event-governance .event-message {
+  color: var(--color-violet-2);
 }
 
 .event-checkpoint .event-icon {
@@ -1136,17 +1134,18 @@ p {
 
 .event-success .event-icon,
 .event-success .event-message {
-  color: var(--color-violet-2);
+  color: var(--color-violet-1);
 }
 
+/* Error events - use BRIGHTEST violet for maximum visibility */
 .event-error .event-icon,
 .event-error .event-message {
-  color: var(--color-violet-3);
+  color: var(--color-violet-1);
 }
 
 .event-warning .event-icon,
 .event-warning .event-message {
-  color: var(--warning);
+  color: #FFB74D;
 }
 
 .event-info .event-icon {
