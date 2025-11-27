@@ -1,8 +1,52 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T15:19:19.780445",
+  "collection_timestamp": "2025-11-27T15:23:57.705063",
   "commits": [
+    {
+      "sha": "49ccf2871795fac9f68a7defd4999db6a83eaa54",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:23:03 -0500",
+      "message": "fix: Add missing anthropic dependency, update Dockerfile for Railway",
+      "contributor_type": "human",
+      "lines_added": 42,
+      "lines_deleted": 11,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "92f64513de5a00bca00aa80a2f7e1f3a69ee536b",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 15:20:24 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 184,
+      "lines_deleted": 151,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "3107fb9bb3fbb40148745a65ab154636ddcf779b",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:19:56 -0500",
+      "message": "docs: Update README with V2 as primary, add deployment section",
+      "contributor_type": "human",
+      "lines_added": 116,
+      "lines_deleted": 517,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "fc1755ed4e30b3368c24749458d60043e8dde532",
+      "author": "preston-fay",
+      "date": "2025-11-27 10:18:44 -0500",
+      "message": "chore: Create archive placeholders for completion reports (to be moved)",
+      "contributor_type": "human",
+      "lines_added": 34,
+      "lines_deleted": 0,
+      "files_changed": 17,
+      "ai_indicators": []
+    },
     {
       "sha": "5244341acc0a16326e8f6368580fa57f9d744f91",
       "author": "preston-fay",
@@ -1848,19 +1892,19 @@
     }
   ],
   "summary": {
-    "total_commits": 152,
-    "human_commits": 109,
+    "total_commits": 156,
+    "human_commits": 113,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 71.71,
-    "ai_percentage": 0.66,
-    "collaborative_percentage": 27.63,
-    "human_lines_added": 58710,
+    "human_percentage": 72.44,
+    "ai_percentage": 0.64,
+    "collaborative_percentage": 26.92,
+    "human_lines_added": 59086,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 189433,
-    "human_lines_percentage": 30.99,
-    "ai_lines_percentage": 22.64,
-    "collaborative_lines_percentage": 46.37
+    "total_lines_added": 189809,
+    "human_lines_percentage": 31.13,
+    "ai_lines_percentage": 22.59,
+    "collaborative_lines_percentage": 46.28
   }
 }
