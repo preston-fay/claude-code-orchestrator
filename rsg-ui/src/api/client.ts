@@ -39,6 +39,9 @@ const STORAGE_KEYS = {
   baseUrl: 'orchestrator_api_url',
   userId: 'orchestrator_user_id',
   userEmail: 'orchestrator_user_email',
+  llmApiKey: 'orchestrator_llm_api_key',  // NEW: Store API key in localStorage
+  llmProvider: 'orchestrator_llm_provider',
+  defaultModel: 'orchestrator_default_model',
 };
 
 // Get stored config or defaults
@@ -47,6 +50,9 @@ function getStoredConfig() {
     baseUrl: localStorage.getItem(STORAGE_KEYS.baseUrl) || DEFAULT_BASE_URL,
     userId: localStorage.getItem(STORAGE_KEYS.userId) || DEFAULT_USER_ID,
     userEmail: localStorage.getItem(STORAGE_KEYS.userEmail) || DEFAULT_USER_EMAIL,
+    llmApiKey: localStorage.getItem(STORAGE_KEYS.llmApiKey) || '',
+    llmProvider: localStorage.getItem(STORAGE_KEYS.llmProvider) || 'anthropic',
+    defaultModel: localStorage.getItem(STORAGE_KEYS.defaultModel) || 'claude-sonnet-4-5-20250929',
   };
 }
 
@@ -56,14 +62,22 @@ let axiosInstance: AxiosInstance = createAxiosInstance();
 function createAxiosInstance(): AxiosInstance {
   const config = getStoredConfig();
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-User-Id': config.userId,
+    'X-User-Email': config.userEmail,
+  };
+
+  // CRITICAL: Send API key with every request so backend can use it
+  // This works around Railway's ephemeral filesystem issue
+  if (config.llmApiKey) {
+    headers['X-LLM-Api-Key'] = config.llmApiKey;
+  }
+
   const instance = axios.create({
     baseURL: config.baseUrl,
-    timeout: 30000,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-User-Id': config.userId,
-      'X-User-Email': config.userEmail,
-    },
+    timeout: 120000, // 2 min for long-running phase operations
+    headers,
   });
 
   // Add response interceptor for error handling
@@ -91,6 +105,50 @@ export function updateApiConfig(baseUrl: string, userId: string, userEmail: stri
 // Get current configuration
 export function getApiConfig() {
   return getStoredConfig();
+}
+
+// NEW: LLM API Key management functions
+export function setLlmApiKey(apiKey: string): void {
+  if (apiKey) {
+    localStorage.setItem(STORAGE_KEYS.llmApiKey, apiKey);
+  } else {
+    localStorage.removeItem(STORAGE_KEYS.llmApiKey);
+  }
+  // Recreate axios instance to include new API key in headers
+  axiosInstance = createAxiosInstance();
+}
+
+export function getLlmApiKey(): string {
+  return localStorage.getItem(STORAGE_KEYS.llmApiKey) || '';
+}
+
+export function hasLlmApiKey(): boolean {
+  const key = getLlmApiKey();
+  return key.length > 0 && key.startsWith('sk-ant-');
+}
+
+export function getLlmApiKeySuffix(): string | null {
+  const key = getLlmApiKey();
+  if (key && key.length >= 4) {
+    return key.slice(-4);
+  }
+  return null;
+}
+
+export function setLlmProvider(provider: string): void {
+  localStorage.setItem(STORAGE_KEYS.llmProvider, provider);
+}
+
+export function getLlmProvider(): string {
+  return localStorage.getItem(STORAGE_KEYS.llmProvider) || 'anthropic';
+}
+
+export function setDefaultModel(model: string): void {
+  localStorage.setItem(STORAGE_KEYS.defaultModel, model);
+}
+
+export function getDefaultModel(): string {
+  return localStorage.getItem(STORAGE_KEYS.defaultModel) || 'claude-sonnet-4-5-20250929';
 }
 
 // API Functions
@@ -171,12 +229,33 @@ export async function healthCheck(): Promise<{ status: string }> {
 
 export async function getCurrentUser(): Promise<UserPublicProfile> {
   const response = await axiosInstance.get<UserPublicProfile>('/users/me');
+  
+  // Merge local storage data with backend response
+  // This ensures we show the locally-stored API key status
+  const localApiKey = getLlmApiKey();
+  if (localApiKey) {
+    response.data.llm_key_set = true;
+    response.data.llm_key_suffix = localApiKey.slice(-4);
+  }
+  
   return response.data;
 }
 
 export async function updateProviderSettings(
   payload: UpdateProviderSettingsPayload
 ): Promise<UserPublicProfile> {
+  // CRITICAL: Also store API key locally so it persists
+  if (payload.api_key) {
+    setLlmApiKey(payload.api_key);
+  }
+  if (payload.llm_provider) {
+    setLlmProvider(payload.llm_provider);
+  }
+  if (payload.default_model) {
+    setDefaultModel(payload.default_model);
+  }
+  
+  // Still call backend to store (for this session at least)
   const response = await axiosInstance.post<UserPublicProfile>(
     '/users/me/provider-settings',
     payload
