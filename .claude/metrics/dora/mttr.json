@@ -1,7 +1,7 @@
 {
   "metric": "mean_time_to_recovery",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T21:10:28.425093",
+  "collection_timestamp": "2025-11-27T21:49:19.654477",
   "incidents": [],
   "summary": {
     "median_mttr_hours": 0,

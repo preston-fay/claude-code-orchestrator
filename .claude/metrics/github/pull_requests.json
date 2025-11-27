@@ -1,8 +1,22 @@
 {
   "metric": "pr_cycle_time",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T21:10:39.452700",
+  "collection_timestamp": "2025-11-27T21:49:30.444917",
   "pull_requests": [
+    {
+      "pr_number": 12,
+      "title": "feat: Add intake mechanism - Phase 1 implementation",
+      "opened_at": "2025-11-27T21:40:51+00:00",
+      "merged_at": "2025-11-27T21:48:34+00:00",
+      "closed_at": "2025-11-27T21:48:34+00:00",
+      "cycle_time_hours": 0.13,
+      "commits": 3,
+      "files_changed": 7,
+      "additions": 317,
+      "deletions": 1274,
+      "author": "preston-fay",
+      "state": "merged"
+    },
     {
       "pr_number": 11,
       "title": "fix(api): correct PhaseState attribute in metrics endpoint",
@@ -145,9 +159,9 @@
     }
   ],
   "summary": {
-    "total_prs": 10,
-    "merged_prs": 10,
-    "median_cycle_time_hours": 0.66,
+    "total_prs": 11,
+    "merged_prs": 11,
+    "median_cycle_time_hours": 0.58,
     "merge_rate": 100.0
   }
 }

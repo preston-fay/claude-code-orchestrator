@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T21:10:35.906765",
+  "collection_timestamp": "2025-11-27T21:49:25.111627",
   "commits": [
+    {
+      "sha": "62f0cb709e1ae40a0fedfecb79eb79a6e750ef85",
+      "author": "preston-fay",
+      "date": "2025-11-27 16:48:33 -0500",
+      "message": "feat: Add intake mechanism - Phase 1 implementation (#12)",
+      "contributor_type": "human",
+      "lines_added": 317,
+      "lines_deleted": 1274,
+      "files_changed": 7,
+      "ai_indicators": []
+    },
+    {
+      "sha": "84476f126a8de8de8dbbbe7cbb6013b85f8afdbb",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 21:11:29 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 139,
+      "lines_deleted": 117,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "c0b0b58739ff041a4bbf963e68dd7cfdfd733235",
       "author": "preston-fay",
@@ -2365,19 +2387,19 @@
     }
   ],
   "summary": {
-    "total_commits": 199,
-    "human_commits": 156,
+    "total_commits": 201,
+    "human_commits": 158,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 78.39,
+    "human_percentage": 78.61,
     "ai_percentage": 0.5,
-    "collaborative_percentage": 21.11,
-    "human_lines_added": 62078,
+    "collaborative_percentage": 20.9,
+    "human_lines_added": 62534,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 192801,
-    "human_lines_percentage": 32.2,
-    "ai_lines_percentage": 22.24,
-    "collaborative_lines_percentage": 45.56
+    "total_lines_added": 193257,
+    "human_lines_percentage": 32.36,
+    "ai_lines_percentage": 22.19,
+    "collaborative_lines_percentage": 45.45
   }
 }
