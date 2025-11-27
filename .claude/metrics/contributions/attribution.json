@@ -1,8 +1,52 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T14:51:44.593713",
+  "collection_timestamp": "2025-11-27T14:56:30.427438",
   "commits": [
+    {
+      "sha": "074a309e95bf5fbd3f368bf69bf59998b2b0830f",
+      "author": "preston-fay",
+      "date": "2025-11-27 09:55:44 -0500",
+      "message": "feat(agents): Update remaining agents to use LLM integration",
+      "contributor_type": "human",
+      "lines_added": 600,
+      "lines_deleted": 145,
+      "files_changed": 4,
+      "ai_indicators": []
+    },
+    {
+      "sha": "c106f0965bebd378ae8d02a9051594c1807a0913",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 14:52:46 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 195,
+      "lines_deleted": 151,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "6d202b24f8727d8629c818dad380ca8b40e337e7",
+      "author": "preston-fay",
+      "date": "2025-11-27 09:52:47 -0500",
+      "message": "feat(documentarian): Update DocumentarianAgent to use LLM integration",
+      "contributor_type": "human",
+      "lines_added": 364,
+      "lines_deleted": 42,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
+    {
+      "sha": "f5f6124cbec33e43a6e2f4303e5e0755f4a521c4",
+      "author": "preston-fay",
+      "date": "2025-11-27 09:51:58 -0500",
+      "message": "feat(qa): Update QAAgent to use LLM integration",
+      "contributor_type": "human",
+      "lines_added": 327,
+      "lines_deleted": 45,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
     {
       "sha": "5fb23bc68ee5515d693550162e23f2fa54568aa5",
       "author": "preston-fay",
@@ -1683,19 +1727,19 @@
     }
   ],
   "summary": {
-    "total_commits": 137,
-    "human_commits": 94,
+    "total_commits": 141,
+    "human_commits": 98,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 68.61,
-    "ai_percentage": 0.73,
-    "collaborative_percentage": 30.66,
-    "human_lines_added": 54699,
+    "human_percentage": 69.5,
+    "ai_percentage": 0.71,
+    "collaborative_percentage": 29.79,
+    "human_lines_added": 56185,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 185422,
-    "human_lines_percentage": 29.5,
-    "ai_lines_percentage": 23.13,
-    "collaborative_lines_percentage": 47.37
+    "total_lines_added": 186908,
+    "human_lines_percentage": 30.06,
+    "ai_lines_percentage": 22.94,
+    "collaborative_lines_percentage": 46.99
   }
 }
