@@ -1,8 +1,49 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T21:03:59.886187",
+  "collection_timestamp": "2025-11-28T21:12:51.863285",
   "commits": [
+    {
+      "sha": "710d551ec3b9292837908a46c669aee623c006b1",
+      "author": "preston-fay",
+      "date": "2025-11-28 16:11:57 -0500",
+      "message": "fix: serve React frontend at root path in production",
+      "contributor_type": "collaborative",
+      "lines_added": 12,
+      "lines_deleted": 11,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "60bb35e268875f1bde28b5c26b160b792fe8da97",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 21:05:06 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 146,
+      "lines_deleted": 120,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "3c8625d491124a9542ad7740ab9b3e77910d2cab",
+      "author": "preston-fay",
+      "date": "2025-11-28 16:04:34 -0500",
+      "message": "fix: add missing public directory with vite.svg",
+      "contributor_type": "collaborative",
+      "lines_added": 2,
+      "lines_deleted": 0,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
     {
       "sha": "9df46f26ebecd2de4082787a88681cedfefe03a2",
       "author": "preston-fay",
@@ -2738,19 +2779,19 @@
     }
   ],
   "summary": {
-    "total_commits": 230,
-    "human_commits": 179,
+    "total_commits": 233,
+    "human_commits": 180,
     "ai_commits": 1,
-    "collaborative_commits": 50,
-    "human_percentage": 77.83,
+    "collaborative_commits": 52,
+    "human_percentage": 77.25,
     "ai_percentage": 0.43,
-    "collaborative_percentage": 21.74,
-    "human_lines_added": 65452,
+    "collaborative_percentage": 22.32,
+    "human_lines_added": 65598,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 529052,
-    "total_lines_added": 637390,
-    "human_lines_percentage": 10.27,
+    "collaborative_lines_added": 529066,
+    "total_lines_added": 637550,
+    "human_lines_percentage": 10.29,
     "ai_lines_percentage": 6.73,
-    "collaborative_lines_percentage": 83.0
+    "collaborative_lines_percentage": 82.98
   }
 }
