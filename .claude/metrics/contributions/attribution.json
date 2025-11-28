@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T20:53:06.080932",
+  "collection_timestamp": "2025-11-28T20:59:18.682977",
   "commits": [
+    {
+      "sha": "e3fb47624b6f65b66927b51584b1b3590fce4179",
+      "author": "preston-fay",
+      "date": "2025-11-28 15:56:42 -0500",
+      "message": "fix: optimize Docker build - exclude node_modules",
+      "contributor_type": "human",
+      "lines_added": 61,
+      "lines_deleted": 4,
+      "files_changed": 2,
+      "ai_indicators": []
+    },
+    {
+      "sha": "06017e38bc3d9a9ed6514f242efdbc466858c663",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 20:54:21 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 140,
+      "lines_deleted": 118,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "aa25a9ab88dff1fc7e2584d7c41862bea2d1a30b",
       "author": "preston-fay",
@@ -2690,19 +2712,19 @@
     }
   ],
   "summary": {
-    "total_commits": 226,
-    "human_commits": 176,
+    "total_commits": 228,
+    "human_commits": 178,
     "ai_commits": 1,
     "collaborative_commits": 49,
-    "human_percentage": 77.88,
+    "human_percentage": 78.07,
     "ai_percentage": 0.44,
-    "collaborative_percentage": 21.68,
-    "human_lines_added": 65144,
+    "collaborative_percentage": 21.49,
+    "human_lines_added": 65345,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 529051,
-    "total_lines_added": 637081,
-    "human_lines_percentage": 10.23,
+    "total_lines_added": 637282,
+    "human_lines_percentage": 10.25,
     "ai_lines_percentage": 6.73,
-    "collaborative_lines_percentage": 83.04
+    "collaborative_lines_percentage": 83.02
   }
 }
