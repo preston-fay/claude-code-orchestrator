@@ -520,31 +520,34 @@ async def health_check() -> dict[str, str]:
 # Error Handlers
 # -----------------------------------------------------------------------------
 
-@router.exception_handler(IntakeServiceError)
-async def intake_service_error_handler(request, exc: IntakeServiceError):
-    """Handle intake service errors."""
-    logger.error(f"Intake service error: {exc}")
-    return JSONResponse(
-        status_code=400,
-        content={"error": "Intake service error", "detail": str(exc)}
-    )
+# Note: Exception handlers should be registered on the app, not router
+# These are commented out but kept for documentation purposes
+
+# @app.exception_handler(IntakeServiceError)
+# async def intake_service_error_handler(request, exc: IntakeServiceError):
+#     """Handle intake service errors."""
+#     logger.error(f"Intake service error: {exc}")
+#     return JSONResponse(
+#         status_code=400,
+#         content={"error": "Intake service error", "detail": str(exc)}
+#     )
 
 
-@router.exception_handler(TemplateNotFoundError)
-async def template_not_found_error_handler(request, exc: TemplateNotFoundError):
-    """Handle template not found errors."""
-    logger.error(f"Template not found: {exc}")
-    return JSONResponse(
-        status_code=404,
-        content={"error": "Template not found", "detail": str(exc)}
-    )
+# @app.exception_handler(TemplateNotFoundError)
+# async def template_not_found_error_handler(request, exc: TemplateNotFoundError):
+#     """Handle template not found errors."""
+#     logger.error(f"Template not found: {exc}")
+#     return JSONResponse(
+#         status_code=404,
+#         content={"error": "Template not found", "detail": str(exc)}
+#     )
 
 
-@router.exception_handler(SessionNotFoundError)
-async def session_not_found_error_handler(request, exc: SessionNotFoundError):
-    """Handle session not found errors."""
-    logger.error(f"Session not found: {exc}")
-    return JSONResponse(
-        status_code=404,
-        content={"error": "Session not found", "detail": str(exc)}
+# @app.exception_handler(SessionNotFoundError)
+# async def session_not_found_error_handler(request, exc: SessionNotFoundError):
+#     """Handle session not found errors."""
+#     logger.error(f"Session not found: {exc}")
+#     return JSONResponse(
+#         status_code=404,
+#         content={"error": "Session not found", "detail": str(exc)}
     )
