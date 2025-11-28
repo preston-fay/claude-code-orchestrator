@@ -1,0 +1,53 @@
+# Node modules - these are huge and will be reinstalled
+rsg-ui/node_modules/
+node_modules/
+
+# Build outputs
+rsg-ui/dist/
+dist/
+build/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.pytest_cache/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Development files
+.env
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Data files (except intake templates)
+data/raw/
+data/interim/
+data/processed/
+data/intake_sessions/
+
+# ML Models
+*.pkl
+*.h5
+*.pt
+models/
+
+# Misc
+.DS_Store
+Thumbs.db

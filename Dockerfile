@@ -3,14 +3,18 @@ FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app/rsg-ui
 
-# Copy package files
-COPY rsg-ui/package*.json ./
+# Copy ONLY package files first (for caching)
+COPY rsg-ui/package.json rsg-ui/package-lock.json ./
 
 # Install ALL dependencies (including dev deps for building)
 RUN npm ci
 
-# Copy frontend source
-COPY rsg-ui/ ./
+# Copy ONLY source files needed for build (not node_modules!)
+COPY rsg-ui/src ./src
+COPY rsg-ui/public ./public
+COPY rsg-ui/index.html ./index.html
+COPY rsg-ui/vite.config.ts ./vite.config.ts
+COPY rsg-ui/tsconfig*.json ./
 
 # Build the React app
 RUN npm run build
