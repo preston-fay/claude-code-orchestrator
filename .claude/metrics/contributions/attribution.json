@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T18:10:32.840894",
+  "collection_timestamp": "2025-11-28T20:01:29.321853",
   "commits": [
+    {
+      "sha": "6393d5de87a6802ebc86e5e1fbf5d98c7711bf00",
+      "author": "preston-fay",
+      "date": "2025-11-28 15:00:06 -0500",
+      "message": "feat: integrate intake template system into orchestrator workflow",
+      "contributor_type": "collaborative",
+      "lines_added": 12345,
+      "lines_deleted": 9,
+      "files_changed": 21,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "e2bb1cbc48cc7f332d9b063df9ed8fe9360e413c",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 18:11:44 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 212,
+      "lines_deleted": 186,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "3f901570b0f5e207d1e6fed24d0b7b09a7850d98",
       "author": "Preston Fay",
@@ -2512,19 +2538,19 @@
     }
   ],
   "summary": {
-    "total_commits": 212,
-    "human_commits": 168,
+    "total_commits": 214,
+    "human_commits": 169,
     "ai_commits": 1,
-    "collaborative_commits": 43,
-    "human_percentage": 79.25,
+    "collaborative_commits": 44,
+    "human_percentage": 78.97,
     "ai_percentage": 0.47,
-    "collaborative_percentage": 20.28,
-    "human_lines_added": 64150,
+    "collaborative_percentage": 20.56,
+    "human_lines_added": 64362,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 92162,
-    "total_lines_added": 199198,
-    "human_lines_percentage": 32.2,
-    "ai_lines_percentage": 21.53,
-    "collaborative_lines_percentage": 46.27
+    "collaborative_lines_added": 104507,
+    "total_lines_added": 211755,
+    "human_lines_percentage": 30.39,
+    "ai_lines_percentage": 20.25,
+    "collaborative_lines_percentage": 49.35
   }
 }
