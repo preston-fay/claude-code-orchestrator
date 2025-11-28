@@ -87,6 +87,7 @@ class IntakeSessionRepository:
         """Get session by ID."""
         session_file = self.storage_path / f"{session_id}.json"
         if not session_file.exists():
+            logger.warning(f"Session file not found: {session_file}")
             return None
             
         try:
@@ -135,6 +136,9 @@ class TemplateLoader:
         """Load template by ID."""
         template_file = self.templates_path / f"{template_id}.yaml"
         if not template_file.exists():
+            # Return a default template if it's one of our built-ins
+            if template_id in ["quick_start", "data_analysis", "build_something", "solve_problem"]:
+                return self._generate_default_template(template_id)
             return None
             
         try:
@@ -174,7 +178,18 @@ class TemplateLoader:
     async def list_templates(self) -> list[TemplateListItem]:
         """List all available templates."""
         templates = []
-        for template_file in self.templates_path.glob("*.yaml"):
+        
+        # Check if templates path exists
+        if not self.templates_path.exists():
+            logger.warning(f"Templates path does not exist: {self.templates_path}")
+            return self._get_default_templates()
+            
+        template_files = list(self.templates_path.glob("*.yaml"))
+        if not template_files:
+            logger.info("No template files found, returning default templates")
+            return self._get_default_templates()
+            
+        for template_file in template_files:
             if template_file.name.startswith("_"):
                 continue  # Skip base templates
                 
@@ -207,6 +222,111 @@ class TemplateLoader:
                 continue
                 
         return sorted(templates, key=lambda t: t.name)
+    
+    def _get_default_templates(self) -> list[TemplateListItem]:
+        """Return simple, conversational default templates."""
+        return [
+            TemplateListItem(
+                template_id="quick_start",
+                name="Quick Project Start", 
+                description="Just tell me about your project in your own words",
+                category="general",
+                estimated_time_minutes=5,
+                question_count=3,
+                phase_count=1
+            ),
+            TemplateListItem(
+                template_id="data_analysis",
+                name="Data Analysis Project",
+                description="Help me understand your data analysis needs",
+                category="analytics",
+                estimated_time_minutes=10,
+                question_count=5,
+                phase_count=2
+            ),
+            TemplateListItem(
+                template_id="build_something",
+                name="Build a New Feature or App",
+                description="Tell me what you want to build",
+                category="development",
+                estimated_time_minutes=10,
+                question_count=6,
+                phase_count=2
+            ),
+            TemplateListItem(
+                template_id="solve_problem",
+                name="Solve a Business Problem",
+                description="Describe your challenge and let's find a solution",
+                category="consulting",
+                estimated_time_minutes=10,
+                question_count=5,
+                phase_count=2
+            )
+        ]
+    
+    def _generate_default_template(self, template_id: str) -> TemplateDefinition | None:
+        """Generate a simple default template."""
+        from orchestrator_v2.models.intake import QuestionType
+        
+        if template_id == "quick_start":
+            return TemplateDefinition(
+                template=TemplateMetadata(
+                    id="quick_start",
+                    name="Quick Project Start",
+                    description="Just tell me about your project",
+                    version="1.0.0",
+                    category="general",
+                    estimated_time_minutes=5
+                ),
+                phases=[
+                    PhaseDefinition(
+                        id="overview",
+                        name="Project Overview",
+                        description="Tell me about your project",
+                        order=1,
+                        required=True,
+                        questions=[
+                            QuestionDefinition(
+                                id="project_description",
+                                question="What would you like to build or analyze?",
+                                type=QuestionType.TEXTAREA,
+                                required=False,
+                                placeholder="Describe your project in your own words...",
+                                help_text="Just tell me what you're trying to accomplish",
+                                hidden=False,
+                                readonly=False,
+                                width="full"
+                            ),
+                            QuestionDefinition(
+                                id="timeline",
+                                question="When do you need this completed?",
+                                type=QuestionType.TEXT,
+                                required=False,
+                                placeholder="e.g., 2 weeks, end of month, Q1 2025",
+                                hidden=False,
+                                readonly=False,
+                                width="full"
+                            ),
+                            QuestionDefinition(
+                                id="additional_context",
+                                question="Anything else I should know?",
+                                type=QuestionType.TEXTAREA,
+                                required=False,
+                                placeholder="Additional context, constraints, preferences...",
+                                hidden=False,
+                                readonly=False,
+                                width="full"
+                            )
+                        ],
+                        show_progress=True,
+                        allow_back=True,
+                        auto_advance=False
+                    )
+                ]
+            )
+        
+        # Return None for unrecognized template IDs
+        return None
 
 
 class ConditionalLogicEngine:
