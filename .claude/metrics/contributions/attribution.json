@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T21:12:51.863285",
+  "collection_timestamp": "2025-11-28T21:17:46.662576",
   "commits": [
+    {
+      "sha": "96f1a08724940bd5f67935b3bcd34c7e708f02e5",
+      "author": "preston-fay",
+      "date": "2025-11-28 16:16:54 -0500",
+      "message": "fix: integrate intake wizard as primary project creation method",
+      "contributor_type": "collaborative",
+      "lines_added": 39,
+      "lines_deleted": 6,
+      "files_changed": 3,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "d9f49fbfb8b92bae6ded8d47eabb62a107dbf99d",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 21:14:03 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 128,
+      "lines_deleted": 87,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "710d551ec3b9292837908a46c669aee623c006b1",
       "author": "preston-fay",
@@ -2779,19 +2805,19 @@
     }
   ],
   "summary": {
-    "total_commits": 233,
-    "human_commits": 180,
+    "total_commits": 235,
+    "human_commits": 181,
     "ai_commits": 1,
-    "collaborative_commits": 52,
-    "human_percentage": 77.25,
+    "collaborative_commits": 53,
+    "human_percentage": 77.02,
     "ai_percentage": 0.43,
-    "collaborative_percentage": 22.32,
-    "human_lines_added": 65598,
+    "collaborative_percentage": 22.55,
+    "human_lines_added": 65726,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 529066,
-    "total_lines_added": 637550,
-    "human_lines_percentage": 10.29,
-    "ai_lines_percentage": 6.73,
-    "collaborative_lines_percentage": 82.98
+    "collaborative_lines_added": 529105,
+    "total_lines_added": 637717,
+    "human_lines_percentage": 10.31,
+    "ai_lines_percentage": 6.72,
+    "collaborative_lines_percentage": 82.97
   }
 }
