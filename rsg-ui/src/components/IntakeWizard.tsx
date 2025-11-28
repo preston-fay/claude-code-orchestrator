@@ -57,7 +57,6 @@ interface QuestionRendererProps {
 
 interface ProgressTrackerProps {
   session: SessionStatusResponse;
-  currentPhase: PhaseDefinition;
 }
 
 // -----------------------------------------------------------------------------
@@ -145,7 +144,7 @@ const TemplateSelection: React.FC<TemplateSelectionProps> = ({
 // Progress Tracker Component
 // -----------------------------------------------------------------------------
 
-const ProgressTracker: React.FC<ProgressTrackerProps> = ({ session, currentPhase }) => {
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({ session }) => {
   return (
     <div className="intake-progress-tracker">
       <div className="progress-header">
@@ -367,7 +366,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               type="button"
               className="button-secondary"
               onClick={() => onChange([...listValues, ''])}
-              disabled={question.max_items && listValues.length >= question.max_items}
+              disabled={!!(question.max_items && listValues.length >= question.max_items)}
             >
               Add Item
             </button>
@@ -430,7 +429,7 @@ const PhaseForm: React.FC<PhaseFormProps> = ({
 }) => {
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [touched, setTouched] = useState<Set<string>>(new Set());
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimeoutRef = useRef<number | null>(null);
 
   // Load existing responses for this phase
   useEffect(() => {
@@ -445,11 +444,11 @@ const PhaseForm: React.FC<PhaseFormProps> = ({
   // Auto-save responses
   useEffect(() => {
     if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
+      window.clearTimeout(autoSaveTimeoutRef.current);
     }
 
     if (Object.keys(responses).length > 0) {
-      autoSaveTimeoutRef.current = setTimeout(async () => {
+      autoSaveTimeoutRef.current = window.setTimeout(async () => {
         try {
           await intakeApi.autoSaveResponses(session.session_id, responses);
         } catch (err) {
@@ -460,7 +459,7 @@ const PhaseForm: React.FC<PhaseFormProps> = ({
 
     return () => {
       if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
+        window.clearTimeout(autoSaveTimeoutRef.current);
       }
     };
   }, [responses, session.session_id]);
@@ -672,7 +671,7 @@ const IntakeWizard: React.FC<IntakeWizardProps> = ({
     }
   };
 
-  const handleNavigation = async (direction: 'next' | 'previous', targetPhaseId?: string) => {
+  const handleNavigation = async (direction: 'next' | 'previous' | 'goto', targetPhaseId?: string) => {
     if (!session || !template) return;
 
     try {
@@ -795,7 +794,7 @@ const IntakeWizard: React.FC<IntakeWizardProps> = ({
 
           <div className="intake-content">
             <aside className="intake-sidebar">
-              <ProgressTracker session={session} currentPhase={currentPhase} />
+              <ProgressTracker session={session} />
             </aside>
 
             <main className="intake-main">
@@ -803,7 +802,7 @@ const IntakeWizard: React.FC<IntakeWizardProps> = ({
                 phase={currentPhase}
                 session={session}
                 onSubmit={handleResponseSubmit}
-                onNavigate={handleNavigation}
+                onNavigate={(direction: 'next' | 'previous' | 'goto', targetPhaseId?: string) => handleNavigation(direction, targetPhaseId)}
                 loading={loading}
                 validationErrors={validationErrors}
               />

@@ -550,4 +550,4 @@ async def health_check() -> dict[str, str]:
 #     return JSONResponse(
 #         status_code=404,
 #         content={"error": "Session not found", "detail": str(exc)}
-    )
+#     )
