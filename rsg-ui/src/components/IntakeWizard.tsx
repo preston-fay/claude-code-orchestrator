@@ -93,11 +93,7 @@ const TemplateSelection: React.FC<TemplateSelectionProps> = ({
               className={`template-card ${selectedTemplateId === template.template_id ? 'selected' : ''}`}
               onClick={() => setSelectedTemplateId(template.template_id)}
             >
-              {template.icon && (
-                <div className="template-icon" style={{ color: template.color }}>
-                  {template.icon}
-                </div>
-              )}
+              {/* NO ICONS - KDS compliant. Icons removed. */}
               <h3>{template.name}</h3>
               {template.description && (
                 <p className="template-description">{template.description}</p>
