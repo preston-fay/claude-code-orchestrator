@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T21:26:54.022497",
+  "collection_timestamp": "2025-11-28T21:31:49.206648",
   "commits": [
+    {
+      "sha": "f28e2f819362ed78f322a2e418b1201b3a05e1e5",
+      "author": "preston-fay",
+      "date": "2025-11-28 16:30:55 -0500",
+      "message": "fix: support object type in intake forms and make questions optional",
+      "contributor_type": "collaborative",
+      "lines_added": 34,
+      "lines_deleted": 4,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "461811f6ae0eb8955e493a53271b598c50221204",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 21:27:50 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 146,
+      "lines_deleted": 120,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "2e371710d9252d9ec1442cd1ca658fcea76bd16a",
       "author": "preston-fay",
@@ -2831,19 +2857,19 @@
     }
   ],
   "summary": {
-    "total_commits": 237,
-    "human_commits": 182,
+    "total_commits": 239,
+    "human_commits": 183,
     "ai_commits": 1,
-    "collaborative_commits": 54,
-    "human_percentage": 76.79,
+    "collaborative_commits": 55,
+    "human_percentage": 76.57,
     "ai_percentage": 0.42,
-    "collaborative_percentage": 22.78,
-    "human_lines_added": 65840,
+    "collaborative_percentage": 23.01,
+    "human_lines_added": 65986,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 529147,
-    "total_lines_added": 637873,
-    "human_lines_percentage": 10.32,
+    "collaborative_lines_added": 529181,
+    "total_lines_added": 638053,
+    "human_lines_percentage": 10.34,
     "ai_lines_percentage": 6.72,
-    "collaborative_lines_percentage": 82.95
+    "collaborative_lines_percentage": 82.94
   }
 }
