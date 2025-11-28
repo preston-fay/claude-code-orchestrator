@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T20:06:30.183496",
+  "collection_timestamp": "2025-11-28T20:11:44.065298",
   "commits": [
+    {
+      "sha": "1deca4b0fc565c7dca1c7db3e87e7c2d7188f1d4",
+      "author": "preston-fay",
+      "date": "2025-11-28 15:10:51 -0500",
+      "message": "fix: resolve deployment issues for Railway",
+      "contributor_type": "collaborative",
+      "lines_added": 36,
+      "lines_deleted": 27,
+      "files_changed": 2,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "f2694289e7ef768c01620fa2cd2e73394051d39d",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 20:07:42 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 147,
+      "lines_deleted": 121,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "d55771d30ba951d4c2b29d92ad5658664973fec4",
       "author": "preston-fay",
@@ -2564,19 +2590,19 @@
     }
   ],
   "summary": {
-    "total_commits": 216,
-    "human_commits": 170,
+    "total_commits": 218,
+    "human_commits": 171,
     "ai_commits": 1,
-    "collaborative_commits": 45,
-    "human_percentage": 78.7,
+    "collaborative_commits": 46,
+    "human_percentage": 78.44,
     "ai_percentage": 0.46,
-    "collaborative_percentage": 20.83,
-    "human_lines_added": 64508,
+    "collaborative_percentage": 21.1,
+    "human_lines_added": 64655,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 104794,
-    "total_lines_added": 212188,
-    "human_lines_percentage": 30.4,
-    "ai_lines_percentage": 20.21,
-    "collaborative_lines_percentage": 49.39
+    "collaborative_lines_added": 104830,
+    "total_lines_added": 212371,
+    "human_lines_percentage": 30.44,
+    "ai_lines_percentage": 20.19,
+    "collaborative_lines_percentage": 49.36
   }
 }
