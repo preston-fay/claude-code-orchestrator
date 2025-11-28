@@ -6,8 +6,8 @@ WORKDIR /app/rsg-ui
 # Copy package files
 COPY rsg-ui/package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including dev deps for building)
+RUN npm ci
 
 # Copy frontend source
 COPY rsg-ui/ ./
