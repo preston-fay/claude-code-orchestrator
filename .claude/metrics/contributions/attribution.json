@@ -1,8 +1,30 @@
 {
   "metric": "contribution_attribution",
-  "period": "2025-08-29/2025-11-27",
-  "collection_timestamp": "2025-11-27T22:23:09.581951",
+  "period": "2025-08-30/2025-11-28",
+  "collection_timestamp": "2025-11-28T09:19:20.215134",
   "commits": [
+    {
+      "sha": "4a8faf1e0c32ce6bff4e50f17f15e10c21380fa9",
+      "author": "github-actions[bot]",
+      "date": "2025-11-27 22:24:16 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 152,
+      "lines_deleted": 119,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
+    {
+      "sha": "49edb5ddc5bb00dbe95196c4400d233b6468a4c8",
+      "author": "preston-fay",
+      "date": "2025-11-27 17:22:42 -0500",
+      "message": "fix: Export RSC DTOs and converters from dto/__init__.py",
+      "contributor_type": "human",
+      "lines_added": 24,
+      "lines_deleted": 6,
+      "files_changed": 1,
+      "ai_indicators": []
+    },
     {
       "sha": "50e9d80ed44be5f5c9ac33bde535999940149195",
       "author": "preston-fay",
@@ -2464,19 +2486,19 @@
     }
   ],
   "summary": {
-    "total_commits": 208,
-    "human_commits": 165,
+    "total_commits": 210,
+    "human_commits": 167,
     "ai_commits": 1,
     "collaborative_commits": 42,
-    "human_percentage": 79.33,
+    "human_percentage": 79.52,
     "ai_percentage": 0.48,
-    "collaborative_percentage": 20.19,
-    "human_lines_added": 63835,
+    "collaborative_percentage": 20.0,
+    "human_lines_added": 64011,
     "ai_lines_added": 42886,
     "collaborative_lines_added": 87837,
-    "total_lines_added": 194558,
-    "human_lines_percentage": 32.81,
-    "ai_lines_percentage": 22.04,
-    "collaborative_lines_percentage": 45.15
+    "total_lines_added": 194734,
+    "human_lines_percentage": 32.87,
+    "ai_lines_percentage": 22.02,
+    "collaborative_lines_percentage": 45.11
   }
 }
