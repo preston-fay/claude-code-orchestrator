@@ -1,0 +1,36 @@
+{
+  "session_id": "acf9b6ad-5ba0-4cfd-a1e6-a8e305ef173b",
+  "user_id": "test-user",
+  "template_id": "general",
+  "client_slug": "kearney-default",
+  "current_phase_id": "project_type_clarification",
+  "phase_order": [
+    "project_type_clarification",
+    "scope_definition",
+    "resources_inputs",
+    "risks_concerns"
+  ],
+  "completed_phases": [],
+  "responses": {
+    "project_category": "analysis",
+    "deliverable_type": "document"
+  },
+  "derived_responses": {},
+  "governance_data": null,
+  "validation_errors": [
+    {
+      "field_id": "deliverable_description",
+      "error_type": "required",
+      "message": "Describe the expected deliverable(s): is required",
+      "details": {}
+    }
+  ],
+  "is_complete": false,
+  "project_id": null,
+  "created_at": "2025-11-28 18:29:55.712522",
+  "updated_at": "2025-11-28 18:29:55.714990",
+  "last_activity": "2025-11-28 18:29:55.714995",
+  "metadata": {},
+  "auto_save_enabled": true,
+  "save_interval_seconds": 30
+}

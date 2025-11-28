@@ -542,3 +542,93 @@ button {
   background-color: var(--success);
   color: var(--text-inverse);
 }
+
+/* ==========================================================================
+   Intake Wizard Integration Styles
+   ========================================================================== */
+
+/* Header actions */
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+}
+
+/* Creation option buttons */
+.creation-options {
+  margin-bottom: 2rem;
+}
+
+.creation-options p {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.option-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.option-button {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.option-button:hover {
+  border-color: var(--emphasis);
+  background: var(--violet-1);
+}
+
+.option-button.guided {
+  background: linear-gradient(135deg, var(--violet-1), var(--violet-2));
+  border-color: var(--emphasis);
+}
+
+.option-button.guided:hover {
+  background: linear-gradient(135deg, var(--violet-2), var(--violet-3));
+  transform: translateY(-2px);
+}
+
+.option-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.option-button h3 {
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.option-button p {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.option-divider {
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0.5rem 0;
+  text-align: center;
+}

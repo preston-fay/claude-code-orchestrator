@@ -16,6 +16,7 @@ import {
   type CreateRunRequest,
   type ListRunsParams,
 } from '../api/orchestrator';
+import IntakeWizard from '../components/IntakeWizard';
 
 const OrchestratorRunsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const OrchestratorRunsPage: React.FC = () => {
 
   // Create run modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showIntakeWizard, setShowIntakeWizard] = useState(false);
   const [newRun, setNewRun] = useState<CreateRunRequest>({
     profile: 'analytics_forecast_app',
     intake: '',
@@ -100,6 +102,23 @@ const OrchestratorRunsPage: React.FC = () => {
     }
   };
 
+  const handleIntakeWizardComplete = async (projectId: string) => {
+    // Close the intake wizard
+    setShowIntakeWizard(false);
+    
+    // Navigate to the newly created project
+    navigate(`/projects/${projectId}`);
+  };
+
+  const handleIntakeWizardCancel = () => {
+    setShowIntakeWizard(false);
+  };
+
+  const handleStartIntakeWizard = () => {
+    setShowCreateModal(false);
+    setShowIntakeWizard(true);
+  };
+
   const handleResetFilters = () => {
     setStatusFilter('');
     setProfileFilter('');
@@ -138,9 +157,14 @@ const OrchestratorRunsPage: React.FC = () => {
     <div className="page orchestrator-runs-page">
       <div className="page-header">
         <h2>Orchestrator Runs</h2>
-        <button className="button-primary" onClick={() => setShowCreateModal(true)}>
-          New Run
-        </button>
+        <div className="header-actions">
+          <button className="button-primary" onClick={() => setShowIntakeWizard(true)}>
+            New Project (Guided)
+          </button>
+          <button className="button-secondary" onClick={() => setShowCreateModal(true)}>
+            Quick Run
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -283,13 +307,29 @@ const OrchestratorRunsPage: React.FC = () => {
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="modal-content new-project-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Create New Run</h2>
+              <h2>Quick Create Run</h2>
               <button className="close-button" onClick={() => setShowCreateModal(false)}>
                 &times;
               </button>
             </div>
 
             <div className="modal-body">
+              <div className="creation-options">
+                <p>Choose how you'd like to create your project:</p>
+                <div className="option-buttons">
+                  <button 
+                    className="option-button guided" 
+                    onClick={handleStartIntakeWizard}
+                  >
+                    <div className="option-icon">🧙‍♂️</div>
+                    <h3>Guided Interview</h3>
+                    <p>Answer structured questions to build a comprehensive project specification</p>
+                  </button>
+                  <div className="option-divider">OR</div>
+                </div>
+              </div>
+
+              <h3>Quick Manual Creation</h3>
               <div className="form-group">
                 <label htmlFor="profile">Profile *</label>
                 <select
@@ -340,6 +380,17 @@ const OrchestratorRunsPage: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Intake Wizard */}
+      {showIntakeWizard && (
+        <div className="modal-overlay" style={{ zIndex: 1000 }}>
+          <IntakeWizard
+            onComplete={handleIntakeWizardComplete}
+            onCancel={handleIntakeWizardCancel}
+            clientSlug="kearney-default"
+          />
         </div>
       )}
     </div>

@@ -91,6 +91,58 @@ ARCHITECTURE        (early dev)         QA
 | [METHODOLOGY](docs/METHODOLOGY.md) | Deep dive into orchestrator design |
 | [API Reference](docs/API_MINIMUM.md) | REST API documentation |
 
+### Intake System Documentation
+
+| Doc | Description |
+|-----|-------------|
+| [Intake Wizard Guide](docs/user_guide/intake_wizard_guide.md) | How to use the intake wizard interface |
+| [Intake API Reference](docs/api/intake_api_reference.md) | Complete API documentation for intake endpoints |
+| [Creating Templates](docs/developer/creating_intake_templates.md) | Developer guide for building custom templates |
+| [System Architecture](docs/architecture/intake_system_design.md) | Technical architecture and design decisions |
+| [QA Report](docs/qa/intake_system_qa_report.md) | Quality assurance testing results |
+
+---
+
+## 🧭 Intake Template System
+
+**Smart requirement gathering for perfect project starts**
+
+The Intake Template System provides structured, adaptive interviews that ensure comprehensive project requirements before workflow execution. No more blank-page syndrome or missing context.
+
+### Key Benefits
+- **Guided interviews** tailored to your project type
+- **Adaptive questions** that respond to your answers
+- **Automatic validation** ensures completeness
+- **Client governance** applies brand and compliance rules
+- **Perfect prompts for perfect prompts** - orchestrator gets complete context
+
+### Quick Example
+
+```bash
+# Start an intake session
+curl -X POST "http://localhost:8000/api/intake/sessions" \
+  -H "Content-Type: application/json" \
+  -d '{"template_id": "presentation", "client_slug": "kearney-default"}'
+
+# The wizard guides users through structured questions
+# Outputs a complete project profile ready for orchestration
+```
+
+### Available Templates
+
+| Template | Use Case | Duration | Questions |
+|----------|----------|----------|-----------|
+| **Presentation** | Slide decks, client reports | 15-20 min | 12-18 |
+| **Analytics** | Data analysis, insights | 25-35 min | 18-25 |
+| **ML Model** | Machine learning projects | 30-45 min | 20-30 |
+| **Web Application** | Web tools, dashboards | 20-30 min | 15-22 |
+| **Supply Chain** | Operations optimization | 35-50 min | 25-35 |
+
+### Documentation
+- **📘 [User Guide](docs/user_guide/intake_wizard_guide.md)** - How to use the intake wizard
+- **🔧 [API Reference](docs/api/intake_api_reference.md)** - Complete API documentation
+- **👨‍💻 [Developer Guide](docs/developer/creating_intake_templates.md)** - Create custom templates
+
 ---
 
 ## 🔧 API Endpoints
@@ -100,6 +152,13 @@ ARCHITECTURE        (early dev)         QA
 POST   /projects                    # Create project
 GET    /projects                    # List projects
 GET    /projects/{id}               # Get project
+
+# Intake Template System
+POST   /api/intake/sessions         # Create intake session
+GET    /api/intake/sessions/{id}    # Get session status
+PUT    /api/intake/sessions/{id}/responses  # Submit answers
+POST   /api/intake/sessions/{id}/complete   # Complete & create project
+GET    /api/intake/templates        # List available templates
 
 # Ready/Set/Go Workflow
 POST   /rsg/{id}/ready/start        # Start Ready stage
@@ -119,17 +178,28 @@ POST   /users/me/provider-test      # Test API key works
 ```
 claude-code-orchestrator/
 ├── orchestrator_v2/          # ✅ PRIMARY - V2 Implementation
-│   ├── api/                  # FastAPI server
+│   ├── api/                  # FastAPI server + intake routes
 │   ├── agents/               # 8 specialized agents
 │   ├── engine/               # Workflow engine
 │   ├── llm/                  # LLM providers (Anthropic, Bedrock)
+│   ├── models/               # Data models (includes intake.py)
+│   ├── services/             # Business logic (includes intake_service.py)
 │   └── rsg/                  # Ready/Set/Go service
+├── intake/                   # 🧭 Intake Template System
+│   ├── templates/            # YAML template definitions
+│   └── schema/               # JSON schema validation
+├── rsg-ui/                   # React frontend with intake wizard
 ├── src/orchestrator/         # ⚠️ DEPRECATED - V1 (see docs/MIGRATION.md)
 ├── subagent_prompts/         # Agent prompt templates
 ├── docs/                     # Documentation
+│   ├── user_guide/           # End-user documentation
+│   ├── api/                  # API reference docs
+│   ├── developer/            # Developer guides
+│   ├── architecture/         # System design docs
+│   └── qa/                   # Quality assurance reports
 ├── scripts/                  # Utility scripts
 ├── _archive/                 # Historical files
-└── tests/                    # Test suite
+└── tests/                    # Test suite (includes intake tests)
 ```
 
 ---
@@ -161,6 +231,19 @@ orchestrator bootstrap analytics --output ~/projects/my-new-project
 ---
 
 ## Features
+
+### Intake Template System
+
+Structured requirement gathering through adaptive interviews that ensure comprehensive project context before orchestrator workflows begin.
+
+**Key capabilities:**
+- Conditional logic and adaptive questioning
+- Client-specific governance and validation
+- Auto-save and session management
+- Project template inheritance
+- Multi-language and branding support
+
+**📖 Learn more:** [docs/user_guide/intake_wizard_guide.md](docs/user_guide/intake_wizard_guide.md)
 
 ### Skills Framework
 

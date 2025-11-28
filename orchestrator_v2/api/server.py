@@ -68,7 +68,7 @@ from orchestrator_v2.user.models import (
     ApiKeyUpdate,
     to_public_profile,
 )
-from orchestrator_v2.api.routes import runs
+from orchestrator_v2.api.routes import runs, intake
 
 
 # Request/Response models
@@ -81,6 +81,8 @@ class CreateProjectRequest(BaseModel):
     # INTAKE: Project description/requirements - CRITICAL for agents to know what to build
     description: str | None = None
     intake_path: str | None = None
+    # NEW: Intake session integration
+    intake_session_id: str | None = None  # Link to completed intake session
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -158,6 +160,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(runs.router)
+app.include_router(intake.router)
 
 
 @app.get("/", include_in_schema=False)
@@ -410,6 +413,38 @@ async def create_project(request: CreateProjectRequest):
     project_type = request.project_type
     template_id = request.template_id
     intake_path = request.intake_path
+    intake_description = request.description
+
+    # NEW: If intake session provided, load session data
+    if request.intake_session_id:
+        from orchestrator_v2.services.intake_service import IntakeSessionService
+        intake_service = IntakeSessionService()
+        
+        try:
+            session = await intake_service.session_repo.get(request.intake_session_id)
+            if session and session.is_complete:
+                # Use intake session data to populate project
+                if not request.project_name and "project_name" in session.responses:
+                    request.project_name = session.responses["project_name"]
+                if not intake_description:
+                    template = await intake_service._load_template(session.template_id)
+                    if template:
+                        intake_description = await intake_service._format_intake_description(session, template)
+                project_type = session.template_id
+                template_id = session.template_id
+                # Add intake session metadata
+                request.metadata.update({
+                    "intake_session_id": request.intake_session_id,
+                    "intake_responses": session.responses,
+                    "derived_responses": session.derived_responses,
+                    "governance_data": session.governance_data.dict() if session.governance_data else None
+                })
+            else:
+                raise HTTPException(status_code=400, detail="Intake session not found or not completed")
+        except Exception as e:
+            import logging
+            logging.warning(f"Failed to load intake session {request.intake_session_id}: {e}")
+            # Continue with regular project creation
 
     if template_id:
         template = get_template_by_id(template_id)
@@ -428,13 +463,13 @@ async def create_project(request: CreateProjectRequest):
     state.template_id = template_id
     
     # CRITICAL: Store the description as intake for agents to use
-    state.intake = request.description
+    state.intake = intake_description
 
     try:
         workspace_config = workspace_manager.create_data_workspace(
             project_id=state.project_id,
             project_type=project_type,
-            metadata={"project_name": request.project_name, "template_id": template_id, "description": request.description},
+            metadata={"project_name": request.project_name, "template_id": template_id, "description": intake_description},
         )
         state.workspace_path = str(workspace_config.workspace_root)
     except Exception as e:
