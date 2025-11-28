@@ -166,14 +166,7 @@ app.include_router(runs.router)
 app.include_router(intake.router)
 
 
-@app.get("/", include_in_schema=False)
-async def root():
-    """Root endpoint - simple alive check."""
-    return {
-        "status": "ok",
-        "timestamp": datetime.utcnow().isoformat(),
-        "version": "2.0.0",
-    }
+# Root endpoint removed - will be handled by frontend serving in production
 
 
 @app.get("/health", include_in_schema=False)
@@ -956,14 +949,22 @@ if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("NODE_ENV") == "production":
     
     if frontend_path.exists():
         # Mount static files from React build
-        app.mount("/static", StaticFiles(directory=str(frontend_path / "assets")), name="static")
+        app.mount("/assets", StaticFiles(directory=str(frontend_path / "assets")), name="static")
+        
+        # Serve index.html for root
+        @app.get("/")
+        async def serve_root():
+            index_path = frontend_path / "index.html"
+            if index_path.exists():
+                return FileResponse(str(index_path))
+            return {"error": "Frontend not built"}
         
         # Serve index.html for all non-API routes (React Router support)
         @app.get("/{full_path:path}")
         async def serve_frontend(full_path: str):
             # Don't serve frontend for API routes
-            if full_path.startswith("api/") or full_path.startswith("health") or full_path.startswith("rsc/"):
-                return {"error": "Not found"}
+            if full_path.startswith("api/") or full_path.startswith("health") or full_path.startswith("rsc/") or full_path.startswith("assets/"):
+                raise HTTPException(status_code=404, detail="Not found")
             
             index_path = frontend_path / "index.html"
             if index_path.exists():
