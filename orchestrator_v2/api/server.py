@@ -69,6 +69,9 @@ from orchestrator_v2.user.models import (
     to_public_profile,
 )
 from orchestrator_v2.api.routes import runs, intake
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pathlib import Path
 
 
 # Request/Response models
@@ -942,3 +945,31 @@ def create_app(
         governance_repo = governance_repo_override
 
     return app
+
+
+# Serve the React frontend
+# Check if we're running in production (Railway sets NODE_ENV)
+import os
+if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("NODE_ENV") == "production":
+    # Path to the built React app
+    frontend_path = Path(__file__).parent.parent.parent / "rsg-ui" / "dist"
+    
+    if frontend_path.exists():
+        # Mount static files from React build
+        app.mount("/static", StaticFiles(directory=str(frontend_path / "assets")), name="static")
+        
+        # Serve index.html for all non-API routes (React Router support)
+        @app.get("/{full_path:path}")
+        async def serve_frontend(full_path: str):
+            # Don't serve frontend for API routes
+            if full_path.startswith("api/") or full_path.startswith("health") or full_path.startswith("rsc/"):
+                return {"error": "Not found"}
+            
+            index_path = frontend_path / "index.html"
+            if index_path.exists():
+                return FileResponse(str(index_path))
+            return {"error": "Frontend not built"}
+    else:
+        print(f"WARNING: Frontend build not found at {frontend_path}")
+else:
+    print("Running in development mode - frontend served separately")
