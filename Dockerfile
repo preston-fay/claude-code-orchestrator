@@ -11,10 +11,10 @@ RUN npm ci
 
 # Copy ONLY source files needed for build (not node_modules!)
 COPY rsg-ui/src ./src
-COPY rsg-ui/public ./public
 COPY rsg-ui/index.html ./index.html
 COPY rsg-ui/vite.config.ts ./vite.config.ts
 COPY rsg-ui/tsconfig*.json ./
+COPY rsg-ui/vite-env.d.ts ./vite-env.d.ts
 
 # Build the React app
 RUN npm run build
