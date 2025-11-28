@@ -1,0 +1,522 @@
+# Supply Chain Project Intake Template
+# For supply chain optimization, logistics, and operations projects
+# Version: 1.0.0
+
+template:
+  id: "supply-chain"
+  name: "Supply Chain Optimization"
+  description: "Supply chain analysis, optimization, and logistics projects"
+  version: "1.0.0"
+  extends: "_base"
+  icon: "truck"
+  color: "#F59E0B"  # Amber/Orange
+
+phases:
+
+  # Phase 1: Problem Area
+  - id: "problem_area"
+    name: "Problem Area"
+    description: "What supply chain challenge are you addressing?"
+    order: 5
+    required: true
+    questions:
+      
+      - id: "supply_chain_domain"
+        question: "What area of the supply chain is this focused on?"
+        type: "choice"
+        required: true
+        options:
+          - value: "network_design"
+            label: "Network Design"
+            description: "Facility location, capacity planning, network optimization"
+          - value: "inventory"
+            label: "Inventory Optimization"
+            description: "Stock levels, safety stock, demand planning"
+          - value: "transportation"
+            label: "Transportation & Logistics"
+            description: "Routing, mode selection, carrier management"
+          - value: "sourcing"
+            label: "Sourcing & Procurement"
+            description: "Supplier selection, make vs buy, contract optimization"
+          - value: "demand_planning"
+            label: "Demand Planning & Forecasting"
+            description: "Demand sensing, S&OP, forecast accuracy"
+          - value: "production"
+            label: "Production Planning"
+            description: "Scheduling, capacity utilization, lot sizing"
+          - value: "warehouse"
+            label: "Warehouse Operations"
+            description: "Layout, picking strategies, labor planning"
+          - value: "last_mile"
+            label: "Last Mile Delivery"
+            description: "Route optimization, delivery windows, fleet"
+          - value: "risk"
+            label: "Risk & Resilience"
+            description: "Supplier risk, disruption planning, visibility"
+          - value: "sustainability"
+            label: "Sustainability"
+            description: "Carbon footprint, circular supply chain, ESG"
+      
+      - id: "problem_statement"
+        question: "What is the specific problem or opportunity?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 50
+          max_length: 500
+        help_text: "Describe the current pain point or opportunity"
+      
+      - id: "quantified_opportunity"
+        question: "What is the quantified opportunity?"
+        type: "object"
+        required: true
+        properties:
+          value:
+            type: "text"
+            required: true
+            placeholder: "e.g., $10M, 15%, 3 days"
+          metric:
+            type: "choice"
+            required: true
+            options:
+              - value: "cost_reduction"
+                label: "Cost reduction"
+              - value: "revenue_increase"
+                label: "Revenue increase"
+              - value: "inventory_reduction"
+                label: "Inventory reduction"
+              - value: "service_improvement"
+                label: "Service level improvement"
+              - value: "lead_time"
+                label: "Lead time reduction"
+              - value: "carbon"
+                label: "Carbon reduction"
+              - value: "other"
+                label: "Other"
+          confidence:
+            type: "choice"
+            required: true
+            options:
+              - value: "validated"
+                label: "Validated (based on analysis)"
+              - value: "estimated"
+                label: "Estimated (directional)"
+              - value: "hypothesis"
+                label: "Hypothesis (to be validated)"
+
+  # Phase 2: Current State
+  - id: "current_state"
+    name: "Current State"
+    description: "Understanding the existing supply chain"
+    order: 6
+    required: true
+    questions:
+      
+      - id: "supply_chain_scope"
+        question: "What is the geographic scope?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "single_site"
+            label: "Single site/facility"
+          - value: "regional"
+            label: "Regional (single country)"
+          - value: "national"
+            label: "National"
+          - value: "continental"
+            label: "Continental"
+          - value: "global"
+            label: "Global"
+      
+      - id: "network_complexity"
+        question: "Describe the supply chain network:"
+        type: "object"
+        required: true
+        properties:
+          suppliers:
+            type: "text"
+            required: true
+            placeholder: "Approximate number of suppliers"
+          facilities:
+            type: "text"
+            required: true
+            placeholder: "Number of DCs/plants/stores"
+          skus:
+            type: "text"
+            required: true
+            placeholder: "Number of SKUs/products"
+          customers:
+            type: "text"
+            required: false
+            placeholder: "Number of customers/ship-to points"
+      
+      - id: "current_systems"
+        question: "What systems are currently in use?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            system:
+              type: "text"
+              required: true
+              placeholder: "System name (e.g., SAP ERP, Oracle WMS)"
+            function:
+              type: "choice"
+              required: true
+              options:
+                - value: "erp"
+                  label: "ERP"
+                - value: "wms"
+                  label: "WMS"
+                - value: "tms"
+                  label: "TMS"
+                - value: "planning"
+                  label: "Planning/APS"
+                - value: "procurement"
+                  label: "Procurement"
+                - value: "analytics"
+                  label: "Analytics/BI"
+                - value: "other"
+                  label: "Other"
+            data_availability:
+              type: "choice"
+              required: true
+              options:
+                - value: "full"
+                  label: "Full data access"
+                - value: "partial"
+                  label: "Partial access"
+                - value: "limited"
+                  label: "Limited/manual extract"
+        min_items: 1
+        max_items: 10
+      
+      - id: "current_performance"
+        question: "Current performance metrics:"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            metric:
+              type: "text"
+              required: true
+              placeholder: "e.g., OTIF, inventory turns, transportation cost"
+            current_value:
+              type: "text"
+              required: true
+              placeholder: "Current performance"
+            target:
+              type: "text"
+              required: false
+              placeholder: "Target value"
+            benchmark:
+              type: "text"
+              required: false
+              placeholder: "Industry benchmark (if known)"
+        min_items: 2
+        max_items: 10
+
+  # Phase 3: Data Availability
+  - id: "data_availability"
+    name: "Data Availability"
+    description: "What data is available for analysis?"
+    order: 7
+    required: true
+    questions:
+      
+      - id: "data_sources"
+        question: "What data sources are available?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            data_type:
+              type: "choice"
+              required: true
+              options:
+                - value: "transactions"
+                  label: "Transaction data (orders, shipments)"
+                - value: "inventory"
+                  label: "Inventory data"
+                - value: "costs"
+                  label: "Cost data (freight, labor, warehousing)"
+                - value: "demand"
+                  label: "Demand/forecast data"
+                - value: "supplier"
+                  label: "Supplier data"
+                - value: "customer"
+                  label: "Customer data"
+                - value: "network"
+                  label: "Network data (locations, capacities)"
+                - value: "external"
+                  label: "External data (market, weather)"
+            granularity:
+              type: "choice"
+              required: true
+              options:
+                - value: "transaction"
+                  label: "Transaction level"
+                - value: "daily"
+                  label: "Daily"
+                - value: "weekly"
+                  label: "Weekly"
+                - value: "monthly"
+                  label: "Monthly"
+            history:
+              type: "text"
+              required: true
+              placeholder: "How much history? (e.g., 3 years)"
+            access:
+              type: "choice"
+              required: true
+              options:
+                - value: "ready"
+                  label: "Ready to extract"
+                - value: "needs_work"
+                  label: "Needs preparation"
+                - value: "difficult"
+                  label: "Difficult to access"
+        min_items: 2
+        max_items: 15
+      
+      - id: "data_quality_concerns"
+        question: "Any known data quality issues?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 400
+        help_text: "Missing data, inconsistencies, integration challenges"
+
+  # Phase 4: Optimization Approach
+  - id: "optimization_approach"
+    name: "Optimization Approach"
+    description: "How should the problem be solved?"
+    order: 8
+    required: true
+    questions:
+      
+      - id: "analytical_approach"
+        question: "What analytical approaches are appropriate?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "descriptive"
+            label: "Descriptive analytics (understanding current state)"
+          - value: "simulation"
+            label: "Simulation modeling"
+          - value: "optimization"
+            label: "Mathematical optimization (LP, MIP)"
+          - value: "heuristics"
+            label: "Heuristics/rules-based"
+          - value: "ml"
+            label: "Machine learning"
+          - value: "scenario"
+            label: "Scenario analysis"
+          - value: "network_opt"
+            label: "Network optimization"
+      
+      - id: "decision_variables"
+        question: "What decisions need to be optimized?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "text"
+          placeholder: "e.g., Which DCs to open, Optimal inventory levels"
+        min_items: 1
+        max_items: 10
+      
+      - id: "constraints"
+        question: "What are the key constraints?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            constraint:
+              type: "text"
+              required: true
+              placeholder: "e.g., Capacity limit, Budget, Service level"
+            type:
+              type: "choice"
+              required: true
+              options:
+                - value: "hard"
+                  label: "Hard constraint (must satisfy)"
+                - value: "soft"
+                  label: "Soft constraint (prefer to satisfy)"
+        min_items: 1
+        max_items: 10
+      
+      - id: "objective_function"
+        question: "What should be optimized?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            objective:
+              type: "text"
+              required: true
+              placeholder: "e.g., Minimize cost, Maximize service"
+            direction:
+              type: "choice"
+              required: true
+              options:
+                - value: "minimize"
+                  label: "Minimize"
+                - value: "maximize"
+                  label: "Maximize"
+            weight:
+              type: "choice"
+              required: false
+              options:
+                - value: "primary"
+                  label: "Primary objective"
+                - value: "secondary"
+                  label: "Secondary"
+        min_items: 1
+        max_items: 3
+      
+      - id: "scenario_requirements"
+        question: "What scenarios need to be analyzed?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          placeholder: "e.g., Base case, 20% demand increase, New DC"
+        min_items: 0
+        max_items: 10
+
+  # Phase 5: Implementation
+  - id: "implementation"
+    name: "Implementation"
+    description: "How will recommendations be implemented?"
+    order: 9
+    required: true
+    questions:
+      
+      - id: "implementation_intent"
+        question: "What is the intent for implementation?"
+        type: "choice"
+        required: true
+        options:
+          - value: "recommendation"
+            label: "Recommendation only (client implements)"
+          - value: "pilot"
+            label: "Pilot implementation"
+          - value: "full_implementation"
+            label: "Full implementation support"
+          - value: "tool_development"
+            label: "Decision support tool development"
+      
+      - id: "change_management"
+        question: "What organizational changes are anticipated?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 400
+        help_text: "Process changes, organizational impact, training needs"
+      
+      - id: "technology_requirements"
+        question: "What technology enablement is needed?"
+        type: "multi_choice"
+        required: false
+        options:
+          - value: "none"
+            label: "No technology changes"
+          - value: "dashboard"
+            label: "Dashboard/reporting"
+          - value: "decision_tool"
+            label: "Decision support tool"
+          - value: "system_config"
+            label: "System configuration"
+          - value: "integration"
+            label: "System integration"
+          - value: "new_system"
+            label: "New system implementation"
+
+  # Phase 6: Deliverables
+  - id: "sc_deliverables"
+    name: "Deliverables"
+    description: "Expected outputs"
+    order: 10
+    required: true
+    questions:
+      
+      - id: "deliverable_components"
+        question: "What deliverables are expected?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "current_state"
+            label: "Current state assessment"
+          - value: "optimization_model"
+            label: "Optimization model"
+          - value: "scenario_analysis"
+            label: "Scenario analysis results"
+          - value: "recommendations"
+            label: "Strategic recommendations"
+          - value: "business_case"
+            label: "Business case / ROI"
+          - value: "implementation_roadmap"
+            label: "Implementation roadmap"
+          - value: "decision_tool"
+            label: "Decision support tool"
+          - value: "dashboard"
+            label: "Analytics dashboard"
+          - value: "documentation"
+            label: "Technical documentation"
+      
+      - id: "presentation_audience"
+        question: "Who will receive the final presentation?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "c_suite"
+            label: "C-Suite"
+          - value: "supply_chain_leadership"
+            label: "Supply Chain Leadership"
+          - value: "operations"
+            label: "Operations team"
+          - value: "finance"
+            label: "Finance"
+          - value: "board"
+            label: "Board of Directors"
+
+# Output configuration
+output:
+  format: "intake_response"
+  validation: "standard"
+  merge_with_governance: true
+  
+  mapping:
+    project:
+      name: "{{project_name}}"
+      slug: "{{project_slug}}"
+      type: "supply-chain"
+      subtype: "{{supply_chain_domain}}"
+      description: "{{project_description}}"
+      client: "{{client_name}}"
+    
+    requirements:
+      functional:
+        - "{{problem_statement}}"
+        - "Opportunity: {{quantified_opportunity}}"
+      technical:
+        - "Approach: {{analytical_approach}}"
+        - "Objectives: {{objective_function}}"
+      data:
+        - "Sources: {{data_sources}}"
+        - "Network: {{network_complexity}}"
+    
+    constraints:
+      timeline: "{{start_date}} to {{target_completion}}"
+      scope: "{{supply_chain_scope}}"
+      optimization: "{{constraints}}"
+    
+    success_criteria:
+      - "{{current_performance}} targets"
+      - "{{primary_objective}}"

@@ -1,0 +1,514 @@
+# Web Application Project Intake Template
+# For web app, PWA, and frontend development projects
+# Version: 1.0.0
+
+template:
+  id: "webapp"
+  name: "Web Application"
+  description: "Web applications, PWAs, dashboards, and frontend development"
+  version: "1.0.0"
+  extends: "_base"
+  icon: "globe"
+  color: "#10B981"  # Teal/Green
+
+phases:
+
+  # Phase 1: Application Type
+  - id: "app_type"
+    name: "Application Type"
+    description: "What kind of web application?"
+    order: 5
+    required: true
+    questions:
+      
+      - id: "application_category"
+        question: "What type of application is this?"
+        type: "choice"
+        required: true
+        options:
+          - value: "dashboard"
+            label: "Analytics Dashboard"
+            description: "Data visualization and reporting interface"
+          - value: "internal_tool"
+            label: "Internal Tool"
+            description: "Tool for internal teams (not customer-facing)"
+          - value: "customer_facing"
+            label: "Customer-Facing Application"
+            description: "External users will interact with this"
+          - value: "demo_mvp"
+            label: "Demo / MVP"
+            description: "Proof of concept or demonstration"
+          - value: "portal"
+            label: "Portal / Self-Service"
+            description: "Self-service platform for users"
+          - value: "pwa"
+            label: "Progressive Web App"
+            description: "Installable app-like experience"
+      
+      - id: "primary_purpose"
+        question: "What is the primary purpose of this application?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 30
+          max_length: 400
+        help_text: "Describe the main problem this application solves"
+      
+      - id: "existing_system"
+        question: "Does this replace or integrate with existing systems?"
+        type: "choice"
+        required: true
+        options:
+          - value: "greenfield"
+            label: "Greenfield (new system)"
+          - value: "replacement"
+            label: "Replacing existing system"
+          - value: "integration"
+            label: "Integrating with existing systems"
+          - value: "enhancement"
+            label: "Enhancing existing application"
+      
+      - id: "existing_system_details"
+        question: "Describe the existing system(s):"
+        type: "textarea"
+        required: true
+        condition:
+          field: "existing_system"
+          operator: "in"
+          value: ["replacement", "integration", "enhancement"]
+        validation:
+          max_length: 400
+
+  # Phase 2: User Requirements
+  - id: "user_requirements"
+    name: "User Requirements"
+    description: "Who will use this application?"
+    order: 6
+    required: true
+    questions:
+      
+      - id: "user_types"
+        question: "Who are the primary users?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            user_type:
+              type: "text"
+              required: true
+              placeholder: "e.g., Sales Manager, Data Analyst, Customer"
+            count:
+              type: "text"
+              required: false
+              placeholder: "Approximate number of users"
+            tech_savviness:
+              type: "choice"
+              required: true
+              options:
+                - value: "technical"
+                  label: "Technical (comfortable with complex interfaces)"
+                - value: "moderate"
+                  label: "Moderate (familiar with standard apps)"
+                - value: "basic"
+                  label: "Basic (needs simple, intuitive design)"
+            frequency:
+              type: "choice"
+              required: true
+              options:
+                - value: "daily"
+                  label: "Daily use"
+                - value: "weekly"
+                  label: "Weekly use"
+                - value: "occasional"
+                  label: "Occasional use"
+        min_items: 1
+        max_items: 5
+      
+      - id: "key_user_journeys"
+        question: "What are the key user journeys/workflows?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            journey:
+              type: "text"
+              required: true
+              placeholder: "e.g., 'View sales report by region'"
+            priority:
+              type: "choice"
+              required: true
+              options:
+                - value: "critical"
+                  label: "Critical (must have for launch)"
+                - value: "important"
+                  label: "Important"
+                - value: "nice_to_have"
+                  label: "Nice to have"
+        min_items: 3
+        max_items: 15
+      
+      - id: "device_requirements"
+        question: "What devices need to be supported?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "desktop"
+            label: "Desktop (Windows/Mac)"
+          - value: "tablet"
+            label: "Tablet"
+          - value: "mobile"
+            label: "Mobile phone"
+          - value: "kiosk"
+            label: "Kiosk/large display"
+      
+      - id: "mobile_approach"
+        question: "Mobile approach:"
+        type: "choice"
+        required: true
+        condition:
+          field: "device_requirements"
+          operator: "contains"
+          value: "mobile"
+        options:
+          - value: "responsive"
+            label: "Responsive web design"
+          - value: "pwa"
+            label: "Progressive Web App (installable)"
+          - value: "mobile_first"
+            label: "Mobile-first design"
+          - value: "native"
+            label: "Need native app (separate project)"
+
+  # Phase 3: Technical Requirements
+  - id: "technical_requirements"
+    name: "Technical Requirements"
+    description: "Technical specifications and constraints"
+    order: 7
+    required: true
+    questions:
+      
+      - id: "tech_stack_preference"
+        question: "Is there a required or preferred technology stack?"
+        type: "object"
+        required: false
+        properties:
+          frontend:
+            type: "choice"
+            required: false
+            label: "Frontend framework"
+            options:
+              - value: "react"
+                label: "React"
+              - value: "vue"
+                label: "Vue.js"
+              - value: "angular"
+                label: "Angular"
+              - value: "nextjs"
+                label: "Next.js"
+              - value: "no_preference"
+                label: "No preference"
+          styling:
+            type: "choice"
+            required: false
+            label: "Styling approach"
+            options:
+              - value: "tailwind"
+                label: "Tailwind CSS"
+              - value: "mui"
+                label: "Material UI"
+              - value: "custom"
+                label: "Custom CSS"
+              - value: "client_design_system"
+                label: "Client's design system"
+              - value: "no_preference"
+                label: "No preference"
+          backend:
+            type: "choice"
+            required: false
+            label: "Backend (if needed)"
+            options:
+              - value: "python_fastapi"
+                label: "Python / FastAPI"
+              - value: "node"
+                label: "Node.js"
+              - value: "existing"
+                label: "Use existing backend"
+              - value: "serverless"
+                label: "Serverless functions"
+              - value: "not_needed"
+                label: "No backend needed"
+      
+      - id: "data_sources"
+        question: "What data sources will the app use?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            source:
+              type: "text"
+              required: true
+              placeholder: "Data source name"
+            type:
+              type: "choice"
+              required: true
+              options:
+                - value: "rest_api"
+                  label: "REST API"
+                - value: "graphql"
+                  label: "GraphQL"
+                - value: "database"
+                  label: "Direct database"
+                - value: "file"
+                  label: "File upload"
+                - value: "static"
+                  label: "Static/hardcoded"
+            exists:
+              type: "choice"
+              required: true
+              options:
+                - value: "yes"
+                  label: "Already exists"
+                - value: "needs_creation"
+                  label: "Needs to be created"
+        min_items: 1
+        max_items: 10
+      
+      - id: "authentication"
+        question: "What authentication is required?"
+        type: "choice"
+        required: true
+        options:
+          - value: "none"
+            label: "No authentication (public)"
+          - value: "simple"
+            label: "Simple login (username/password)"
+          - value: "sso"
+            label: "SSO (single sign-on)"
+          - value: "oauth"
+            label: "OAuth (Google, Microsoft, etc.)"
+          - value: "enterprise"
+            label: "Enterprise (SAML, LDAP)"
+      
+      - id: "performance_requirements"
+        question: "Performance requirements:"
+        type: "object"
+        required: false
+        properties:
+          load_time:
+            type: "choice"
+            required: true
+            label: "Page load time"
+            options:
+              - value: "fast"
+                label: "Fast (<2 seconds)"
+              - value: "standard"
+                label: "Standard (2-5 seconds)"
+              - value: "acceptable"
+                label: "Acceptable (>5 seconds OK)"
+          concurrent_users:
+            type: "text"
+            required: false
+            placeholder: "Expected concurrent users"
+          offline:
+            type: "choice"
+            required: true
+            label: "Offline capability"
+            options:
+              - value: "required"
+                label: "Required (must work offline)"
+              - value: "nice_to_have"
+                label: "Nice to have"
+              - value: "not_needed"
+                label: "Not needed"
+
+  # Phase 4: Design & Branding
+  - id: "design_branding"
+    name: "Design & Branding"
+    description: "Visual design requirements"
+    order: 8
+    required: true
+    questions:
+      
+      - id: "branding_source"
+        question: "What branding should be used?"
+        type: "choice"
+        required: true
+        options:
+          - value: "kearney"
+            label: "Kearney branding"
+          - value: "client"
+            label: "Client's branding"
+          - value: "co_branded"
+            label: "Co-branded"
+          - value: "neutral"
+            label: "Neutral/minimal branding"
+      
+      - id: "design_assets"
+        question: "Do design assets exist?"
+        type: "choice"
+        required: true
+        options:
+          - value: "complete"
+            label: "Complete designs (Figma, Sketch, etc.)"
+          - value: "partial"
+            label: "Some wireframes/mockups"
+          - value: "brand_only"
+            label: "Brand guidelines only"
+          - value: "none"
+            label: "Nothing (need design support)"
+      
+      - id: "design_handoff"
+        question: "Design file location or link:"
+        type: "text"
+        required: false
+        condition:
+          field: "design_assets"
+          operator: "in"
+          value: ["complete", "partial"]
+        help_text: "Figma link, Google Drive folder, etc."
+      
+      - id: "accessibility"
+        question: "Accessibility requirements:"
+        type: "choice"
+        required: true
+        options:
+          - value: "wcag_aa"
+            label: "WCAG 2.1 AA compliance (required)"
+          - value: "wcag_aaa"
+            label: "WCAG 2.1 AAA compliance (stricter)"
+          - value: "best_effort"
+            label: "Best effort (not strictly required)"
+
+  # Phase 5: Deployment & Hosting
+  - id: "deployment"
+    name: "Deployment"
+    description: "Where and how the app will be hosted"
+    order: 9
+    required: true
+    questions:
+      
+      - id: "hosting_environment"
+        question: "Where will this be hosted?"
+        type: "choice"
+        required: true
+        options:
+          - value: "aws_amplify"
+            label: "AWS Amplify"
+          - value: "aws_s3"
+            label: "AWS S3 + CloudFront"
+          - value: "vercel"
+            label: "Vercel"
+          - value: "azure"
+            label: "Azure"
+          - value: "client_infra"
+            label: "Client's infrastructure"
+          - value: "tbd"
+            label: "To be determined"
+      
+      - id: "domain"
+        question: "Domain/URL requirements:"
+        type: "object"
+        required: false
+        properties:
+          domain:
+            type: "text"
+            required: false
+            placeholder: "e.g., dashboard.client.com"
+          ssl:
+            type: "choice"
+            required: true
+            options:
+              - value: "required"
+                label: "HTTPS required"
+              - value: "not_needed"
+                label: "HTTP acceptable"
+      
+      - id: "environments"
+        question: "What environments are needed?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "dev"
+            label: "Development"
+          - value: "staging"
+            label: "Staging/UAT"
+          - value: "prod"
+            label: "Production"
+
+  # Phase 6: Deliverables
+  - id: "webapp_deliverables"
+    name: "Deliverables"
+    description: "Expected outputs"
+    order: 10
+    required: true
+    questions:
+      
+      - id: "deliverable_components"
+        question: "What deliverables are expected?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "deployed_app"
+            label: "Deployed application"
+          - value: "source_code"
+            label: "Source code repository"
+          - value: "documentation"
+            label: "Technical documentation"
+          - value: "user_guide"
+            label: "User guide"
+          - value: "admin_guide"
+            label: "Admin/deployment guide"
+          - value: "training"
+            label: "Training session"
+      
+      - id: "handoff_team"
+        question: "Who will maintain the app after delivery?"
+        type: "choice"
+        required: true
+        options:
+          - value: "client_dev"
+            label: "Client development team"
+          - value: "client_it"
+            label: "Client IT"
+          - value: "kearney"
+            label: "Kearney ongoing support"
+          - value: "tbd"
+            label: "To be determined"
+
+# Output configuration
+output:
+  format: "intake_response"
+  validation: "standard"
+  merge_with_governance: true
+  
+  mapping:
+    project:
+      name: "{{project_name}}"
+      slug: "{{project_slug}}"
+      type: "webapp"
+      subtype: "{{application_category}}"
+      description: "{{project_description}}"
+      client: "{{client_name}}"
+    
+    requirements:
+      functional:
+        - "{{primary_purpose}}"
+        - "User journeys: {{key_user_journeys}}"
+      technical:
+        - "Stack: {{tech_stack_preference}}"
+        - "Auth: {{authentication}}"
+        - "Devices: {{device_requirements}}"
+      design:
+        - "Branding: {{branding_source}}"
+        - "Accessibility: {{accessibility}}"
+    
+    constraints:
+      timeline: "{{start_date}} to {{target_completion}}"
+      hosting: "{{hosting_environment}}"
+    
+    success_criteria:
+      - "{{primary_objective}}"
+      - "{{success_metrics}}"

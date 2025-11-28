@@ -1,0 +1,318 @@
+# Base Intake Template
+# All project templates extend this base to inherit common fields
+# Version: 1.0.0
+
+template:
+  id: "_base"
+  name: "Base Template"
+  description: "Common fields shared across all project types"
+  version: "1.0.0"
+  abstract: true  # Cannot be used directly, must be extended
+
+# Common fields that appear in ALL project intakes
+common_fields:
+  
+  # Project Identity (always first)
+  project_identity:
+    name: "Project Identity"
+    description: "Basic information about your project"
+    order: 0
+    questions:
+      
+      - id: "project_name"
+        question: "What is the name of this project?"
+        type: "text"
+        required: true
+        validation:
+          min_length: 3
+          max_length: 100
+          pattern: "^[a-zA-Z0-9][a-zA-Z0-9\\s\\-_]*$"
+        help_text: "Use a clear, descriptive name (e.g., 'Q4 Strategy Review' or 'Supply Chain Optimization')"
+        placeholder: "Enter project name"
+      
+      - id: "project_slug"
+        question: null  # Auto-generated from project_name
+        type: "derived"
+        derived_from: "project_name"
+        transform: "slugify"
+        hidden: true
+      
+      - id: "project_description"
+        question: "Provide a brief description of this project:"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 20
+          max_length: 500
+        help_text: "Summarize what this project aims to accomplish in 2-3 sentences"
+        placeholder: "Describe the project objectives and expected outcomes..."
+      
+      - id: "client_name"
+        question: "Who is the client or primary stakeholder?"
+        type: "text"
+        required: false
+        help_text: "Leave blank for internal projects"
+        placeholder: "Client or stakeholder name"
+      
+      - id: "project_lead"
+        question: "Who is the project lead?"
+        type: "text"
+        required: true
+        help_text: "Primary point of contact for this project"
+        placeholder: "Your name or team lead name"
+      
+      - id: "project_lead_email"
+        question: "Project lead email:"
+        type: "text"
+        required: true
+        validation:
+          pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+        placeholder: "email@company.com"
+
+  # Timeline (common to all projects)
+  timeline:
+    name: "Timeline"
+    description: "Project timeline and deadlines"
+    order: 1
+    questions:
+      
+      - id: "start_date"
+        question: "When does this project start?"
+        type: "date"
+        required: true
+        default: "today"
+        help_text: "The date work begins on this project"
+      
+      - id: "target_completion"
+        question: "Target completion date:"
+        type: "date"
+        required: true
+        validation:
+          min_date: "{{start_date}}"
+        help_text: "When should the final deliverable be ready?"
+      
+      - id: "key_milestones"
+        question: "Are there any key milestones or checkpoints?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            date:
+              type: "date"
+              required: true
+            description:
+              type: "text"
+              required: true
+              max_length: 200
+        min_items: 0
+        max_items: 10
+        help_text: "Add important dates like reviews, presentations, or deliverable handoffs"
+      
+      - id: "timeline_flexibility"
+        question: "How flexible is the timeline?"
+        type: "choice"
+        required: true
+        default: "somewhat_flexible"
+        options:
+          - value: "fixed"
+            label: "Fixed (hard deadline, cannot move)"
+          - value: "somewhat_flexible"
+            label: "Somewhat Flexible (1-2 weeks buffer possible)"
+          - value: "very_flexible"
+            label: "Very Flexible (timeline is a target, not a commitment)"
+
+  # Stakeholders (common to all projects)
+  stakeholders:
+    name: "Stakeholders"
+    description: "Who will be involved with this project"
+    order: 2
+    questions:
+      
+      - id: "primary_audience"
+        question: "Who is the primary audience for the deliverable?"
+        type: "choice"
+        required: true
+        options:
+          - value: "c_suite"
+            label: "C-Suite / Executive Leadership"
+          - value: "senior_management"
+            label: "Senior Management / Directors"
+          - value: "middle_management"
+            label: "Middle Management / Team Leads"
+          - value: "technical_team"
+            label: "Technical Team / Analysts"
+          - value: "client_external"
+            label: "External Client"
+          - value: "board"
+            label: "Board of Directors"
+          - value: "mixed"
+            label: "Mixed Audience"
+      
+      - id: "audience_familiarity"
+        question: "How familiar is your audience with this topic?"
+        type: "choice"
+        required: true
+        default: "moderate"
+        options:
+          - value: "expert"
+            label: "Expert (deep knowledge, skip basics)"
+          - value: "moderate"
+            label: "Moderate (knows context, needs details)"
+          - value: "novice"
+            label: "Novice (needs background and explanation)"
+          - value: "mixed"
+            label: "Mixed (some experts, some novices)"
+      
+      - id: "key_decision_makers"
+        question: "Who are the key decision makers?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            name:
+              type: "text"
+              required: true
+            role:
+              type: "text"
+              required: true
+            concerns:
+              type: "text"
+              required: false
+              help_text: "What matters most to this person?"
+        min_items: 0
+        max_items: 5
+        help_text: "People who will approve or act on this deliverable"
+
+  # Success Criteria (common to all projects)
+  success_criteria:
+    name: "Success Criteria"
+    description: "How we'll know this project succeeded"
+    order: 3
+    questions:
+      
+      - id: "primary_objective"
+        question: "What is the primary objective of this project?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 20
+          max_length: 300
+        help_text: "What single outcome would make this project a success?"
+        placeholder: "The project will be successful if..."
+      
+      - id: "secondary_objectives"
+        question: "Any secondary objectives?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          max_length: 200
+        min_items: 0
+        max_items: 5
+        help_text: "Additional goals that would be nice to achieve"
+      
+      - id: "success_metrics"
+        question: "How will success be measured?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            metric:
+              type: "text"
+              required: true
+            target:
+              type: "text"
+              required: false
+        min_items: 0
+        max_items: 5
+        help_text: "Specific, measurable indicators of success"
+
+  # Constraints (common to all projects)
+  constraints:
+    name: "Constraints"
+    description: "Limitations and requirements"
+    order: 4
+    questions:
+      
+      - id: "budget_constraint"
+        question: "Is there a budget constraint?"
+        type: "choice"
+        required: true
+        default: "not_applicable"
+        options:
+          - value: "not_applicable"
+            label: "Not Applicable / Internal"
+          - value: "fixed_budget"
+            label: "Fixed Budget"
+          - value: "flexible_budget"
+            label: "Flexible Budget"
+      
+      - id: "budget_amount"
+        question: "Budget amount (if applicable):"
+        type: "text"
+        required: false
+        condition:
+          field: "budget_constraint"
+          operator: "in"
+          value: ["fixed_budget", "flexible_budget"]
+        help_text: "Enter amount and currency (e.g., $50,000 or 45,000 EUR)"
+      
+      - id: "technical_constraints"
+        question: "Any technical constraints or requirements?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 500
+        help_text: "Systems, tools, formats, or technical requirements that must be met"
+        placeholder: "e.g., Must be compatible with PowerPoint, data must come from SAP..."
+      
+      - id: "compliance_requirements"
+        question: "Any compliance or regulatory requirements?"
+        type: "multi_choice"
+        required: false
+        options:
+          - value: "gdpr"
+            label: "GDPR (data privacy)"
+          - value: "hipaa"
+            label: "HIPAA (healthcare)"
+          - value: "sox"
+            label: "SOX (financial)"
+          - value: "pci"
+            label: "PCI-DSS (payment data)"
+          - value: "iso27001"
+            label: "ISO 27001 (security)"
+          - value: "none"
+            label: "None / Not sure"
+        help_text: "Select all that apply"
+
+# Governance integration
+governance:
+  auto_apply: true
+  fields_to_pull:
+    - "brand.colors"
+    - "brand.fonts"
+    - "brand.constraints"
+    - "quality_gates"
+  display_notice: "Client brand standards will be applied automatically based on governance settings."
+
+# Ad-hoc section (always present in base)
+ad_hoc:
+  enabled: true
+  section_name: "Additional Context"
+  prompt: "Is there anything else we should know about this project?"
+  help_text: "Add any context, background, or requirements not covered above"
+  max_items: 10
+  item_schema:
+    type: "object"
+    properties:
+      topic:
+        type: "text"
+        required: true
+        placeholder: "Topic or category"
+      content:
+        type: "textarea"
+        required: true
+        placeholder: "Provide details..."

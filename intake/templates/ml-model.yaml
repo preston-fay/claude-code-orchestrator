@@ -1,0 +1,459 @@
+# ML Model Project Intake Template
+# For machine learning and AI model development projects
+# Version: 1.0.0
+
+template:
+  id: "ml-model"
+  name: "ML Model Project"
+  description: "Machine learning model development, training, and deployment"
+  version: "1.0.0"
+  extends: "_base"
+  icon: "brain"
+  color: "#8B5CF6"  # Purple
+
+phases:
+
+  # Phase 1: ML Problem Definition
+  - id: "problem_definition"
+    name: "Problem Definition"
+    description: "Define the ML problem to solve"
+    order: 5
+    required: true
+    questions:
+      
+      - id: "ml_task_type"
+        question: "What type of ML task is this?"
+        type: "choice"
+        required: true
+        options:
+          - value: "classification"
+            label: "Classification"
+            description: "Predict categories (e.g., fraud detection, churn prediction)"
+          - value: "regression"
+            label: "Regression"
+            description: "Predict continuous values (e.g., price prediction, demand forecasting)"
+          - value: "clustering"
+            label: "Clustering"
+            description: "Group similar items (e.g., customer segmentation)"
+          - value: "recommendation"
+            label: "Recommendation"
+            description: "Suggest items to users"
+          - value: "nlp"
+            label: "NLP / Text Analysis"
+            description: "Process and analyze text data"
+          - value: "computer_vision"
+            label: "Computer Vision"
+            description: "Analyze images or video"
+          - value: "time_series"
+            label: "Time Series Forecasting"
+            description: "Predict future values from historical data"
+          - value: "anomaly_detection"
+            label: "Anomaly Detection"
+            description: "Identify outliers or unusual patterns"
+          - value: "reinforcement"
+            label: "Reinforcement Learning"
+            description: "Learn optimal actions through interaction"
+          - value: "other"
+            label: "Other"
+      
+      - id: "target_variable"
+        question: "What are you trying to predict or learn?"
+        type: "text"
+        required: true
+        help_text: "The target variable or outcome you want the model to produce"
+        placeholder: "e.g., 'Customer will churn in next 30 days', 'Product demand for next week'"
+      
+      - id: "business_value"
+        question: "What business value will this model create?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 50
+          max_length: 500
+        help_text: "How will accurate predictions improve business outcomes?"
+      
+      - id: "current_approach"
+        question: "How is this problem solved today?"
+        type: "choice"
+        required: true
+        options:
+          - value: "manual"
+            label: "Manual process / human judgment"
+          - value: "rules_based"
+            label: "Rules-based system"
+          - value: "simple_model"
+            label: "Simple statistical model"
+          - value: "existing_ml"
+            label: "Existing ML model (needs improvement)"
+          - value: "not_solved"
+            label: "Not currently addressed"
+      
+      - id: "current_performance"
+        question: "What is the current performance baseline?"
+        type: "textarea"
+        required: false
+        condition:
+          field: "current_approach"
+          operator: "not_equals"
+          value: "not_solved"
+        validation:
+          max_length: 300
+        help_text: "Current accuracy, error rate, or other metrics if available"
+
+  # Phase 2: Data Requirements
+  - id: "data_requirements"
+    name: "Data Requirements"
+    description: "Training data and feature information"
+    order: 6
+    required: true
+    questions:
+      
+      - id: "training_data_sources"
+        question: "What data sources will be used for training?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            source:
+              type: "text"
+              required: true
+              placeholder: "Data source name"
+            record_count:
+              type: "text"
+              required: false
+              placeholder: "Approximate records"
+            time_span:
+              type: "text"
+              required: false
+              placeholder: "Time period covered"
+            quality:
+              type: "choice"
+              required: true
+              options:
+                - value: "high"
+                  label: "High (clean, labeled)"
+                - value: "medium"
+                  label: "Medium (needs cleaning)"
+                - value: "low"
+                  label: "Low (significant issues)"
+                - value: "unknown"
+                  label: "Unknown"
+        min_items: 1
+        max_items: 10
+      
+      - id: "labeled_data"
+        question: "Is the data labeled (for supervised learning)?"
+        type: "choice"
+        required: true
+        options:
+          - value: "fully_labeled"
+            label: "Fully labeled"
+          - value: "partially_labeled"
+            label: "Partially labeled"
+          - value: "not_labeled"
+            label: "Not labeled (need to create labels)"
+          - value: "not_applicable"
+            label: "Not applicable (unsupervised)"
+      
+      - id: "labeling_effort"
+        question: "How will labels be created?"
+        type: "textarea"
+        required: true
+        condition:
+          field: "labeled_data"
+          operator: "in"
+          value: ["partially_labeled", "not_labeled"]
+        validation:
+          max_length: 300
+        help_text: "Manual labeling, rules-based, external provider, etc."
+      
+      - id: "key_features"
+        question: "What are the expected key features/predictors?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            feature:
+              type: "text"
+              required: true
+              placeholder: "Feature name"
+            type:
+              type: "choice"
+              required: true
+              options:
+                - value: "numerical"
+                  label: "Numerical"
+                - value: "categorical"
+                  label: "Categorical"
+                - value: "text"
+                  label: "Text"
+                - value: "datetime"
+                  label: "Date/Time"
+                - value: "image"
+                  label: "Image"
+            importance:
+              type: "choice"
+              required: false
+              options:
+                - value: "high"
+                  label: "Expected high importance"
+                - value: "medium"
+                  label: "Medium"
+                - value: "exploratory"
+                  label: "Exploratory"
+        min_items: 3
+        max_items: 30
+      
+      - id: "data_privacy"
+        question: "Does the data contain sensitive/PII information?"
+        type: "choice"
+        required: true
+        options:
+          - value: "no_pii"
+            label: "No PII or sensitive data"
+          - value: "anonymized"
+            label: "Contains PII but will be anonymized"
+          - value: "pii_required"
+            label: "PII required for model (with safeguards)"
+          - value: "unknown"
+            label: "Need to assess"
+
+  # Phase 3: Model Requirements
+  - id: "model_requirements"
+    name: "Model Requirements"
+    description: "Technical requirements and constraints"
+    order: 7
+    required: true
+    questions:
+      
+      - id: "performance_metrics"
+        question: "What metrics will measure model success?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            metric:
+              type: "choice"
+              required: true
+              options:
+                - value: "accuracy"
+                  label: "Accuracy"
+                - value: "precision"
+                  label: "Precision"
+                - value: "recall"
+                  label: "Recall"
+                - value: "f1"
+                  label: "F1 Score"
+                - value: "auc_roc"
+                  label: "AUC-ROC"
+                - value: "rmse"
+                  label: "RMSE"
+                - value: "mae"
+                  label: "MAE"
+                - value: "mape"
+                  label: "MAPE"
+                - value: "custom"
+                  label: "Custom metric"
+            target:
+              type: "text"
+              required: false
+              placeholder: "Target value (e.g., >0.85)"
+            priority:
+              type: "choice"
+              required: true
+              options:
+                - value: "primary"
+                  label: "Primary"
+                - value: "secondary"
+                  label: "Secondary"
+        min_items: 1
+        max_items: 5
+      
+      - id: "interpretability"
+        question: "How important is model interpretability?"
+        type: "choice"
+        required: true
+        options:
+          - value: "critical"
+            label: "Critical (must explain every prediction)"
+          - value: "important"
+            label: "Important (need general understanding)"
+          - value: "nice_to_have"
+            label: "Nice to have"
+          - value: "not_important"
+            label: "Not important (black box OK)"
+      
+      - id: "inference_requirements"
+        question: "What are the inference/prediction requirements?"
+        type: "object"
+        required: true
+        properties:
+          latency:
+            type: "choice"
+            required: true
+            label: "Latency requirement"
+            options:
+              - value: "realtime"
+                label: "Real-time (<100ms)"
+              - value: "near_realtime"
+                label: "Near real-time (<1s)"
+              - value: "batch"
+                label: "Batch (minutes to hours OK)"
+              - value: "offline"
+                label: "Offline (daily or less)"
+          throughput:
+            type: "text"
+            required: false
+            placeholder: "e.g., 1000 predictions/second"
+      
+      - id: "model_constraints"
+        question: "Any constraints on model type or technology?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 400
+        help_text: "e.g., must use specific framework, avoid deep learning, size limits"
+
+  # Phase 4: Deployment & Operations
+  - id: "deployment_ops"
+    name: "Deployment & Operations"
+    description: "How the model will be deployed and maintained"
+    order: 8
+    required: true
+    questions:
+      
+      - id: "deployment_target"
+        question: "Where will the model be deployed?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "api"
+            label: "REST API endpoint"
+          - value: "batch"
+            label: "Batch pipeline"
+          - value: "embedded"
+            label: "Embedded in application"
+          - value: "edge"
+            label: "Edge device"
+          - value: "notebook"
+            label: "Jupyter notebook (manual)"
+          - value: "cloud_service"
+            label: "Cloud ML service (SageMaker, Vertex, etc.)"
+      
+      - id: "retraining_strategy"
+        question: "How often should the model be retrained?"
+        type: "choice"
+        required: true
+        options:
+          - value: "continuous"
+            label: "Continuous learning"
+          - value: "scheduled"
+            label: "Scheduled (daily/weekly/monthly)"
+          - value: "triggered"
+            label: "Triggered by performance degradation"
+          - value: "manual"
+            label: "Manual retraining as needed"
+          - value: "one_time"
+            label: "One-time training (no retraining)"
+      
+      - id: "monitoring_requirements"
+        question: "What monitoring is needed?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "performance_metrics"
+            label: "Model performance metrics"
+          - value: "data_drift"
+            label: "Data drift detection"
+          - value: "concept_drift"
+            label: "Concept drift detection"
+          - value: "latency"
+            label: "Latency monitoring"
+          - value: "throughput"
+            label: "Throughput monitoring"
+          - value: "errors"
+            label: "Error/failure monitoring"
+          - value: "fairness"
+            label: "Fairness/bias monitoring"
+
+  # Phase 5: Deliverables
+  - id: "ml_deliverables"
+    name: "Deliverables"
+    description: "Expected outputs from the ML project"
+    order: 9
+    required: true
+    questions:
+      
+      - id: "deliverable_components"
+        question: "What deliverables are expected?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "trained_model"
+            label: "Trained model artifact"
+          - value: "api_endpoint"
+            label: "Deployed API endpoint"
+          - value: "training_pipeline"
+            label: "Training pipeline code"
+          - value: "inference_pipeline"
+            label: "Inference pipeline code"
+          - value: "documentation"
+            label: "Model documentation"
+          - value: "performance_report"
+            label: "Performance evaluation report"
+          - value: "monitoring_dashboard"
+            label: "Monitoring dashboard"
+          - value: "jupyter_notebooks"
+            label: "Analysis notebooks"
+      
+      - id: "handoff_requirements"
+        question: "Who will maintain the model after delivery?"
+        type: "choice"
+        required: true
+        options:
+          - value: "client_team"
+            label: "Client data science team"
+          - value: "client_it"
+            label: "Client IT/Engineering"
+          - value: "kearney_ongoing"
+            label: "Kearney ongoing support"
+          - value: "tbd"
+            label: "To be determined"
+
+# Output configuration
+output:
+  format: "intake_response"
+  validation: "standard"
+  merge_with_governance: true
+  
+  mapping:
+    project:
+      name: "{{project_name}}"
+      slug: "{{project_slug}}"
+      type: "ml-model"
+      subtype: "{{ml_task_type}}"
+      description: "{{project_description}}"
+      client: "{{client_name}}"
+    
+    requirements:
+      functional:
+        - "Target: {{target_variable}}"
+        - "Business value: {{business_value}}"
+      technical:
+        - "Task type: {{ml_task_type}}"
+        - "Latency: {{inference_requirements.latency}}"
+        - "{{model_constraints}}"
+      data:
+        - "Sources: {{training_data_sources}}"
+        - "Features: {{key_features}}"
+    
+    constraints:
+      timeline: "{{start_date}} to {{target_completion}}"
+      interpretability: "{{interpretability}}"
+      deployment: "{{deployment_target}}"
+    
+    success_criteria:
+      - "{{performance_metrics}}"

@@ -1,0 +1,312 @@
+# General Project Intake Template
+# Use this for projects that don't fit other specific templates
+# Version: 1.0.0
+
+template:
+  id: "general"
+  name: "General Project"
+  description: "Generic project intake for any type of work"
+  version: "1.0.0"
+  extends: "_base"
+  icon: "folder"
+  color: "#6B7280"  # Gray
+
+# This template inherits ALL common fields from _base.yaml
+# and adds general-purpose questions
+
+phases:
+
+  # Phase 1: Project Type Clarification
+  - id: "project_type_clarification"
+    name: "Project Type"
+    description: "Help us understand what kind of project this is"
+    order: 5  # After base fields
+    required: true
+    questions:
+      
+      - id: "project_category"
+        question: "What category best describes this project?"
+        type: "choice"
+        required: true
+        options:
+          - value: "analysis"
+            label: "Analysis / Research"
+            description: "Gathering data, analyzing trends, generating insights"
+          - value: "development"
+            label: "Development / Building"
+            description: "Creating software, applications, or tools"
+          - value: "documentation"
+            label: "Documentation / Writing"
+            description: "Creating guides, reports, or content"
+          - value: "strategy"
+            label: "Strategy / Planning"
+            description: "Developing plans, roadmaps, or recommendations"
+          - value: "process"
+            label: "Process / Operations"
+            description: "Improving workflows, efficiency, or operations"
+          - value: "other"
+            label: "Other"
+            description: "Doesn't fit these categories"
+      
+      - id: "project_category_other"
+        question: "Please describe the project type:"
+        type: "textarea"
+        required: true
+        condition:
+          field: "project_category"
+          operator: "equals"
+          value: "other"
+        validation:
+          min_length: 20
+          max_length: 300
+      
+      - id: "deliverable_type"
+        question: "What is the primary deliverable?"
+        type: "choice"
+        required: true
+        options:
+          - value: "document"
+            label: "Document (report, proposal, guide)"
+          - value: "presentation"
+            label: "Presentation (deck, slides)"
+          - value: "dashboard"
+            label: "Dashboard / Visualization"
+          - value: "application"
+            label: "Application / Software"
+          - value: "data"
+            label: "Data / Dataset"
+          - value: "recommendation"
+            label: "Recommendation / Decision Support"
+          - value: "multiple"
+            label: "Multiple Deliverables"
+          - value: "other"
+            label: "Other"
+      
+      - id: "deliverable_description"
+        question: "Describe the expected deliverable(s):"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 20
+          max_length: 500
+        help_text: "What will be handed over when the project is complete?"
+
+  # Phase 2: Scope Definition
+  - id: "scope_definition"
+    name: "Scope"
+    description: "Define what's in and out of scope"
+    order: 6
+    required: true
+    questions:
+      
+      - id: "in_scope"
+        question: "What is IN scope for this project?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "text"
+          max_length: 200
+        min_items: 1
+        max_items: 10
+        help_text: "List the key activities, deliverables, or outcomes included"
+      
+      - id: "out_of_scope"
+        question: "What is explicitly OUT of scope?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          max_length: 200
+        min_items: 0
+        max_items: 10
+        help_text: "Clarify boundaries to prevent scope creep"
+      
+      - id: "assumptions"
+        question: "What assumptions are we making?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          max_length: 200
+        min_items: 0
+        max_items: 10
+        help_text: "Things we're taking as given that could affect the project"
+      
+      - id: "dependencies"
+        question: "Are there any dependencies on other projects or teams?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            dependency:
+              type: "text"
+              required: true
+              placeholder: "What we need"
+            source:
+              type: "text"
+              required: true
+              placeholder: "Who provides it"
+            status:
+              type: "choice"
+              required: true
+              options:
+                - value: "confirmed"
+                  label: "Confirmed"
+                - value: "pending"
+                  label: "Pending"
+                - value: "at_risk"
+                  label: "At Risk"
+        min_items: 0
+        max_items: 5
+
+  # Phase 3: Resources and Inputs
+  - id: "resources_inputs"
+    name: "Resources & Inputs"
+    description: "What do you have to work with?"
+    order: 7
+    required: false
+    questions:
+      
+      - id: "existing_materials"
+        question: "Do you have existing materials to leverage?"
+        type: "choice"
+        required: true
+        default: "some"
+        options:
+          - value: "none"
+            label: "Starting from scratch"
+          - value: "some"
+            label: "Some materials exist"
+          - value: "extensive"
+            label: "Extensive prior work to build on"
+      
+      - id: "materials_description"
+        question: "Describe the existing materials:"
+        type: "textarea"
+        required: false
+        condition:
+          field: "existing_materials"
+          operator: "in"
+          value: ["some", "extensive"]
+        validation:
+          max_length: 500
+        help_text: "What documents, data, or work products can we reference?"
+      
+      - id: "data_sources"
+        question: "What data sources will be used?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            source:
+              type: "text"
+              required: true
+              placeholder: "Data source name"
+            access:
+              type: "choice"
+              required: true
+              options:
+                - value: "have_access"
+                  label: "Have access"
+                - value: "need_access"
+                  label: "Need access"
+                - value: "need_to_acquire"
+                  label: "Need to acquire"
+        min_items: 0
+        max_items: 10
+      
+      - id: "tools_systems"
+        question: "What tools or systems will be used?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          placeholder: "Tool or system name"
+        min_items: 0
+        max_items: 10
+        help_text: "Software, platforms, or systems relevant to this project"
+
+  # Phase 4: Risks and Concerns
+  - id: "risks_concerns"
+    name: "Risks & Concerns"
+    description: "What could go wrong?"
+    order: 8
+    required: false
+    questions:
+      
+      - id: "known_risks"
+        question: "What risks do you see with this project?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            risk:
+              type: "text"
+              required: true
+              placeholder: "Describe the risk"
+            likelihood:
+              type: "choice"
+              required: true
+              options:
+                - value: "low"
+                  label: "Low"
+                - value: "medium"
+                  label: "Medium"
+                - value: "high"
+                  label: "High"
+            impact:
+              type: "choice"
+              required: true
+              options:
+                - value: "low"
+                  label: "Low"
+                - value: "medium"
+                  label: "Medium"
+                - value: "high"
+                  label: "High"
+            mitigation:
+              type: "text"
+              required: false
+              placeholder: "How might we mitigate this?"
+        min_items: 0
+        max_items: 5
+      
+      - id: "concerns"
+        question: "Any concerns or potential blockers?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 500
+        help_text: "Things keeping you up at night about this project"
+
+# Output configuration
+output:
+  format: "intake_response"
+  validation: "standard"
+  merge_with_governance: true
+  
+  # Map intake responses to orchestrator intake format
+  mapping:
+    project:
+      name: "{{project_name}}"
+      slug: "{{project_slug}}"
+      type: "general"
+      description: "{{project_description}}"
+      client: "{{client_name}}"
+    
+    requirements:
+      functional:
+        - "{{primary_objective}}"
+        - "{{secondary_objectives}}"
+      technical:
+        - "{{technical_constraints}}"
+      
+    constraints:
+      timeline: "{{start_date}} to {{target_completion}}"
+      budget: "{{budget_amount}}"
+      compliance: "{{compliance_requirements}}"
+    
+    success_criteria: "{{success_metrics}}"

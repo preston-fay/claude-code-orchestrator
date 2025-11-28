@@ -1,0 +1,672 @@
+# Analytics Project Intake Template
+# For data science, exploratory analysis, and insights projects
+# Version: 1.0.0
+#
+# This extends the base template with analytics-specific questions
+# It works alongside templates/project-types/analytics.yaml
+
+template:
+  id: "analytics"
+  name: "Analytics Project"
+  description: "Data analysis, exploratory analytics, and insights generation"
+  version: "1.0.0"
+  extends: "_base"
+  icon: "chart-bar"
+  color: "#3B82F6"  # Blue
+
+# Analytics-specific brand constraints
+brand_constraints:
+  inherit_from_governance: true
+  analytics_specific:
+    chart_style:
+      no_gridlines: true
+      label_first_approach: true
+      color_palette: "kearney_sequential"
+    export_formats:
+      - "html"
+      - "pdf"
+      - "excel"
+
+phases:
+
+  # Phase 1: Analysis Type
+  - id: "analysis_type"
+    name: "Analysis Type"
+    description: "What kind of analysis are you performing?"
+    order: 5
+    required: true
+    questions:
+      
+      - id: "analysis_category"
+        question: "What type of analysis is this?"
+        type: "choice"
+        required: true
+        options:
+          - value: "exploratory"
+            label: "Exploratory Data Analysis (EDA)"
+            description: "Understanding the data, finding patterns, generating hypotheses"
+          - value: "descriptive"
+            label: "Descriptive Analytics"
+            description: "Summarizing what happened, KPIs, dashboards"
+          - value: "diagnostic"
+            label: "Diagnostic Analytics"
+            description: "Understanding why something happened, root cause analysis"
+          - value: "predictive"
+            label: "Predictive Analytics"
+            description: "Forecasting, prediction models, what will happen"
+          - value: "prescriptive"
+            label: "Prescriptive Analytics"
+            description: "Recommendations, optimization, what should we do"
+          - value: "ab_testing"
+            label: "A/B Testing / Experimentation"
+            description: "Testing hypotheses, measuring impact of changes"
+        conditional_phases:
+          exploratory: ["data_exploration"]
+          descriptive: ["kpi_definition"]
+          diagnostic: ["root_cause"]
+          predictive: ["prediction_setup"]
+          prescriptive: ["optimization_setup"]
+          ab_testing: ["experiment_design"]
+      
+      - id: "business_question"
+        question: "What business question are you trying to answer?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 30
+          max_length: 500
+        help_text: "Frame the question from a business perspective, not technical"
+        placeholder: "e.g., 'Why did customer churn increase 15% in Q3?' or 'Which markets should we prioritize for expansion?'"
+      
+      - id: "hypothesis"
+        question: "Do you have a hypothesis to test?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 300
+        help_text: "What do you expect to find? (It's okay to not have one for exploratory work)"
+
+  # Phase 2: Data Context
+  - id: "data_context"
+    name: "Data Context"
+    description: "Understanding the data available"
+    order: 6
+    required: true
+    questions:
+      
+      - id: "data_sources"
+        question: "What data sources will be used?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            source_name:
+              type: "text"
+              required: true
+              placeholder: "e.g., SAP, Salesforce, Excel files"
+            source_type:
+              type: "choice"
+              required: true
+              options:
+                - value: "database"
+                  label: "Database/Data warehouse"
+                - value: "api"
+                  label: "API"
+                - value: "file"
+                  label: "File (CSV, Excel, etc.)"
+                - value: "external"
+                  label: "External/third-party"
+                - value: "survey"
+                  label: "Survey data"
+                - value: "other"
+                  label: "Other"
+            access_status:
+              type: "choice"
+              required: true
+              options:
+                - value: "have_access"
+                  label: "Have access"
+                - value: "need_access"
+                  label: "Need to request access"
+                - value: "need_to_acquire"
+                  label: "Need to acquire/purchase"
+            data_quality:
+              type: "choice"
+              required: false
+              options:
+                - value: "high"
+                  label: "High quality (clean, complete)"
+                - value: "medium"
+                  label: "Medium (some cleaning needed)"
+                - value: "low"
+                  label: "Low (significant issues)"
+                - value: "unknown"
+                  label: "Unknown"
+        min_items: 1
+        max_items: 10
+      
+      - id: "data_volume"
+        question: "What is the approximate data volume?"
+        type: "choice"
+        required: true
+        options:
+          - value: "small"
+            label: "Small (< 100K rows)"
+          - value: "medium"
+            label: "Medium (100K - 10M rows)"
+          - value: "large"
+            label: "Large (10M - 100M rows)"
+          - value: "very_large"
+            label: "Very Large (> 100M rows)"
+          - value: "unknown"
+            label: "Unknown"
+      
+      - id: "time_range"
+        question: "What time period does the data cover?"
+        type: "object"
+        required: true
+        properties:
+          start:
+            type: "date"
+            required: true
+            label: "From"
+          end:
+            type: "date"
+            required: true
+            label: "To"
+          granularity:
+            type: "choice"
+            required: true
+            options:
+              - value: "second"
+                label: "Second-level"
+              - value: "minute"
+                label: "Minute-level"
+              - value: "hourly"
+                label: "Hourly"
+              - value: "daily"
+                label: "Daily"
+              - value: "weekly"
+                label: "Weekly"
+              - value: "monthly"
+                label: "Monthly"
+              - value: "quarterly"
+                label: "Quarterly"
+              - value: "yearly"
+                label: "Yearly"
+      
+      - id: "key_entities"
+        question: "What are the key entities in the data?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            entity:
+              type: "text"
+              required: true
+              placeholder: "e.g., Customer, Product, Transaction, Store"
+            identifier:
+              type: "text"
+              required: false
+              placeholder: "Primary key field name"
+            approximate_count:
+              type: "text"
+              required: false
+              placeholder: "e.g., ~50,000 customers"
+        min_items: 1
+        max_items: 10
+      
+      - id: "known_data_issues"
+        question: "Are there any known data quality issues?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            issue:
+              type: "text"
+              required: true
+              placeholder: "Describe the issue"
+            severity:
+              type: "choice"
+              required: true
+              options:
+                - value: "blocker"
+                  label: "Blocker (must resolve first)"
+                - value: "significant"
+                  label: "Significant (workaround possible)"
+                - value: "minor"
+                  label: "Minor (can proceed)"
+            workaround:
+              type: "text"
+              required: false
+              placeholder: "Potential workaround"
+        min_items: 0
+        max_items: 10
+
+  # Phase 3: Analysis Requirements
+  - id: "analysis_requirements"
+    name: "Analysis Requirements"
+    description: "What should the analysis cover?"
+    order: 7
+    required: true
+    questions:
+      
+      - id: "key_metrics"
+        question: "What are the key metrics to analyze?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            metric_name:
+              type: "text"
+              required: true
+              placeholder: "e.g., Revenue, Churn Rate, NPS"
+            definition:
+              type: "text"
+              required: true
+              placeholder: "How is this calculated?"
+            baseline:
+              type: "text"
+              required: false
+              placeholder: "Current value or benchmark"
+        min_items: 1
+        max_items: 10
+      
+      - id: "segmentation_dimensions"
+        question: "What dimensions should we segment by?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          placeholder: "e.g., Region, Product Category, Customer Segment"
+        min_items: 0
+        max_items: 10
+        help_text: "Ways to cut the data for deeper insights"
+      
+      - id: "comparisons_needed"
+        question: "What comparisons are important?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            comparison_type:
+              type: "choice"
+              required: true
+              options:
+                - value: "time_period"
+                  label: "Time period comparison (YoY, MoM)"
+                - value: "cohort"
+                  label: "Cohort comparison"
+                - value: "segment"
+                  label: "Segment comparison"
+                - value: "benchmark"
+                  label: "Benchmark comparison"
+                - value: "scenario"
+                  label: "Scenario comparison"
+            description:
+              type: "text"
+              required: true
+              placeholder: "What are we comparing?"
+        min_items: 0
+        max_items: 5
+      
+      - id: "statistical_methods"
+        question: "Are specific statistical methods required?"
+        type: "multi_choice"
+        required: false
+        options:
+          - value: "descriptive_stats"
+            label: "Descriptive statistics"
+          - value: "regression"
+            label: "Regression analysis"
+          - value: "hypothesis_testing"
+            label: "Hypothesis testing"
+          - value: "time_series"
+            label: "Time series analysis"
+          - value: "clustering"
+            label: "Clustering/segmentation"
+          - value: "correlation"
+            label: "Correlation analysis"
+          - value: "significance_testing"
+            label: "Statistical significance testing"
+          - value: "other"
+            label: "Other (specify in ad-hoc)"
+
+  # Phase 4A: Data Exploration (for exploratory)
+  - id: "data_exploration"
+    name: "Exploration Scope"
+    description: "Define the exploration parameters"
+    order: 8
+    required: true
+    condition:
+      field: "analysis_category"
+      operator: "equals"
+      value: "exploratory"
+    questions:
+      
+      - id: "exploration_goals"
+        question: "What are you hoping to discover?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "text"
+          max_length: 200
+        min_items: 1
+        max_items: 5
+        help_text: "Open questions you're trying to answer"
+      
+      - id: "known_patterns"
+        question: "Are there any patterns you've already observed?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 400
+        help_text: "Prior knowledge that might guide exploration"
+      
+      - id: "exploration_depth"
+        question: "How deep should the exploration go?"
+        type: "choice"
+        required: true
+        options:
+          - value: "surface"
+            label: "Surface level (quick overview)"
+          - value: "moderate"
+            label: "Moderate (standard EDA)"
+          - value: "deep"
+            label: "Deep dive (comprehensive analysis)"
+
+  # Phase 4B: KPI Definition (for descriptive)
+  - id: "kpi_definition"
+    name: "KPI Definition"
+    description: "Define the metrics and dashboards"
+    order: 8
+    required: true
+    condition:
+      field: "analysis_category"
+      operator: "equals"
+      value: "descriptive"
+    questions:
+      
+      - id: "kpi_hierarchy"
+        question: "Define the KPI hierarchy:"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            kpi:
+              type: "text"
+              required: true
+            level:
+              type: "choice"
+              required: true
+              options:
+                - value: "primary"
+                  label: "Primary (top-level)"
+                - value: "secondary"
+                  label: "Secondary (supporting)"
+                - value: "diagnostic"
+                  label: "Diagnostic (drill-down)"
+            target:
+              type: "text"
+              required: false
+              placeholder: "Target value if applicable"
+        min_items: 3
+        max_items: 15
+      
+      - id: "refresh_frequency"
+        question: "How often should metrics be updated?"
+        type: "choice"
+        required: true
+        options:
+          - value: "realtime"
+            label: "Real-time"
+          - value: "daily"
+            label: "Daily"
+          - value: "weekly"
+            label: "Weekly"
+          - value: "monthly"
+            label: "Monthly"
+          - value: "one_time"
+            label: "One-time analysis"
+
+  # Phase 4C: Root Cause Setup (for diagnostic)
+  - id: "root_cause"
+    name: "Root Cause Parameters"
+    description: "Define the diagnostic analysis"
+    order: 8
+    required: true
+    condition:
+      field: "analysis_category"
+      operator: "equals"
+      value: "diagnostic"
+    questions:
+      
+      - id: "problem_statement"
+        question: "What problem are we diagnosing?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 30
+          max_length: 400
+        help_text: "Clearly state the issue or anomaly to investigate"
+      
+      - id: "when_observed"
+        question: "When was this first observed?"
+        type: "date"
+        required: true
+      
+      - id: "impact_quantified"
+        question: "What is the quantified impact?"
+        type: "text"
+        required: true
+        help_text: "e.g., '$2M revenue loss' or '15% decrease in conversion'"
+      
+      - id: "suspected_causes"
+        question: "What are the suspected root causes?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            cause:
+              type: "text"
+              required: true
+            likelihood:
+              type: "choice"
+              required: true
+              options:
+                - value: "high"
+                  label: "High"
+                - value: "medium"
+                  label: "Medium"
+                - value: "low"
+                  label: "Low"
+        min_items: 0
+        max_items: 10
+
+  # Phase 4D: Prediction Setup (for predictive)
+  - id: "prediction_setup"
+    name: "Prediction Parameters"
+    description: "Define the forecasting requirements"
+    order: 8
+    required: true
+    condition:
+      field: "analysis_category"
+      operator: "equals"
+      value: "predictive"
+    questions:
+      
+      - id: "prediction_target"
+        question: "What are you trying to predict?"
+        type: "text"
+        required: true
+        help_text: "The target variable for prediction"
+      
+      - id: "prediction_horizon"
+        question: "How far into the future?"
+        type: "object"
+        required: true
+        properties:
+          value:
+            type: "number"
+            required: true
+            min: 1
+          unit:
+            type: "choice"
+            required: true
+            options:
+              - value: "days"
+                label: "Days"
+              - value: "weeks"
+                label: "Weeks"
+              - value: "months"
+                label: "Months"
+              - value: "quarters"
+                label: "Quarters"
+              - value: "years"
+                label: "Years"
+      
+      - id: "accuracy_requirements"
+        question: "What accuracy level is needed?"
+        type: "choice"
+        required: true
+        options:
+          - value: "directional"
+            label: "Directional (right trend is enough)"
+          - value: "reasonable"
+            label: "Reasonable (~80% accuracy)"
+          - value: "high"
+            label: "High precision needed (>90%)"
+          - value: "critical"
+            label: "Critical (must be very accurate)"
+      
+      - id: "prediction_features"
+        question: "What factors might influence the prediction?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          placeholder: "Potential predictor variable"
+        min_items: 0
+        max_items: 20
+
+  # Phase 5: Deliverables
+  - id: "analytics_deliverables"
+    name: "Deliverables"
+    description: "Expected outputs from the analysis"
+    order: 9
+    required: true
+    questions:
+      
+      - id: "deliverable_formats"
+        question: "What deliverables are expected?"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "jupyter_notebook"
+            label: "Jupyter Notebook (documented analysis)"
+          - value: "html_report"
+            label: "HTML Report"
+          - value: "powerpoint"
+            label: "PowerPoint presentation"
+          - value: "dashboard"
+            label: "Interactive dashboard"
+          - value: "excel"
+            label: "Excel workbook"
+          - value: "data_file"
+            label: "Processed data file"
+          - value: "model"
+            label: "Trained model"
+          - value: "documentation"
+            label: "Technical documentation"
+      
+      - id: "visualization_requirements"
+        question: "What visualizations are needed?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            chart_type:
+              type: "choice"
+              required: true
+              options:
+                - value: "bar"
+                  label: "Bar chart"
+                - value: "line"
+                  label: "Line chart"
+                - value: "scatter"
+                  label: "Scatter plot"
+                - value: "heatmap"
+                  label: "Heatmap"
+                - value: "pie"
+                  label: "Pie/donut chart"
+                - value: "waterfall"
+                  label: "Waterfall"
+                - value: "map"
+                  label: "Geographic map"
+                - value: "sankey"
+                  label: "Sankey diagram"
+                - value: "tree"
+                  label: "Treemap"
+                - value: "table"
+                  label: "Summary table"
+            purpose:
+              type: "text"
+              required: true
+              placeholder: "What does this visualization show?"
+        min_items: 0
+        max_items: 10
+      
+      - id: "automation_needed"
+        question: "Should this analysis be repeatable/automated?"
+        type: "choice"
+        required: true
+        options:
+          - value: "one_time"
+            label: "One-time analysis"
+          - value: "rerunnable"
+            label: "Should be easy to re-run"
+          - value: "automated"
+            label: "Fully automated (scheduled)"
+        help_text: "This affects how we structure the code"
+
+# Output configuration
+output:
+  format: "intake_response"
+  validation: "standard"
+  merge_with_governance: true
+  
+  mapping:
+    project:
+      name: "{{project_name}}"
+      slug: "{{project_slug}}"
+      type: "analytics"
+      subtype: "{{analysis_category}}"
+      description: "{{project_description}}"
+      client: "{{client_name}}"
+    
+    requirements:
+      functional:
+        - "{{business_question}}"
+        - "Analyze {{key_metrics}}"
+      technical:
+        - "{{technical_constraints}}"
+        - "Data sources: {{data_sources}}"
+      data:
+        - "Data volume: {{data_volume}}"
+        - "Time range: {{time_range}}"
+    
+    constraints:
+      timeline: "{{start_date}} to {{target_completion}}"
+      budget: "{{budget_amount}}"
+    
+    success_criteria:
+      - "{{primary_objective}}"
+      - "{{success_metrics}}"

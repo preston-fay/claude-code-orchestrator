@@ -1,0 +1,364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kearney.com/orchestrator/intake/schema/v1",
+  "title": "Intake Template Schema",
+  "description": "Schema for validating orchestrator intake templates",
+  "type": "object",
+  "required": ["template", "phases"],
+  "properties": {
+    "template": {
+      "type": "object",
+      "required": ["id", "name", "description", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "description": "Unique identifier for the template"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100,
+          "description": "Human-readable template name"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500,
+          "description": "Template description"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semantic version"
+        },
+        "extends": {
+          "type": "string",
+          "description": "Parent template to extend"
+        },
+        "abstract": {
+          "type": "boolean",
+          "description": "If true, cannot be used directly"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Icon identifier for UI"
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Hex color for UI"
+        }
+      }
+    },
+    "brand_constraints": {
+      "type": "object",
+      "properties": {
+        "inherit_from_governance": {
+          "type": "boolean",
+          "default": true
+        },
+        "overrides": {
+          "type": "object"
+        }
+      }
+    },
+    "common_fields": {
+      "type": "object",
+      "description": "Fields shared across templates (for _base.yaml)"
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/phase"
+      },
+      "description": "Ordered list of intake phases"
+    },
+    "ad_hoc": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "section_name": {
+          "type": "string",
+          "default": "Additional Context"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "help_text": {
+          "type": "string"
+        },
+        "max_items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 10
+        },
+        "item_schema": {
+          "$ref": "#/$defs/item_schema"
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "auto_apply": {
+          "type": "boolean",
+          "default": true
+        },
+        "fields_to_pull": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "display_notice": {
+          "type": "string"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["intake_response", "project_config", "custom"]
+        },
+        "validation": {
+          "type": "string",
+          "enum": ["strict", "standard", "lenient"]
+        },
+        "merge_with_governance": {
+          "type": "boolean"
+        },
+        "mapping": {
+          "type": "object",
+          "description": "Maps intake responses to output format"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "required": ["id", "name", "questions"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "condition": {
+          "$ref": "#/$defs/condition"
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/question"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "question": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "question": {
+          "type": ["string", "null"],
+          "description": "Question text (null for derived/hidden fields)"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "text",
+            "textarea",
+            "choice",
+            "multi_choice",
+            "number",
+            "date",
+            "file",
+            "list",
+            "object",
+            "derived"
+          ]
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "default": {
+          "description": "Default value"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "help_text": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "validation": {
+          "$ref": "#/$defs/validation"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/option"
+          },
+          "description": "For choice/multi_choice types"
+        },
+        "condition": {
+          "$ref": "#/$defs/condition"
+        },
+        "conditional_next": {
+          "type": "object",
+          "description": "Maps option values to next phase IDs"
+        },
+        "conditional_phases": {
+          "type": "object",
+          "description": "Maps option values to arrays of phase IDs"
+        },
+        "item_schema": {
+          "$ref": "#/$defs/item_schema",
+          "description": "For list type"
+        },
+        "properties": {
+          "type": "object",
+          "description": "For object type"
+        },
+        "min_items": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_items": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit for number type (e.g., 'minutes', 'USD')"
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false
+        },
+        "derived_from": {
+          "type": "string",
+          "description": "Field ID to derive value from"
+        },
+        "transform": {
+          "type": "string",
+          "enum": ["slugify", "uppercase", "lowercase", "trim"],
+          "description": "Transformation to apply for derived fields"
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "required": ["value", "label"],
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "required": ["field", "operator", "value"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Field ID to check"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["equals", "not_equals", "in", "not_in", "contains", "greater_than", "less_than", "is_set", "is_not_set"]
+        },
+        "value": {
+          "description": "Value to compare against"
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "min_length": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_length": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "step": {
+          "type": "number"
+        },
+        "min_date": {
+          "type": "string",
+          "description": "Can be ISO date or '{{field_id}}' reference"
+        },
+        "max_date": {
+          "type": "string"
+        }
+      }
+    },
+    "item_schema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["text", "textarea", "object"]
+        },
+        "properties": {
+          "type": "object",
+          "description": "For object type items"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "max_length": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

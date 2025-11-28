@@ -1,0 +1,941 @@
+# Presentation Content Intake Template
+# For consulting project deliverables and client pitches
+# Version: 1.0.0
+#
+# Context: This template is designed for Kearney consultants creating:
+# - Project report-outs (presenting findings from an engagement)
+# - Client pitches (proposing a new engagement to a potential client)
+# - Internal updates (leadership briefings, team updates)
+
+template:
+  id: "presentation"
+  name: "Presentation Content"
+  description: "Create consulting project deliverables or client pitch decks"
+  version: "1.0.0"
+  extends: "_base"
+  icon: "presentation"
+  color: "#7823DC"  # Kearney purple
+
+# Brand constraints specific to presentations
+brand_constraints:
+  inherit_from_governance: true
+  presentation_specific:
+    font: "Arial"                    # NOT Inter - presentations use Arial
+    font_fallback: "Helvetica, sans-serif"
+    no_emojis: true
+    no_gridlines: true
+    label_first_approach: true       # Data labels outside bars, not on axes
+    max_bullets_per_slide: 5
+    max_words_per_bullet: 15
+
+phases:
+
+  # Phase 1: Presentation Type (determines flow)
+  - id: "presentation_type"
+    name: "Presentation Type"
+    description: "What kind of presentation are you creating?"
+    order: 5
+    required: true
+    questions:
+      
+      - id: "presentation_purpose"
+        question: "What is the purpose of this presentation?"
+        type: "choice"
+        required: true
+        options:
+          - value: "project_report"
+            label: "Project Report-Out"
+            description: "Presenting findings, recommendations, and results from a completed or ongoing consulting engagement"
+          - value: "client_pitch"
+            label: "Client Pitch / Proposal"
+            description: "Proposing a new engagement to a potential or existing client"
+          - value: "internal_update"
+            label: "Internal Update"
+            description: "Team update, leadership briefing, or knowledge sharing"
+          - value: "workshop"
+            label: "Workshop / Working Session"
+            description: "Facilitating a collaborative session with stakeholders"
+        conditional_phases:
+          project_report: ["report_context", "findings_insights", "recommendations"]
+          client_pitch: ["pitch_context", "value_proposition", "approach_methodology", "team_credentials", "the_ask"]
+          internal_update: ["update_context", "key_messages"]
+          workshop: ["workshop_design", "activities"]
+      
+      - id: "presentation_format"
+        question: "What format will this presentation take?"
+        type: "choice"
+        required: true
+        options:
+          - value: "live_presentation"
+            label: "Live Presentation"
+            description: "You'll present in person or via video"
+          - value: "read_ahead"
+            label: "Read-Ahead / Leave-Behind"
+            description: "Document that stands alone without presenter"
+          - value: "hybrid"
+            label: "Hybrid"
+            description: "Live presentation + leave-behind document"
+      
+      - id: "time_available"
+        question: "How much time do you have?"
+        type: "number"
+        required: true
+        validation:
+          min: 5
+          max: 180
+        unit: "minutes"
+        default: 30
+        help_text: "Total time including Q&A"
+      
+      - id: "slide_count_preference"
+        question: "Target slide count (optional):"
+        type: "number"
+        required: false
+        validation:
+          min: 5
+          max: 100
+        help_text: "Leave blank for automatic recommendation based on time"
+
+  # Phase 2A: Report Context (for project_report)
+  - id: "report_context"
+    name: "Project Context"
+    description: "Background on the consulting engagement"
+    order: 6
+    required: true
+    condition:
+      field: "presentation_purpose"
+      operator: "equals"
+      value: "project_report"
+    questions:
+      
+      - id: "engagement_name"
+        question: "What is the engagement/project name?"
+        type: "text"
+        required: true
+        help_text: "Official project name as known to the client"
+      
+      - id: "engagement_duration"
+        question: "What is the engagement duration?"
+        type: "object"
+        required: true
+        properties:
+          start_date:
+            type: "date"
+            required: true
+          end_date:
+            type: "date"
+            required: false
+            help_text: "Leave blank if ongoing"
+      
+      - id: "original_objectives"
+        question: "What were the original engagement objectives?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "text"
+          max_length: 200
+        min_items: 1
+        max_items: 5
+        help_text: "As defined in the SOW or project charter"
+      
+      - id: "scope_changes"
+        question: "Were there any scope changes during the engagement?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 500
+        help_text: "Note any material changes from original scope"
+      
+      - id: "data_sources_used"
+        question: "What data sources were analyzed?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            source:
+              type: "text"
+              required: true
+            type:
+              type: "choice"
+              required: true
+              options:
+                - value: "client_provided"
+                  label: "Client-provided"
+                - value: "public_data"
+                  label: "Public data"
+                - value: "proprietary"
+                  label: "Proprietary/licensed"
+                - value: "interviews"
+                  label: "Interviews"
+                - value: "surveys"
+                  label: "Surveys"
+        min_items: 1
+        max_items: 10
+      
+      - id: "methodology_used"
+        question: "What methodology/approach was used?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 50
+          max_length: 500
+        help_text: "Describe the analytical approach and frameworks applied"
+
+  # Phase 2B: Pitch Context (for client_pitch)
+  - id: "pitch_context"
+    name: "Pitch Context"
+    description: "Understanding the opportunity"
+    order: 6
+    required: true
+    condition:
+      field: "presentation_purpose"
+      operator: "equals"
+      value: "client_pitch"
+    questions:
+      
+      - id: "prospect_company"
+        question: "Who is the prospective client?"
+        type: "text"
+        required: true
+        help_text: "Company name"
+      
+      - id: "prospect_industry"
+        question: "What industry are they in?"
+        type: "choice"
+        required: true
+        options:
+          - value: "retail_consumer"
+            label: "Retail & Consumer Products"
+          - value: "manufacturing"
+            label: "Manufacturing & Industrial"
+          - value: "healthcare"
+            label: "Healthcare & Life Sciences"
+          - value: "financial_services"
+            label: "Financial Services"
+          - value: "technology"
+            label: "Technology & Telecom"
+          - value: "energy"
+            label: "Energy & Utilities"
+          - value: "public_sector"
+            label: "Public Sector"
+          - value: "other"
+            label: "Other"
+      
+      - id: "opportunity_source"
+        question: "How did this opportunity come about?"
+        type: "choice"
+        required: true
+        options:
+          - value: "rfp"
+            label: "RFP/RFI Response"
+          - value: "existing_relationship"
+            label: "Existing Client Relationship"
+          - value: "referral"
+            label: "Referral"
+          - value: "inbound"
+            label: "Inbound Interest"
+          - value: "proactive_outreach"
+            label: "Proactive Outreach"
+      
+      - id: "rfp_reference"
+        question: "RFP/RFI reference number (if applicable):"
+        type: "text"
+        required: false
+        condition:
+          field: "opportunity_source"
+          operator: "equals"
+          value: "rfp"
+      
+      - id: "client_challenge"
+        question: "What challenge is the client facing?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 50
+          max_length: 500
+        help_text: "The business problem or opportunity they're trying to address"
+      
+      - id: "why_now"
+        question: "Why is this important NOW?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 30
+          max_length: 300
+        help_text: "What's driving urgency for this engagement?"
+      
+      - id: "competitive_situation"
+        question: "Who else is pitching for this work?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            competitor:
+              type: "text"
+              required: true
+            strength:
+              type: "text"
+              required: false
+              placeholder: "Their key strength"
+            weakness:
+              type: "text"
+              required: false
+              placeholder: "Their vulnerability"
+        min_items: 0
+        max_items: 5
+      
+      - id: "existing_relationship"
+        question: "What is Kearney's history with this client?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 300
+        help_text: "Past engagements, relationships, relevant experience"
+
+  # Phase 3A: Findings & Insights (for project_report)
+  - id: "findings_insights"
+    name: "Findings & Insights"
+    description: "The core content of your report"
+    order: 7
+    required: true
+    condition:
+      field: "presentation_purpose"
+      operator: "equals"
+      value: "project_report"
+    questions:
+      
+      - id: "key_findings"
+        question: "What are the key findings?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            finding:
+              type: "textarea"
+              required: true
+              placeholder: "Describe the finding"
+              max_length: 300
+            evidence:
+              type: "textarea"
+              required: true
+              placeholder: "Supporting data/evidence"
+              max_length: 200
+            so_what:
+              type: "textarea"
+              required: true
+              placeholder: "Why does this matter?"
+              max_length: 200
+        min_items: 3
+        max_items: 10
+        help_text: "Each finding should have evidence and explain why it matters"
+      
+      - id: "surprising_findings"
+        question: "Were there any surprising or counterintuitive findings?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 500
+        help_text: "Things that challenged assumptions or revealed unexpected insights"
+      
+      - id: "quantified_impact"
+        question: "What is the quantified impact/opportunity?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            metric:
+              type: "text"
+              required: true
+              placeholder: "e.g., Revenue, Cost, Efficiency"
+            value:
+              type: "text"
+              required: true
+              placeholder: "e.g., $50M, 30%, 2x"
+            confidence:
+              type: "choice"
+              required: true
+              options:
+                - value: "high"
+                  label: "High confidence"
+                - value: "medium"
+                  label: "Medium confidence"
+                - value: "estimate"
+                  label: "Estimate/range"
+            timeframe:
+              type: "text"
+              required: false
+              placeholder: "e.g., per year, by 2026"
+        min_items: 1
+        max_items: 5
+      
+      - id: "supporting_visualizations"
+        question: "What key charts or visuals will support the findings?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            chart_type:
+              type: "choice"
+              required: true
+              options:
+                - value: "bar"
+                  label: "Bar chart"
+                - value: "line"
+                  label: "Line chart"
+                - value: "pie"
+                  label: "Pie/donut chart"
+                - value: "waterfall"
+                  label: "Waterfall"
+                - value: "scatter"
+                  label: "Scatter plot"
+                - value: "heatmap"
+                  label: "Heatmap"
+                - value: "map"
+                  label: "Geographic map"
+                - value: "process"
+                  label: "Process diagram"
+                - value: "matrix"
+                  label: "2x2 matrix"
+                - value: "other"
+                  label: "Other"
+            purpose:
+              type: "text"
+              required: true
+              placeholder: "What does this visual show?"
+        min_items: 0
+        max_items: 10
+
+  # Phase 3B: Value Proposition (for client_pitch)
+  - id: "value_proposition"
+    name: "Value Proposition"
+    description: "Why Kearney, why now?"
+    order: 7
+    required: true
+    condition:
+      field: "presentation_purpose"
+      operator: "equals"
+      value: "client_pitch"
+    questions:
+      
+      - id: "proposed_solution"
+        question: "What is the proposed solution/approach?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 100
+          max_length: 800
+        help_text: "High-level description of what we're proposing to do"
+      
+      - id: "key_benefits"
+        question: "What are the key benefits for the client?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            benefit:
+              type: "text"
+              required: true
+              max_length: 200
+            quantification:
+              type: "text"
+              required: false
+              placeholder: "Quantify if possible"
+        min_items: 3
+        max_items: 7
+      
+      - id: "why_kearney"
+        question: "Why is Kearney uniquely positioned for this work?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            differentiator:
+              type: "text"
+              required: true
+              placeholder: "Unique capability or experience"
+            proof_point:
+              type: "text"
+              required: true
+              placeholder: "Evidence/example"
+        min_items: 2
+        max_items: 5
+        help_text: "What makes us better than competitors for THIS specific work?"
+      
+      - id: "relevant_experience"
+        question: "What relevant experience can we reference?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            client:
+              type: "text"
+              required: true
+              placeholder: "Client name (or 'Confidential')"
+            project:
+              type: "text"
+              required: true
+              placeholder: "Brief project description"
+            results:
+              type: "text"
+              required: true
+              placeholder: "Key outcomes achieved"
+            referenceable:
+              type: "choice"
+              required: true
+              options:
+                - value: "yes"
+                  label: "Yes, can reference"
+                - value: "no"
+                  label: "No, confidential"
+        min_items: 2
+        max_items: 5
+      
+      - id: "risk_mitigation"
+        question: "How will we mitigate client concerns/risks?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            concern:
+              type: "text"
+              required: true
+              placeholder: "Client concern"
+            mitigation:
+              type: "text"
+              required: true
+              placeholder: "How we address it"
+        min_items: 0
+        max_items: 5
+
+  # Phase 4A: Recommendations (for project_report)
+  - id: "recommendations"
+    name: "Recommendations"
+    description: "What should the client do?"
+    order: 8
+    required: true
+    condition:
+      field: "presentation_purpose"
+      operator: "equals"
+      value: "project_report"
+    questions:
+      
+      - id: "strategic_recommendations"
+        question: "What are the strategic recommendations?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            recommendation:
+              type: "textarea"
+              required: true
+              placeholder: "Describe the recommendation"
+              max_length: 300
+            rationale:
+              type: "textarea"
+              required: true
+              placeholder: "Why this recommendation?"
+              max_length: 200
+            priority:
+              type: "choice"
+              required: true
+              options:
+                - value: "critical"
+                  label: "Critical (must do)"
+                - value: "high"
+                  label: "High priority"
+                - value: "medium"
+                  label: "Medium priority"
+                - value: "nice_to_have"
+                  label: "Nice to have"
+            effort:
+              type: "choice"
+              required: true
+              options:
+                - value: "quick_win"
+                  label: "Quick win (< 3 months)"
+                - value: "medium_term"
+                  label: "Medium term (3-12 months)"
+                - value: "long_term"
+                  label: "Long term (> 12 months)"
+            investment:
+              type: "text"
+              required: false
+              placeholder: "Estimated investment"
+            expected_return:
+              type: "text"
+              required: false
+              placeholder: "Expected return/benefit"
+        min_items: 3
+        max_items: 10
+      
+      - id: "implementation_roadmap"
+        question: "Is there a recommended implementation sequence?"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 500
+        help_text: "Phasing, dependencies, critical path"
+      
+      - id: "quick_wins"
+        question: "What quick wins can be achieved immediately?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          max_length: 200
+        min_items: 0
+        max_items: 5
+      
+      - id: "next_steps"
+        question: "What are the immediate next steps?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            action:
+              type: "text"
+              required: true
+            owner:
+              type: "text"
+              required: false
+              placeholder: "Who is responsible?"
+            deadline:
+              type: "date"
+              required: false
+        min_items: 2
+        max_items: 7
+
+  # Phase 4B: Approach & Methodology (for client_pitch)
+  - id: "approach_methodology"
+    name: "Approach & Methodology"
+    description: "How we'll deliver the work"
+    order: 8
+    required: true
+    condition:
+      field: "presentation_purpose"
+      operator: "equals"
+      value: "client_pitch"
+    questions:
+      
+      - id: "project_phases"
+        question: "What are the proposed project phases?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            phase_name:
+              type: "text"
+              required: true
+            duration:
+              type: "text"
+              required: true
+              placeholder: "e.g., 2 weeks"
+            activities:
+              type: "textarea"
+              required: true
+              placeholder: "Key activities"
+              max_length: 300
+            deliverables:
+              type: "textarea"
+              required: true
+              placeholder: "Phase deliverables"
+              max_length: 200
+        min_items: 2
+        max_items: 6
+      
+      - id: "key_workstreams"
+        question: "What are the key workstreams?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "object"
+          properties:
+            workstream:
+              type: "text"
+              required: true
+            description:
+              type: "text"
+              required: true
+        min_items: 0
+        max_items: 5
+      
+      - id: "client_involvement"
+        question: "What client involvement is required?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 50
+          max_length: 400
+        help_text: "Time commitment, access needed, key participants"
+      
+      - id: "governance_model"
+        question: "Proposed governance/meeting cadence:"
+        type: "textarea"
+        required: false
+        validation:
+          max_length: 300
+        help_text: "Steering committees, check-ins, review points"
+
+  # Phase 5B: Team & Credentials (for client_pitch)
+  - id: "team_credentials"
+    name: "Team & Credentials"
+    description: "Who will do the work"
+    order: 9
+    required: true
+    condition:
+      field: "presentation_purpose"
+      operator: "equals"
+      value: "client_pitch"
+    questions:
+      
+      - id: "team_structure"
+        question: "What is the proposed team structure?"
+        type: "list"
+        required: true
+        item_schema:
+          type: "object"
+          properties:
+            role:
+              type: "choice"
+              required: true
+              options:
+                - value: "partner"
+                  label: "Partner / Engagement Lead"
+                - value: "principal"
+                  label: "Principal / Project Lead"
+                - value: "manager"
+                  label: "Manager / Workstream Lead"
+                - value: "consultant"
+                  label: "Consultant"
+                - value: "analyst"
+                  label: "Analyst"
+                - value: "specialist"
+                  label: "Subject Matter Expert"
+            name:
+              type: "text"
+              required: true
+            relevant_experience:
+              type: "textarea"
+              required: true
+              placeholder: "Why this person?"
+              max_length: 200
+            allocation:
+              type: "text"
+              required: false
+              placeholder: "e.g., 50%, Full-time"
+        min_items: 2
+        max_items: 8
+      
+      - id: "team_differentiators"
+        question: "What makes this team special for this engagement?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 50
+          max_length: 400
+        help_text: "Combined experience, unique skills, chemistry"
+
+  # Phase 6B: The Ask (for client_pitch)
+  - id: "the_ask"
+    name: "The Ask"
+    description: "What we're asking for"
+    order: 10
+    required: true
+    condition:
+      field: "presentation_purpose"
+      operator: "equals"
+      value: "client_pitch"
+    questions:
+      
+      - id: "fee_structure"
+        question: "Proposed fee structure:"
+        type: "choice"
+        required: true
+        options:
+          - value: "fixed_fee"
+            label: "Fixed fee"
+          - value: "time_materials"
+            label: "Time & materials"
+          - value: "milestone_based"
+            label: "Milestone-based"
+          - value: "success_fee"
+            label: "Success fee / Value share"
+          - value: "hybrid"
+            label: "Hybrid"
+      
+      - id: "fee_range"
+        question: "Fee range (or specific amount):"
+        type: "text"
+        required: true
+        help_text: "e.g., $500K-$750K or €400,000 fixed"
+      
+      - id: "timeline_proposed"
+        question: "Proposed project timeline:"
+        type: "object"
+        required: true
+        properties:
+          start:
+            type: "date"
+            required: true
+          end:
+            type: "date"
+            required: true
+      
+      - id: "decision_criteria"
+        question: "What criteria will the client use to decide?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          max_length: 100
+        min_items: 0
+        max_items: 5
+        help_text: "Understanding this helps us tailor the pitch"
+      
+      - id: "closing_request"
+        question: "What is the specific closing request?"
+        type: "textarea"
+        required: true
+        validation:
+          min_length: 20
+          max_length: 200
+        help_text: "The specific action you want the client to take (e.g., 'We'd like to schedule a follow-up to discuss scope and timing')"
+
+  # Phase: Presentation Details (for all types)
+  - id: "presentation_details"
+    name: "Presentation Details"
+    description: "Logistics and format"
+    order: 11
+    required: true
+    questions:
+      
+      - id: "delivery_format"
+        question: "How will this be delivered?"
+        type: "choice"
+        required: true
+        options:
+          - value: "in_person"
+            label: "In-person meeting"
+          - value: "video_call"
+            label: "Video conference"
+          - value: "email"
+            label: "Email send (read-ahead)"
+          - value: "hybrid_meeting"
+            label: "Hybrid (some in-person, some virtual)"
+      
+      - id: "output_format"
+        question: "Desired output format:"
+        type: "multi_choice"
+        required: true
+        options:
+          - value: "powerpoint"
+            label: "PowerPoint (.pptx)"
+          - value: "pdf"
+            label: "PDF"
+          - value: "google_slides"
+            label: "Google Slides"
+          - value: "html"
+            label: "HTML (scrollytelling)"
+        help_text: "Select all that apply"
+      
+      - id: "language"
+        question: "Presentation language:"
+        type: "choice"
+        required: true
+        default: "en"
+        options:
+          - value: "en"
+            label: "English"
+          - value: "de"
+            label: "German"
+          - value: "fr"
+            label: "French"
+          - value: "es"
+            label: "Spanish"
+          - value: "pt"
+            label: "Portuguese"
+          - value: "zh"
+            label: "Chinese"
+          - value: "ja"
+            label: "Japanese"
+      
+      - id: "brand_customization"
+        question: "Brand customization:"
+        type: "choice"
+        required: true
+        default: "kearney"
+        options:
+          - value: "kearney"
+            label: "Kearney branding"
+          - value: "co_branded"
+            label: "Co-branded (Kearney + Client)"
+          - value: "client_branded"
+            label: "Client branded (white-label)"
+      
+      - id: "appendix_needs"
+        question: "What should go in the appendix?"
+        type: "list"
+        required: false
+        item_schema:
+          type: "text"
+          max_length: 200
+        min_items: 0
+        max_items: 10
+        help_text: "Supporting materials, detailed analyses, backup slides"
+
+# Output configuration
+output:
+  format: "intake_response"
+  validation: "strict"
+  merge_with_governance: true
+  
+  # Map intake responses to orchestrator format
+  mapping:
+    project:
+      name: "{{project_name}}"
+      slug: "{{project_slug}}"
+      type: "presentation"
+      subtype: "{{presentation_purpose}}"
+      description: "{{project_description}}"
+      client: "{{client_name}}"
+    
+    presentation:
+      purpose: "{{presentation_purpose}}"
+      format: "{{presentation_format}}"
+      duration_minutes: "{{time_available}}"
+      slide_count: "{{slide_count_preference}}"
+      output_formats: "{{output_format}}"
+      language: "{{language}}"
+      branding: "{{brand_customization}}"
+    
+    content:
+      # For project reports
+      engagement: "{{engagement_name}}"
+      findings: "{{key_findings}}"
+      recommendations: "{{strategic_recommendations}}"
+      next_steps: "{{next_steps}}"
+      
+      # For client pitches
+      prospect: "{{prospect_company}}"
+      challenge: "{{client_challenge}}"
+      solution: "{{proposed_solution}}"
+      team: "{{team_structure}}"
+      ask: "{{closing_request}}"
+    
+    constraints:
+      timeline: "{{start_date}} to {{target_completion}}"
+      brand: "{{brand_customization}}"
+    
+    success_criteria: "{{success_metrics}}"
