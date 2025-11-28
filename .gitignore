@@ -68,9 +68,10 @@ data/interim/
 data/processed/
 !data/external/sample/  # Allow sample data
 
-# Models (never commit model artifacts)
-models/
-!models/.gitkeep
+# Models (never commit ML model artifacts, but keep Python modules)
+/models/
+!/models/.gitkeep
+!orchestrator_v2/models/
 
 # MLflow
 mlruns/
