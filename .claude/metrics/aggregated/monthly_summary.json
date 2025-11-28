@@ -5,7 +5,7 @@
     "month_end": "2025-11-01",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.33,
+        "deployment_frequency": 0.32,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
@@ -14,12 +14,12 @@
         "pr_cycle_time_hours": 0.58,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.67
+        "features_per_week": 4.83
       },
       "contributions": {
-        "human_percentage": 79.52,
-        "ai_percentage": 0.48,
-        "collaborative_percentage": 20.0
+        "human_percentage": 79.25,
+        "ai_percentage": 0.47,
+        "collaborative_percentage": 20.28
       },
       "ai_review": {
         "review_coverage": 0,
@@ -35,7 +35,7 @@
     "month_end": "2025-10-02",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.33,
+        "deployment_frequency": 0.32,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
@@ -44,12 +44,12 @@
         "pr_cycle_time_hours": 0.58,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.67
+        "features_per_week": 4.83
       },
       "contributions": {
-        "human_percentage": 79.52,
-        "ai_percentage": 0.48,
-        "collaborative_percentage": 20.0
+        "human_percentage": 79.25,
+        "ai_percentage": 0.47,
+        "collaborative_percentage": 20.28
       },
       "ai_review": {
         "review_coverage": 0,
@@ -136,7 +136,7 @@
     "month_end": "2025-09-02",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.33,
+        "deployment_frequency": 0.32,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
@@ -145,12 +145,12 @@
         "pr_cycle_time_hours": 0.58,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.67
+        "features_per_week": 4.83
       },
       "contributions": {
-        "human_percentage": 79.52,
-        "ai_percentage": 0.48,
-        "collaborative_percentage": 20.0
+        "human_percentage": 79.25,
+        "ai_percentage": 0.47,
+        "collaborative_percentage": 20.28
       },
       "ai_review": {
         "review_coverage": 0,
@@ -237,7 +237,7 @@
     "month_end": "2025-08-03",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.33,
+        "deployment_frequency": 0.32,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
@@ -246,12 +246,12 @@
         "pr_cycle_time_hours": 0.58,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.67
+        "features_per_week": 4.83
       },
       "contributions": {
-        "human_percentage": 79.52,
-        "ai_percentage": 0.48,
-        "collaborative_percentage": 20.0
+        "human_percentage": 79.25,
+        "ai_percentage": 0.47,
+        "collaborative_percentage": 20.28
       },
       "ai_review": {
         "review_coverage": 0,
@@ -338,7 +338,7 @@
     "month_end": "2025-07-04",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.33,
+        "deployment_frequency": 0.32,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
@@ -347,12 +347,12 @@
         "pr_cycle_time_hours": 0.58,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.67
+        "features_per_week": 4.83
       },
       "contributions": {
-        "human_percentage": 79.52,
-        "ai_percentage": 0.48,
-        "collaborative_percentage": 20.0
+        "human_percentage": 79.25,
+        "ai_percentage": 0.47,
+        "collaborative_percentage": 20.28
       },
       "ai_review": {
         "review_coverage": 0,
@@ -439,7 +439,7 @@
     "month_end": "2025-06-04",
     "metrics": {
       "dora": {
-        "deployment_frequency": 0.33,
+        "deployment_frequency": 0.32,
         "lead_time_hours": 2.39,
         "mttr_hours": 0,
         "change_failure_rate": 0
@@ -448,12 +448,12 @@
         "pr_cycle_time_hours": 0.58,
         "merge_rate": 100.0,
         "conflict_rate": 0,
-        "features_per_week": 4.67
+        "features_per_week": 4.83
       },
       "contributions": {
-        "human_percentage": 79.52,
-        "ai_percentage": 0.48,
-        "collaborative_percentage": 20.0
+        "human_percentage": 79.25,
+        "ai_percentage": 0.47,
+        "collaborative_percentage": 20.28
       },
       "ai_review": {
         "review_coverage": 0,
