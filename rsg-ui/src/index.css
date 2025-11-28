@@ -113,6 +113,24 @@ body {
   gap: 1rem;
 }
 
+/* Template icon styles using Lucide */
+.template-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  background: var(--surface-elevated);
+  border-radius: 12px;
+  color: var(--emphasis);
+}
+
+.template-card.selected .template-icon {
+  background: var(--emphasis);
+  color: var(--text-inverse);
+}
+
 /* Buttons */
 button {
   cursor: pointer;

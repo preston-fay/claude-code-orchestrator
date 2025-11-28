@@ -6,6 +6,12 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { 
+  Rocket, 
+  Database, 
+  Code, 
+  Lightbulb
+} from 'lucide-react';
 import {
   intakeApi,
   type TemplateDefinition,
@@ -63,6 +69,25 @@ interface ProgressTrackerProps {
 // Template Selection Component
 // -----------------------------------------------------------------------------
 
+// Helper function to get appropriate Lucide icon
+const getTemplateIcon = (templateId: string, category?: string) => {
+  // Map template IDs or categories to appropriate Lucide icons
+  if (templateId === 'quick_start' || category === 'general') {
+    return <Rocket size={24} />;
+  }
+  if (templateId === 'data_analysis' || category === 'analytics') {
+    return <Database size={24} />;
+  }
+  if (templateId === 'build_something' || category === 'development') {
+    return <Code size={24} />;
+  }
+  if (templateId === 'solve_problem' || category === 'consulting') {
+    return <Lightbulb size={24} />;
+  }
+  // Default icon
+  return <Rocket size={24} />;
+};
+
 const TemplateSelection: React.FC<TemplateSelectionProps> = ({ 
   templates, 
   onSelect, 
@@ -93,7 +118,9 @@ const TemplateSelection: React.FC<TemplateSelectionProps> = ({
               className={`template-card ${selectedTemplateId === template.template_id ? 'selected' : ''}`}
               onClick={() => setSelectedTemplateId(template.template_id)}
             >
-              {/* NO ICONS - KDS compliant. Icons removed. */}
+              <div className="template-icon">
+                {getTemplateIcon(template.template_id, template.category)}
+              </div>
               <h3>{template.name}</h3>
               {template.description && (
                 <p className="template-description">{template.description}</p>
