@@ -374,11 +374,37 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           </div>
         );
 
-      default:
+      case 'object':
+        // For object types, render a textarea for JSON or structured input
         return (
-          <div className="unsupported-type">
-            Unsupported question type: {question.type}
-          </div>
+          <textarea
+            value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value || ''}
+            onChange={(e) => {
+              try {
+                const parsed = JSON.parse(e.target.value);
+                onChange(parsed);
+              } catch {
+                onChange(e.target.value);
+              }
+            }}
+            placeholder={question.placeholder || 'Enter structured data (JSON format)'}
+            required={question.required}
+            disabled={question.readonly}
+            rows={6}
+            className={error && touched ? 'error' : ''}
+          />
+        );
+
+      default:
+        // For any other type, provide a text input as fallback
+        return (
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={question.placeholder || `Enter ${question.type} data`}
+            className={error && touched ? 'error' : ''}
+          />
         );
     }
   };
@@ -392,7 +418,11 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       {question.question && (
         <label className="question-label">
           {question.question}
-          {question.required && <span className="required">*</span>}
+          {question.required ? (
+            <span className="required">*</span>
+          ) : (
+            <span className="optional"> (optional)</span>
+          )}
         </label>
       )}
       
