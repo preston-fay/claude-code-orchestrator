@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listProjects, createProject, listProjectTemplates } from '../api/client';
 import { ProjectSummary, CreateProjectPayload, ProjectTemplate } from '../api/types';
+import IntakeWizard from '../components/IntakeWizard';
 
 const ProjectListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const ProjectListPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showIntakeWizard, setShowIntakeWizard] = useState(false);
   const [newProject, setNewProject] = useState<CreateProjectPayload>({
     project_name: '',
     client: 'kearney-default',
@@ -107,9 +109,14 @@ const ProjectListPage: React.FC = () => {
     <div className="page project-list-page">
       <div className="page-header">
         <h2>Projects</h2>
-        <button className="button-primary" onClick={() => setShowCreateModal(true)}>
-          New Project
-        </button>
+        <div className="header-actions">
+          <button className="button-primary" onClick={() => setShowIntakeWizard(true)}>
+            New Project (Interview)
+          </button>
+          <button className="button-secondary" onClick={() => setShowCreateModal(true)}>
+            Quick Create
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -127,7 +134,7 @@ const ProjectListPage: React.FC = () => {
           <p>Create your first project to get started with Ready/Set/Go.</p>
           <div className="quick-start-hint">
             <h4>Quick Start</h4>
-            <p>Click "New Project" and select a template to begin.</p>
+            <p>Click "New Project (Interview)" for a guided project setup.</p>
             <p className="hint-text">Choose from Analytics, ML, Optimization, and more.</p>
           </div>
         </div>
@@ -269,6 +276,26 @@ const ProjectListPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Intake Wizard Modal */}
+      {showIntakeWizard && (
+        <IntakeWizard
+          onComplete={(sessionId) => {
+            setShowIntakeWizard(false);
+            // Create project with the completed intake session
+            createProject({
+              project_name: `Project-${new Date().toISOString().split('T')[0]}`,
+              client: 'kearney-default',
+              intake_session_id: sessionId
+            }).then((created) => {
+              navigate(`/projects/${created.project_id}`);
+            }).catch((err) => {
+              setError(err.message || 'Failed to create project from intake');
+            });
+          }}
+          onCancel={() => setShowIntakeWizard(false)}
+        />
       )}
     </div>
   );

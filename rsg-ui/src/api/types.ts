@@ -41,6 +41,7 @@ export interface CreateProjectPayload {
   // INTAKE: Project requirements - CRITICAL for agents to know what to build
   description?: string;
   intake_path?: string;
+  intake_session_id?: string;  // Link to completed intake session
   metadata?: Record<string, unknown>;
 }
 
