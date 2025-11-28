@@ -10,7 +10,13 @@ import {
   Rocket, 
   Database, 
   Code, 
-  Lightbulb
+  Lightbulb,
+  Brain,
+  TrendingUp,
+  Package,
+  Globe,
+  FileText,
+  Briefcase
 } from 'lucide-react';
 import {
   intakeApi,
@@ -69,23 +75,46 @@ interface ProgressTrackerProps {
 // Template Selection Component
 // -----------------------------------------------------------------------------
 
-// Helper function to get appropriate Lucide icon
-const getTemplateIcon = (templateId: string, category?: string) => {
-  // Map template IDs or categories to appropriate Lucide icons
-  if (templateId === 'quick_start' || category === 'general') {
-    return <Rocket size={24} />;
+// Helper function to get appropriate Lucide icon based on template name and category
+const getTemplateIcon = (templateId: string, category?: string, name?: string) => {
+  const lowerName = name?.toLowerCase() || '';
+  const lowerId = templateId.toLowerCase();
+  const lowerCategory = category?.toLowerCase() || '';
+  
+  // Check name and category for keywords
+  if (lowerName.includes('ml') || lowerName.includes('machine learning') || lowerName.includes('model')) {
+    return <Brain size={24} />;
   }
-  if (templateId === 'data_analysis' || category === 'analytics') {
-    return <Database size={24} />;
+  if (lowerName.includes('analytic') || lowerName.includes('data') || lowerCategory === 'analytics') {
+    return <TrendingUp size={24} />;
   }
-  if (templateId === 'build_something' || category === 'development') {
+  if (lowerName.includes('supply chain') || lowerName.includes('logistics')) {
+    return <Package size={24} />;
+  }
+  if (lowerName.includes('web') || lowerName.includes('app') || lowerCategory === 'development') {
+    return <Globe size={24} />;
+  }
+  if (lowerName.includes('presentation') || lowerName.includes('pitch')) {
+    return <FileText size={24} />;
+  }
+  if (lowerName.includes('build') || lowerName.includes('feature')) {
     return <Code size={24} />;
   }
-  if (templateId === 'solve_problem' || category === 'consulting') {
+  if (lowerName.includes('consulting') || lowerName.includes('business') || lowerCategory === 'consulting') {
+    return <Briefcase size={24} />;
+  }
+  if (lowerId === 'quick_start' || lowerCategory === 'general') {
+    return <Rocket size={24} />;
+  }
+  if (lowerId === 'data_analysis') {
+    return <Database size={24} />;
+  }
+  if (lowerId === 'solve_problem') {
     return <Lightbulb size={24} />;
   }
-  // Default icon
-  return <Rocket size={24} />;
+  
+  // Default - but should rarely hit this now
+  return <Lightbulb size={24} />;
 };
 
 const TemplateSelection: React.FC<TemplateSelectionProps> = ({ 
@@ -119,7 +148,7 @@ const TemplateSelection: React.FC<TemplateSelectionProps> = ({
               onClick={() => setSelectedTemplateId(template.template_id)}
             >
               <div className="template-icon">
-                {getTemplateIcon(template.template_id, template.category)}
+                {getTemplateIcon(template.template_id, template.category, template.name)}
               </div>
               <h3>{template.name}</h3>
               {template.description && (
