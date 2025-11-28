@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T20:59:18.682977",
+  "collection_timestamp": "2025-11-28T21:03:59.886187",
   "commits": [
+    {
+      "sha": "9df46f26ebecd2de4082787a88681cedfefe03a2",
+      "author": "preston-fay",
+      "date": "2025-11-28 16:03:05 -0500",
+      "message": "fix: remove non-existent public directory from Dockerfile",
+      "contributor_type": "collaborative",
+      "lines_added": 1,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "b28e9819b56a018c142e76d8e5427a360d3cc057",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 21:00:35 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 107,
+      "lines_deleted": 85,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "e3fb47624b6f65b66927b51584b1b3590fce4179",
       "author": "preston-fay",
@@ -2712,19 +2738,19 @@
     }
   ],
   "summary": {
-    "total_commits": 228,
-    "human_commits": 178,
+    "total_commits": 230,
+    "human_commits": 179,
     "ai_commits": 1,
-    "collaborative_commits": 49,
-    "human_percentage": 78.07,
-    "ai_percentage": 0.44,
-    "collaborative_percentage": 21.49,
-    "human_lines_added": 65345,
+    "collaborative_commits": 50,
+    "human_percentage": 77.83,
+    "ai_percentage": 0.43,
+    "collaborative_percentage": 21.74,
+    "human_lines_added": 65452,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 529051,
-    "total_lines_added": 637282,
-    "human_lines_percentage": 10.25,
+    "collaborative_lines_added": 529052,
+    "total_lines_added": 637390,
+    "human_lines_percentage": 10.27,
     "ai_lines_percentage": 6.73,
-    "collaborative_lines_percentage": 83.02
+    "collaborative_lines_percentage": 83.0
   }
 }
