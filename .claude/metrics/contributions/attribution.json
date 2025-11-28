@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T21:42:49.746366",
+  "collection_timestamp": "2025-11-28T21:51:45.147787",
   "commits": [
+    {
+      "sha": "799ad3dab2649779f5c45847eb9e3beac9a5e0e4",
+      "author": "preston-fay",
+      "date": "2025-11-28 16:50:48 -0500",
+      "message": "fix: unique icons for each template type",
+      "contributor_type": "collaborative",
+      "lines_added": 42,
+      "lines_deleted": 13,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "ed7562149d4acae22bb569e32af047080b0c5fd0",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 21:43:58 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 146,
+      "lines_deleted": 120,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "dfc6f2eb1f914c6e58f7d090ba43d3ada96715c9",
       "author": "preston-fay",
@@ -2909,19 +2935,19 @@
     }
   ],
   "summary": {
-    "total_commits": 243,
-    "human_commits": 185,
+    "total_commits": 245,
+    "human_commits": 186,
     "ai_commits": 1,
-    "collaborative_commits": 57,
-    "human_percentage": 76.13,
+    "collaborative_commits": 58,
+    "human_percentage": 75.92,
     "ai_percentage": 0.41,
-    "collaborative_percentage": 23.46,
-    "human_lines_added": 66245,
+    "collaborative_percentage": 23.67,
+    "human_lines_added": 66391,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 603076,
-    "total_lines_added": 712207,
-    "human_lines_percentage": 9.3,
+    "collaborative_lines_added": 603118,
+    "total_lines_added": 712395,
+    "human_lines_percentage": 9.32,
     "ai_lines_percentage": 6.02,
-    "collaborative_lines_percentage": 84.68
+    "collaborative_lines_percentage": 84.66
   }
 }
