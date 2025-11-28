@@ -1,8 +1,34 @@
 {
   "metric": "contribution_attribution",
   "period": "2025-08-30/2025-11-28",
-  "collection_timestamp": "2025-11-28T21:31:49.206648",
+  "collection_timestamp": "2025-11-28T21:36:50.874277",
   "commits": [
+    {
+      "sha": "e55f2b04699293210d392fe94267dbb150e36a88",
+      "author": "preston-fay",
+      "date": "2025-11-28 16:35:51 -0500",
+      "message": "fix: add default templates and improve session persistence",
+      "contributor_type": "collaborative",
+      "lines_added": 121,
+      "lines_deleted": 1,
+      "files_changed": 1,
+      "ai_indicators": [
+        "Co-Authored-By:.*Claude",
+        "Generated with.*Claude",
+        "Co-Authored-By:.*noreply@anthropic\\.com"
+      ]
+    },
+    {
+      "sha": "92190459da8b7051c4d091552f6725bed9041bb6",
+      "author": "github-actions[bot]",
+      "date": "2025-11-28 21:32:51 +0000",
+      "message": "chore: update metrics data [skip ci]",
+      "contributor_type": "human",
+      "lines_added": 113,
+      "lines_deleted": 87,
+      "files_changed": 12,
+      "ai_indicators": []
+    },
     {
       "sha": "f28e2f819362ed78f322a2e418b1201b3a05e1e5",
       "author": "preston-fay",
@@ -2857,19 +2883,19 @@
     }
   ],
   "summary": {
-    "total_commits": 239,
-    "human_commits": 183,
+    "total_commits": 241,
+    "human_commits": 184,
     "ai_commits": 1,
-    "collaborative_commits": 55,
-    "human_percentage": 76.57,
-    "ai_percentage": 0.42,
-    "collaborative_percentage": 23.01,
-    "human_lines_added": 65986,
+    "collaborative_commits": 56,
+    "human_percentage": 76.35,
+    "ai_percentage": 0.41,
+    "collaborative_percentage": 23.24,
+    "human_lines_added": 66099,
     "ai_lines_added": 42886,
-    "collaborative_lines_added": 529181,
-    "total_lines_added": 638053,
-    "human_lines_percentage": 10.34,
+    "collaborative_lines_added": 529302,
+    "total_lines_added": 638287,
+    "human_lines_percentage": 10.36,
     "ai_lines_percentage": 6.72,
-    "collaborative_lines_percentage": 82.94
+    "collaborative_lines_percentage": 82.93
   }
 }
