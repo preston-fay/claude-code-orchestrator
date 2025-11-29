@@ -1,8 +1,8 @@
 [
   {
-    "week_id": "2025-W46",
-    "week_start": "2025-11-22",
-    "week_end": "2025-11-28",
+    "week_id": "2025-W47",
+    "week_start": "2025-11-23",
+    "week_end": "2025-11-29",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -17,9 +17,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -30,9 +30,9 @@
     "trends": {}
   },
   {
-    "week_id": "2025-W45",
-    "week_start": "2025-11-15",
-    "week_end": "2025-11-21",
+    "week_id": "2025-W46",
+    "week_start": "2025-11-16",
+    "week_end": "2025-11-22",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -47,9 +47,110 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
+      },
+      "ai_review": {
+        "review_coverage": 0,
+        "avg_suggestions_per_pr": 0,
+        "avg_acceptance_rate": 0
+      }
+    },
+    "trends": {
+      "dora.deployment_frequency": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "dora.lead_time_hours": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "dora.mttr_hours": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "dora.change_failure_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.pr_cycle_time_hours": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.merge_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.conflict_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "github.features_per_week": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "contributions.human_percentage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "contributions.ai_percentage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "contributions.collaborative_percentage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.review_coverage": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_suggestions_per_pr": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      },
+      "ai_review.avg_acceptance_rate": {
+        "change_percentage": 0.0,
+        "direction": "stable",
+        "is_anomaly": false
+      }
+    }
+  },
+  {
+    "week_id": "2025-W45",
+    "week_start": "2025-11-09",
+    "week_end": "2025-11-15",
+    "metrics": {
+      "dora": {
+        "deployment_frequency": 0.32,
+        "lead_time_hours": 2.39,
+        "mttr_hours": 0,
+        "change_failure_rate": 0
+      },
+      "github": {
+        "pr_cycle_time_hours": 0.58,
+        "merge_rate": 100.0,
+        "conflict_rate": 0,
+        "features_per_week": 5.17
+      },
+      "contributions": {
+        "human_percentage": 76.02,
+        "ai_percentage": 0.41,
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -132,8 +233,8 @@
   },
   {
     "week_id": "2025-W44",
-    "week_start": "2025-11-08",
-    "week_end": "2025-11-14",
+    "week_start": "2025-11-02",
+    "week_end": "2025-11-08",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -148,9 +249,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -233,8 +334,8 @@
   },
   {
     "week_id": "2025-W43",
-    "week_start": "2025-11-01",
-    "week_end": "2025-11-07",
+    "week_start": "2025-10-26",
+    "week_end": "2025-11-01",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -249,9 +350,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -334,8 +435,8 @@
   },
   {
     "week_id": "2025-W42",
-    "week_start": "2025-10-25",
-    "week_end": "2025-10-31",
+    "week_start": "2025-10-19",
+    "week_end": "2025-10-25",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -350,9 +451,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -435,8 +536,8 @@
   },
   {
     "week_id": "2025-W41",
-    "week_start": "2025-10-18",
-    "week_end": "2025-10-24",
+    "week_start": "2025-10-12",
+    "week_end": "2025-10-18",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -451,9 +552,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -536,8 +637,8 @@
   },
   {
     "week_id": "2025-W40",
-    "week_start": "2025-10-11",
-    "week_end": "2025-10-17",
+    "week_start": "2025-10-05",
+    "week_end": "2025-10-11",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -552,9 +653,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -637,8 +738,8 @@
   },
   {
     "week_id": "2025-W39",
-    "week_start": "2025-10-04",
-    "week_end": "2025-10-10",
+    "week_start": "2025-09-28",
+    "week_end": "2025-10-04",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -653,9 +754,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -738,8 +839,8 @@
   },
   {
     "week_id": "2025-W38",
-    "week_start": "2025-09-27",
-    "week_end": "2025-10-03",
+    "week_start": "2025-09-21",
+    "week_end": "2025-09-27",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -754,9 +855,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -839,8 +940,8 @@
   },
   {
     "week_id": "2025-W37",
-    "week_start": "2025-09-20",
-    "week_end": "2025-09-26",
+    "week_start": "2025-09-14",
+    "week_end": "2025-09-20",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -855,9 +956,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
@@ -940,8 +1041,8 @@
   },
   {
     "week_id": "2025-W36",
-    "week_start": "2025-09-13",
-    "week_end": "2025-09-19",
+    "week_start": "2025-09-07",
+    "week_end": "2025-09-13",
     "metrics": {
       "dora": {
         "deployment_frequency": 0.32,
@@ -956,110 +1057,9 @@
         "features_per_week": 5.17
       },
       "contributions": {
-        "human_percentage": 75.92,
+        "human_percentage": 76.02,
         "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
-      },
-      "ai_review": {
-        "review_coverage": 0,
-        "avg_suggestions_per_pr": 0,
-        "avg_acceptance_rate": 0
-      }
-    },
-    "trends": {
-      "dora.deployment_frequency": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "dora.lead_time_hours": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "dora.mttr_hours": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "dora.change_failure_rate": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "github.pr_cycle_time_hours": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "github.merge_rate": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "github.conflict_rate": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "github.features_per_week": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "contributions.human_percentage": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "contributions.ai_percentage": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "contributions.collaborative_percentage": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "ai_review.review_coverage": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "ai_review.avg_suggestions_per_pr": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      },
-      "ai_review.avg_acceptance_rate": {
-        "change_percentage": 0.0,
-        "direction": "stable",
-        "is_anomaly": false
-      }
-    }
-  },
-  {
-    "week_id": "2025-W35",
-    "week_start": "2025-09-06",
-    "week_end": "2025-09-12",
-    "metrics": {
-      "dora": {
-        "deployment_frequency": 0.32,
-        "lead_time_hours": 2.39,
-        "mttr_hours": 0,
-        "change_failure_rate": 0
-      },
-      "github": {
-        "pr_cycle_time_hours": 0.58,
-        "merge_rate": 100.0,
-        "conflict_rate": 0,
-        "features_per_week": 5.17
-      },
-      "contributions": {
-        "human_percentage": 75.92,
-        "ai_percentage": 0.41,
-        "collaborative_percentage": 23.67
+        "collaborative_percentage": 23.58
       },
       "ai_review": {
         "review_coverage": 0,
